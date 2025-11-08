@@ -162,6 +162,12 @@
 <body class="flex min-h-screen bg-gray-50">
 
     <div id="sidebar" class="sidebar w-64 border-r border-gray-200 p-4 lg:static lg:block">
+
+        <!-- VANTECH -->
+        <div class="image-container mb-6">
+            <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="w-32 mx-auto mb-6">
+        </div>
+
         <nav class="space-y-2">
             <!-- Dashboard -->
             <a href="{{ route('dashboard') }}" class="sidebar-item">
@@ -247,8 +253,8 @@
                             d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
-               @yield('btn')
-               <h1 class="ml-4 text-xl font-semibold">@yield('name')</h1>
+                @yield('btn')
+                <h1 class="ml-4 text-xl font-semibold">@yield('name')</h1>
             </div>
             <div>
                 <span>Welcome, User</span>
