@@ -41,3 +41,7 @@ Route::get('/Suppliers', function () {
 Route::get('/Suppliers/List', function () {
     return view('DASHBOARD.suppliers_list');
 })->name('suppliers.list');
+
+Route::get('/tester', function () {
+    return view('tester.testscanner');
+})->name('tester.testscanner');
