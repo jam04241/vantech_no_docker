@@ -288,7 +288,7 @@
 
                 <!-- POS Button -->
                 <div class="relative group">
-                    <a href=""
+                    <a href="{{ route("pos.items") }}"
                         class="sidebar-item flex items-center justify-center w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 p-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
