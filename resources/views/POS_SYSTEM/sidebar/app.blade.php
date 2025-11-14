@@ -45,16 +45,35 @@
         </a>
 
         <ul class="navbar w-full space-y-4 mt-10 overflow-y-auto scrollbar-hide">
+            <li value="ALL">
+                <button type="button"
+                    class="category-btn w-full flex flex-col items-center p-4 border-2 border-[#3B4A5A] rounded-lg shadow-md text-[#3B4A5A] bg-white hover:bg-[#3B4A5A] transition-all duration-150 ease-in-out"
+                    aria-current="false">
+                    <span class="text-sm font-semibold"> ALL </span>
+                </button>
+            </li>
             @isset($categories)
-                @foreach ($categories as $category)
-                    <li value="{{ $category->id }}">
-                        <button
-                            class="w-full flex flex-col items-center p-4 border-2 border-orange-400 rounded-lg shadow-md text-orange-500"
-                            aria-current="true">
-                            <span class="text-sm font-semibold">{{ $category->category_name }}</span>
-                        </button>
+                @if($categories->count() > 0)
+                    @foreach ($categories as $category)
+                        @if(!empty($category->category_name))
+                            <li value="{{ $category->id }}">
+                                <button type="button" data-category-id="{{ $category->id }}"
+                                    class="category-btn w-full flex flex-col items-center p-4 border-2 border-[#3B4A5A] rounded-lg shadow-md text-[#3B4A5A] bg-white hover:bg-[#3B4A5A] transition-all duration-150 ease-in-out"
+                                    aria-current="false">
+                                    <span class="text-sm font-semibold">{{ $category->category_name }}</span>
+                                </button>
+                            </li>
+                        @endif
+                    @endforeach
+                @else
+                    <li class="w-full p-4 text-center">
+                        <p class="text-sm text-gray-500">No categories available</p>
                     </li>
-                @endforeach
+                @endif
+            @else
+                <li class="w-full p-4 text-center">
+                    <p class="text-sm text-gray-500">Categories not loaded</p>
+                </li>
             @endisset
         </ul>
 
@@ -65,6 +84,48 @@
     <main class="flex-1 p-10 overflow-auto">
         @yield('content_items')
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryButtons = document.querySelectorAll('.category-btn');
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const categoryId = this.getAttribute('data-category-id');
+                    const isActive = this.classList.contains('bg-[#3B4A5A]');
+
+                    if (isActive) {
+                        // Remove active state - return to default
+                        this.classList.remove('bg-[#3B4A5A]', 'border-[#3B4A5A]', 'text-white', 'hover:bg-[#3B4A5A]');
+                        this.classList.add('bg-white', 'border-[#3B4A5A]', 'text-[#3B4A5A]', 'hover:bg-[#3B4A5A]');
+                        this.setAttribute('aria-current', 'false');
+                    } else {
+                        // Add active state
+                        this.classList.remove('bg-white', 'border-[#3B4A5A]', 'text-[#3B4A5A]', 'hover:bg-[#3B4A5A]');
+                        this.classList.add('bg-[#3B4A5A]', 'border-[#3B4A5A]', 'text-white', 'hover:bg-[#3B4A5A]');
+                        this.setAttribute('aria-current', 'true');
+                    }
+
+                    // Optional: Remove active state from other buttons (single selection)
+                    // Uncomment the code below if you want only one category selected at a time
+                    /*
+                    if (!isActive) {
+                        categoryButtons.forEach(btn => {
+                            if (btn !== this) {
+                                btn.classList.remove('bg-[#3B4A5A]', 'border-[#3B4A5A]', 'text-white', 'hover:bg-[#3B4A5A]');
+                                btn.classList.add('bg-white', 'border-[#3B4A5A]', 'text-[#3B4A5A]', 'hover:bg-[#3B4A5A]');
+                                btn.setAttribute('aria-current', 'false');
+                            }
+                        });
+                    }
+                    */
+
+                    // You can add additional functionality here, like filtering products
+                    console.log('Category selected:', categoryId, 'Active:', !isActive);
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

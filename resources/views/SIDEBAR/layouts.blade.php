@@ -9,6 +9,9 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- ... other head content ... -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
     {{-- Tailwind & Vite --}}
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
@@ -345,7 +348,7 @@
 
                 <!-- POS Button -->
                 <div class="relative group">
-                    <a href="{{ route("pos.items") }}"
+                    <a href="{{ route("pos.brands") }}"
                         class="sidebar-item flex items-center justify-center w-8 h-8 bg-[#46647F] hover:bg-[#3a5469] text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 p-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

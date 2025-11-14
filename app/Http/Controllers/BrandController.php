@@ -2,23 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
 use App\Http\Requests\BrandRequest;
+use App\Models\Brand;
+use App\Traits\LoadsBrandData;
+use App\Traits\LoadsProductData;
+use App\Traits\LoadsCategoryData;
 use Illuminate\Http\Request;
-
 
 class BrandController extends Controller
 {
+    use LoadsBrandData;
+    use LoadsProductData;
+    use LoadsCategoryData;
+
     public function index()
     {
         $brands = Brand::all();
         return response()->json($brands);
     }
 
-    public function posItems()
+    public function posBrand()
     {
-        $brands = Brand::orderBy('brand_name')->get(); // FOR BRAND DROPDOWN IN POS
-        return view('POS_SYSTEM.item_list', compact('brands'));
+        $data = array_merge(
+            $this->loadBrands(),
+            $this->loadCategories(),
+            $this->loadProducts(),
+        );
+
+        return view('POS_SYSTEM.item_list',  $data);
+    }
+
+    public function inventoryBrand()
+    {
+        $data = array_merge(
+            $this->loadBrands(),
+            $this->loadProducts()
+        );
+        return view('DASHBOARD.inventory', $data);
+    }
+
+    public function inventoryListBrand()
+    {
+        $data = array_merge(
+            $this->loadBrands(),
+            $this->loadCategories(),
+            $this->loadGroupedProducts(), // Use grouped products to sum quantities by product name
+        );
+        return view('DASHBOARD.inventory_list', $data);
     }
 
     public function store(BrandRequest $request)
@@ -28,11 +58,7 @@ class BrandController extends Controller
         return redirect()->route('product.add')->with('success', 'Brand created successfully.');
     }
 
-    public function create()
-    {
-        $brands = Brand::all(); // Fetch brands from database
-        return view('POS_SYSTEM.item_list', compact('brands'));
-    }
+    public function create() {}
 
 
     public function show($id)

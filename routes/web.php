@@ -31,14 +31,9 @@
         return view('DASHBOARD.POS');
     })->name('POS');
 
-    // Inventory page route
-    Route::get('/inventory', function () {
-        return view('DASHBOARD.inventory');
-    })->name('inventory');
-
-    Route::get('/inventory/list', function () {
-        return view('DASHBOARD.inventory_list');
-    })->name('inventory.list');
+    // Route::get('/inventory/list', function () {
+    //     return view('DASHBOARD.inventory_list');
+    // })->name('inventory.list');
 
 
     Route::get('/Suppliers', function () {
@@ -84,13 +79,19 @@
     Route::delete('/suppliers/{supplier}', [SuppliersController::class, 'destroy'])->name('suppliers.destroy');
 
 
+    // Inventory fetch 
+    Route::get('/inventory', [ProductController::class, 'show'])->name('inventory'); // For inventory view
+    Route::get('/inventory/brands', [BrandController::class, 'inventoryBrand'])->name('inventory.brands'); //dropdown brands
+    Route::get('/inventory/categories', [CategoryController::class, 'inventorygetCategories'])->name('inventory.categories'); //dropdown categories
 
-
-    // SIDEBAR FOR CATEGORIES
-    Route::get('/PointOfSale', [CategoryController::class, 'getCategories'])->name('pos.categories');
+    // Inventory_list fetch PRODUCTS
+    Route::get('/inventory/list', [ProductController::class, 'inventoryList'])->name('inventory.list'); //inventory list with search and sorting
+    Route::get('/inventory/list/categories', [CategoryController::class, 'inventoryListgetCategories'])->name('inventory.list.categories'); //dropdown categories
 
     // POS BRAND DROPDOWN
-    Route::get('/PointOfSale/brands', [BrandController::class, 'posItems'])->name('pos.items');
+    Route::get('/PointOfSale', [BrandController::class, 'posBrand'])->name('pos.brands');
+    // POS CATEGORIES DROPDOWN (JSON API)
+    Route::get('/PointOfSale/categories', [CategoryController::class, 'posCategories'])->name('pos.categories');
 
     // LOGIN FORM
     Route::get('/LOGIN_FORM', function () {
