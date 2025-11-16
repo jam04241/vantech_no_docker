@@ -1,15 +1,16 @@
 @extends('SIDEBAR.layouts')
+@section('title', 'Inventory')
 @section('name', 'Inventory')
 @section('content')
 
-    <div class="flex items-center gap-3 mb-4">
+    {{-- <div class="flex items-center gap-3 mb-4">
         <a href="#" class="px-4 py-2 rounded-lg bg-gray-600 text-white font-medium shadow ">
             Brand History
         </a>
         <a href="#" class="px-4 py-2 rounded-lg bg-gray-600 text-white font-medium shadow">
             Categories History
         </a>
-    </div>
+    </div> --}}
 
     <div class="py-6 rounded-xl">
         <div class="flex flex-col sm:flex-row justify-between gap-3">

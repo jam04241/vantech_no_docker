@@ -364,12 +364,14 @@
 
                 <!-- Upcoming Feature Button -->
                 <div class="relative group">
-                    <a href=""
+                    <a href="{{ route("inventory.brandcategory") }}"
                         class="sidebar-item flex items-center justify-center w-8 h-8 bg-[#46647F] hover:bg-[#3a5469] text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 p-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-white-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                d="M3 7h4l2 2h12v11H3z" />
                         </svg>
+                        {{-- <!-- ICON SAVE -->
+                        <x-far-save /> --}}
                     </a>
                     <div
                         class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-10">

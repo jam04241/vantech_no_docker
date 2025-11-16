@@ -51,6 +51,11 @@ class BrandController extends Controller
         return view('DASHBOARD.inventory_list', $data);
     }
 
+    public function brandHistory()
+    {
+        return view('INVENTORY.brandcategoryHistory', $this->loadBrands());
+    }
+
     public function store(BrandRequest $request)
     {
         $validated = $request->validated();

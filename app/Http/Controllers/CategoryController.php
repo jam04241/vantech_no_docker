@@ -32,12 +32,16 @@ class CategoryController extends Controller
     {
         return response()->json($this->loadCategories()['categories']);
     }
-    
+
     public function inventoryListgetCategories()
     {
         return response()->json($this->loadCategories()['categories']);
     }
 
+    public function categoryHistory()
+    {
+        return view('INVENTORY.brandcategoryHistory', $this->loadCategories());
+    }
 
 
     public function show($id)

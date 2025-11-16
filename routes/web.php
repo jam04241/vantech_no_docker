@@ -53,6 +53,20 @@
         return view('tester.testscanner');
     })->name('tester.testscanner');
 
+    Route::get('/brandcategory', function () {
+        return view('INVENTORY.brandcategoryHistory');
+    })->name('inventory.brandcategory');
+
+
+    // Issue Receipt for Quotation and Purchase
+    Route::get('/Receipt/Purchase', function () {
+        return view('POS_SYSTEM.PurchaseReceipt');
+    })->name('pos.purchasereceipt');
+
+    Route::get('/Receipt/Quotation', function () {
+        return view('POS_SYSTEM.QuotationReceipt');
+    })->name('pos.quotationreceipt');
+
 
     // ROUTE FOR DATABAASE
     // Brand routes
@@ -87,6 +101,10 @@
     // Inventory_list fetch PRODUCTS
     Route::get('/inventory/list', [ProductController::class, 'inventoryList'])->name('inventory.list'); //inventory list with search and sorting
     Route::get('/inventory/list/categories', [CategoryController::class, 'inventoryListgetCategories'])->name('inventory.list.categories'); //dropdown categories
+
+    // Brand History and Category History fetch
+    Route::get('/brandcategory/list', [CategoryController::class, 'brandHistory'])->name('brandcategory.brands'); //dropdown categories
+    Route::get('/brandcategory/list', [CategoryController::class, 'categoryHistory'])->name('brandcategory.categories'); //dropdown categories
 
     // POS BRAND DROPDOWN
     Route::get('/PointOfSale', [BrandController::class, 'posBrand'])->name('pos.brands');
