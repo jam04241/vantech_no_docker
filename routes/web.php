@@ -80,3 +80,8 @@ Route::post('/suppliers/{supplier}/toggle-status', [SuppliersController::class, 
 Route::get('/suppliers/{supplier}/edit', [SuppliersController::class, 'edit'])->name('suppliers.edit');
 Route::put('/suppliers/{supplier}', [SuppliersController::class, 'update'])->name('suppliers.update');
 Route::delete('/suppliers/{supplier}', [SuppliersController::class, 'destroy'])->name('suppliers.destroy');
+
+//Suppliers Purchase Orders Route
+Route::get('/suppliers/purchase-orders', function () {
+    return view('SUPPLIERS.suppliers_purchase');
+})->name('suppliers.purchase-orders');
