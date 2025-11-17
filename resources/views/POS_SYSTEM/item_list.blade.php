@@ -17,35 +17,11 @@
     }
 </style>
 @section('content_items')
-    <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+    <div class="flex items-center space-between gap-2 w-full sm:w-auto flex-1">
 
         {{-- SEARCH BAR --}}
         <input type="text" placeholder="Search inventory..."
             class="w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-
-        {{-- SORT BY --}}
-        <select
-            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-            <option value="" selected>Sort by</option>
-            <option value="">Default</option>
-            <!-- Price Sorting -->
-            <option value="price_low_high">Cheapest</option>
-            <option value="price_high_low">Expensive</option>
-
-            <!-- Name Sorting -->
-            <option value="name_a_z">Name: A to Z</option>
-            <option value="name_z_a">Name: Z to A</option>
-
-            <!-- Stock/Quantity -->
-            <option value="stock_low_high">Stock: Low to High</option>
-            <option value="stock_high_low">Stock: High to Low</option>
-
-            <!-- Date Added -->
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <!-- Best Sellers -->
-            <option value="best_selling">Best Selling</option>
-        </select>
 
         {{-- Brand --}}
         <select
@@ -58,6 +34,12 @@
                 @endforeach
             @endisset
         </select>
+
+        <div class="gap-3">
+            <button
+                class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out">Add
+                Customer</button>
+        </div>
     </div>
     <div class="flex flex-col lg:flex-row gap-6 mt-6">
 
@@ -186,10 +168,13 @@
                                 <span class="font-medium text-gray-900">₱14,999.00</span>
                             </div>
                             <div class="flex justify-between mb-1.5">
-                                <span class="text-gray-700">Discount (5%)</span>
+
+                                <span class="text-gray-700 mt-3">
+                                    <input class="" type="text" placeholder="Discount">
+                                </span>
                                 <span class="font-medium text-red-500">-₱750.00</span>
                             </div>
-                            <div class="flex justify-between mb-1.5">
+                            <div class="flex justify-between mb-1.5 mt-3">
                                 <span class="text-gray-700">VAT (12%)</span>
                                 <span class="font-medium text-gray-900">₱1,710.00</span>
                             </div>
