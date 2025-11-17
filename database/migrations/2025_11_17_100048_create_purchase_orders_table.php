@@ -13,17 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id(); // BIGINT unsigned, auto-increment
-            $table->string('product_name');
-            $table->foreignId('brand_id')->constrained('brands', 'id')->onDelete('cascade');
-            $table->foreignId('category_id')->constrained('categories', 'id')->onDelete('cascade');
+        Schema::create('purchase_orders', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('supplier_id')->constrained('suppliers', 'id')->onDelete('cascade');
-            $table->string('warranty_period');
-            $table->string('serial_number');
+            $table->date('order_date');
+            $table->enum('status', ['Cancel', 'Received', 'Pending']);
             $table->timestamps();
         });
-        //
     }
 
     /**
@@ -33,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('purchase_orders');
     }
 };
