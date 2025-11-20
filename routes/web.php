@@ -98,6 +98,9 @@
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::put('/products/{product}/price', [ProductStocksController::class, 'updatePrice'])->name('products.update_price');
+    // ============= AUTO-SUGGESTION API ROUTE =============
+    Route::get('/api/products/recent', [ProductController::class, 'getRecentProducts'])->name('products.recent');
+    // ============= END AUTO-SUGGESTION API ROUTE =============
 
     Route::get('/Suppliers', [SuppliersController::class, 'index'])->name('suppliers');
     Route::post('/suppliers', [SuppliersController::class, 'store'])->name('suppliers.store');

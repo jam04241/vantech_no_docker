@@ -70,22 +70,29 @@
                                 Product Information
                             </h3>
                             <div class="grid md:grid-cols-2 gap-6">
-                                <div>
+                                <!-- ============= AUTO-SUGGESTION PRODUCT NAME INPUT ============= -->
+                                <div class="relative">
                                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Product Name <span
                                             class="text-red-500">*</span></label>
                                     <input type="text" id="name" name="product_name"
                                         value="{{ old('product_name') }}"
                                         class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                                        placeholder="Enter product name" required>
+                                        placeholder="Enter product name or select from suggestions" required
+                                        autocomplete="off">
+                                    <!-- ============= AUTO-SUGGESTION DROPDOWN ============= -->
+                                    <div id="productSuggestions" 
+                                        class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden z-50 max-h-64 overflow-y-auto">
+                                    </div>
+                                    <!-- ============= END AUTO-SUGGESTION DROPDOWN ============= -->
                                 </div>
-
+                                <!-- ============= END AUTO-SUGGESTION PRODUCT NAME INPUT ============= -->
                                 <div>
-                                    <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">Serial
-                                        Number</label>
+                                    <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Serial Number</label>
                                     <input type="text" id="serial_number" name="serial_number"
                                         value="{{ old('serial_number') }}"
                                         class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                                        placeholder="Enter serial number (optional)">
+                                        placeholder="Enter serial number (optional)" autofocus required>
                                 </div>
                             </div>
                         </div>
@@ -133,7 +140,7 @@
                     <div>
                         <label for="brand_id" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
                         <select id="brand_id" name="brand_id"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" required>
                             <option value="">Select Brand</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->brand_name }}</option>
@@ -183,7 +190,7 @@
                                     <input type="text" id="warranty" name="warranty_period"
                                         value="{{ old('warranty_period') }}"
                                         class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                                        placeholder="e.g. 1 year">
+                                        placeholder="e.g. 1 year" required>
                                 </div>
                             </div>
                         </div>
@@ -313,7 +320,156 @@
                 </div>
 
     <script>
-            // ============= USED PRODUCT CHECKBOX LOGIC =============
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on serial number field on page load
+            const serialNumberInput = document.getElementById('serial_number');
+            if (serialNumberInput) {
+                serialNumberInput.focus();
+            }
+
+            // ============= AUTO-SUGGESTION PRODUCT NAME FUNCTIONALITY =============
+            // Get the product name input and suggestions dropdown
+            const productNameInput = document.getElementById('name');
+            const suggestionsDropdown = document.getElementById('productSuggestions');
+            
+            // Event listener for input changes to fetch suggestions
+            if (productNameInput) {
+                productNameInput.addEventListener('input', async function() {
+                    const searchTerm = this.value.trim();
+                    
+                    // Show suggestions only if there's input
+                    if (searchTerm.length > 0) {
+                        try {
+                            // Fetch recent products from API
+                            const response = await fetch(`/api/products/recent?search=${encodeURIComponent(searchTerm)}`);
+                            const products = await response.json();
+                            
+                            // Clear previous suggestions
+                            suggestionsDropdown.innerHTML = '';
+                            
+                            if (products.length > 0) {
+                                // Display suggestions
+                                products.forEach(product => {
+                                    const suggestionItem = document.createElement('div');
+                                    suggestionItem.className = 'px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-200 transition duration-150';
+                                    suggestionItem.innerHTML = `
+                                        <div class="font-medium text-gray-800">${product.product_name}</div>
+                                        <div class="text-sm text-gray-600">
+                                            Brand: ${product.brand_name} | Category: ${product.category_name} | Price: ₱${parseFloat(product.price).toFixed(2)}
+                                        </div>
+                                    `;
+                                    
+                                    // Click handler to fill form fields
+                                    suggestionItem.addEventListener('click', function() {
+                                        // ============= AUTO-FILL FORM FIELDS FROM SUGGESTION =============
+                                        productNameInput.value = product.product_name;
+                                        document.getElementById('brand_id').value = product.brand_id || '';
+                                        document.getElementById('category_id').value = product.category_id || '';
+                                        document.getElementById('price').value = product.price || '';
+                                        // ============= END AUTO-FILL FORM FIELDS =============
+                                        
+                                        // Hide suggestions dropdown
+                                        suggestionsDropdown.classList.add('hidden');
+                                    });
+                                    
+                                    suggestionsDropdown.appendChild(suggestionItem);
+                                });
+                                
+                                // Show suggestions dropdown
+                                suggestionsDropdown.classList.remove('hidden');
+                            } else {
+                                // Hide dropdown if no suggestions
+                                suggestionsDropdown.classList.add('hidden');
+                            }
+                        } catch (error) {
+                            console.error('Error fetching suggestions:', error);
+                            suggestionsDropdown.classList.add('hidden');
+                        }
+                    } else {
+                        // Hide dropdown if input is empty
+                        suggestionsDropdown.classList.add('hidden');
+                    }
+                });
+                
+                // Hide suggestions when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (event.target !== productNameInput && !suggestionsDropdown.contains(event.target)) {
+                        suggestionsDropdown.classList.add('hidden');
+                    }
+                });
+            }
+            // ============= END AUTO-SUGGESTION PRODUCT NAME FUNCTIONALITY =============
+
+            // Handle form submission
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    // Scroll to top of the page
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    // Clear any stored scroll position
+                    localStorage.removeItem('formScrollPosition');
+                    // Show any pending SweetAlert messages
+                    showSweetAlerts();
+                });
+            }
+        });
+
+        // Function to show SweetAlert messages
+        function showSweetAlerts() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#4F46E5',
+                    timer: 3000
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#E11D48',
+                    timer: 3000
+                });
+            @endif
+
+            @if($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: '{!! implode('<br>', $errors->all()) !!}',
+                    confirmButtonColor: '#E11D48',
+                    timer: 3000
+                });
+            @endif
+        }
+
+        // After page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show SweetAlert messages
+            showSweetAlerts();
+
+            // Focus on serial number field after page load
+            const serialNumberInput = document.getElementById('serial_number');
+            if (serialNumberInput) {
+                // Small timeout to ensure the field is ready to receive focus
+                setTimeout(() => {
+                    serialNumberInput.focus();
+                    serialNumberInput.select();
+                }, 100);
+            }
+
+            // Initialize checkbox state
+            toggleSupplierField();
+        });
+
+        // ============= USED PRODUCT CHECKBOX LOGIC =============
             const isUsedCheckbox = document.getElementById('is_used');
             const supplierSelect = document.getElementById('supplier_id');
             const supplierRequired = document.getElementById('supplier');
@@ -335,11 +491,12 @@
                 }
             }
 
-            // Initialize on page load
-            toggleSupplierField();
-
             // Listen for checkbox changes
-            isUsedCheckbox.addEventListener('change', toggleSupplierField);
+            if (isUsedCheckbox) {
+                isUsedCheckbox.addEventListener('change', toggleSupplierField);
+                // Initialize on page load
+                toggleSupplierField();
+            }
 
             // ============= QR SCANNER LOGIC =============
             let html5QrCode;
@@ -494,6 +651,30 @@
                         }
                     });
 
+                   // AUTOFOCUS FOR BARCODE SCANNER INPUT
+                //    const sn = document.getElementById("serial_number");
+
+                //     sn.addEventListener("keydown", function (e) {
+                //         if (e.key === "Enter") {
+                //             e.preventDefault();
+                //             console.log("Scanned:", sn.value);
+
+                //             sn.value = "";
+                //             sn.focus();
+                //         }
+                //     });
+                // AUTOFOCUS FOR BARCODE SCANNER INPUT (BEST USE FOR POS)
+                // document.addEventListener("DOMContentLoaded", function () {
+                //         const field = document.getElementById("serial_number");
+
+                //         // Always force the scanner to type here
+                //         setInterval(() => {
+                //             if (document.activeElement !== field) {
+                //                 field.focus();
+                //             }
+                //         }, 300);
+                //     });
+
             // Brand Modal
             const brandModal = document.getElementById('brandModal');
             document.getElementById('openBrandModal').addEventListener('click', () => {
@@ -525,31 +706,6 @@
             });
 
             // SweetAlert messages
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: '{{ session('success') }}',
-                    confirmButtonColor: '#4F46E5'
-                });
-            @endif
-
-            @if(session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: '{{ session('error') }}',
-                    confirmButtonColor: '#E11D48'
-                });
-            @endif
-
-            @if($errors->any())
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    html: '{!! implode("<br>", $errors->all()) !!}',
-                    confirmButtonColor: '#E11D48'
-                });
-            @endif
+            // SweetAlert messages are now handled by the showSweetAlerts() function
     </script>
 @endsection

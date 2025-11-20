@@ -97,12 +97,10 @@
                             required>
                     </div>
                     <div>
-                        <div class="flex flex-col gap-1">
-                            <span class="text-sm font-medium text-gray-700">Serial Number</span>
-                            <span class="text-xs text-gray-500 -mt-1">Read-only (each serial equals one unit)</span>
-                        </div>
+                        <label class="block text-sm font-medium text-gray-500 mb-2">Serial Number (Read Only)</label>
+
                         <input type="text" name="serial_number"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                             readonly>
                     </div>
                 </div>
@@ -129,31 +127,25 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                        <select name="supplier_id"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                            required>
-                            @foreach ($suppliers ?? collect() as $supplier)
-                                <option value="{{ $supplier->id }}">{{ $supplier->company_name ?? $supplier->supplier_name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Warranty</label>
+                            <input type="text" name="warranty_period"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
+                        </div>
+
                     </div>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-6 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Warranty</label>
-                        <input type="text" name="warranty_period"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Price (₱)</label>
-                        <span class="text-xs text-gray-500 -mt-1">Read-only</span>
-                        <input type="number" name="price" step="0.01" min="0"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                            readonly>
-                    </div>
+                <div class="grid md:grid-cols-1 gap-6 mb-6">
+                    <label class="block text-sm font-medium text-gray-700">Company</label>
+                    <select name="supplier_id"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        required>
+                        @foreach ($suppliers ?? collect() as $supplier)
+                            <option value="{{ $supplier->id }}">{{ $supplier->company_name ?? $supplier->supplier_name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="flex justify-end gap-3">
@@ -258,6 +250,7 @@
 
             const productModal = document.getElementById('productEditModal');
             const productForm = document.getElementById('productEditForm');
+            // ============= PRODUCT FORM FIELDS (PRICE REMOVED - EDIT SEPARATELY) =============
             const productFields = {
                 product_name: productForm.querySelector('[name="product_name"]'),
                 serial_number: productForm.querySelector('[name="serial_number"]'),
@@ -265,8 +258,8 @@
                 category_id: productForm.querySelector('[name="category_id"]'),
                 supplier_id: productForm.querySelector('[name="supplier_id"]'),
                 warranty_period: productForm.querySelector('[name="warranty_period"]'),
-                price: productForm.querySelector('[name="price"]'),
             };
+            // ============= END PRODUCT FORM FIELDS =============
 
             const bindProductButtons = () => {
                 document.querySelectorAll('[data-product-modal]').forEach(button => {
@@ -284,7 +277,7 @@
                             productFields.category_id.value = payload.category_id || '';
                             productFields.supplier_id.value = payload.supplier_id || '';
                             productFields.warranty_period.value = payload.warranty_period || '';
-                            productFields.price.value = payload.price ?? 0;
+                            // ============= PRICE FIELD REMOVED - EDIT PRICE SEPARATELY IN PRICE EDIT MODAL =============
                             toggleModal(productModal, true);
                         } catch (error) {
                             console.error('Unable to parse product payload', error);

@@ -249,12 +249,15 @@ class ProductController extends Controller
 
         $productsCollection = $query->get();
 
+        // ============= GROUP BY PRODUCT NAME, BRAND, CATEGORY, CONDITION, AND PRICE =============
+        // Products with different prices will be shown as separate entries in the table
         $grouped = $productsCollection->groupBy(function ($product) {
             return implode('|', [
                 $product->product_name,
                 $product->brand_id ?? 'null',
                 $product->category_id ?? 'null',
-                $product->product_condition ?? 'null',  // Added product_condition to group by
+                $product->product_condition ?? 'null',
+                $product->stock?->price ?? 0,  // ============= ADDED PRICE TO GROUPING BASIS =============
             ]);
         })->map(function ($group) {
             $first = $group->first();
@@ -265,11 +268,12 @@ class ProductController extends Controller
                 'category' => $first->category,
                 'brand_id' => $first->brand_id,
                 'category_id' => $first->category_id,
-                'product_condition' => $first->product_condition,  // Added product_condition to the mapped object
+                'product_condition' => $first->product_condition,
                 'quantity' => $group->count(),
                 'price' => $first->stock?->price ?? 0,
             ];
         })->values();
+        // ============= END GROUPING BY PRICE =============
 
         $sort = $request->get('sort', 'name_asc');
         $products = match ($sort) {
@@ -341,4 +345,56 @@ class ProductController extends Controller
     {
         //
     }
+
+    // ============= AUTO-SUGGESTION API FOR PRODUCT NAME =============
+    // This endpoint returns recent products for autocomplete suggestions
+    // ============= FILTERS OUT DUPLICATES BASED ON NAME, BRAND, CATEGORY, AND PRICE =============
+    public function getRecentProducts(Request $request)
+    {
+        $search = $request->get('search', '');
+
+        $query = Product::with('brand', 'category', 'stock')
+            ->orderBy('created_at', 'desc')
+            ->limit(50); // Get more records to filter duplicates
+
+        // Filter by search term if provided
+        if (!empty($search)) {
+            $query->where('product_name', 'like', '%' . $search . '%');
+        }
+
+        $products = $query->get();
+
+        // ============= REMOVE DUPLICATE PRODUCTS BASED ON NAME, BRAND, CATEGORY, AND PRICE =============
+        $seen = [];
+        $uniqueProducts = [];
+
+        foreach ($products as $product) {
+            $productName = $product->product_name;
+            $brandId = $product->brand_id ?? 'null';
+            $categoryId = $product->category_id ?? 'null';
+            $price = $product->stock?->price ?? 0;
+
+            // Create a unique key based on product_name, brand_id, category_id, and price
+            $uniqueKey = md5($productName . '|' . $brandId . '|' . $categoryId . '|' . $price);
+
+            // Only add if we haven't seen this combination before
+            if (!isset($seen[$uniqueKey])) {
+                $seen[$uniqueKey] = true;
+                $uniqueProducts[] = [
+                    'id' => $product->id,
+                    'product_name' => $productName,
+                    'brand_id' => $brandId === 'null' ? null : $brandId,
+                    'brand_name' => $product->brand?->brand_name ?? 'N/A',
+                    'category_id' => $categoryId === 'null' ? null : $categoryId,
+                    'category_name' => $product->category?->category_name ?? 'N/A',
+                    'price' => $price,
+                ];
+            }
+        }
+        // ============= END DUPLICATE REMOVAL =============
+
+        // Return only the first 10 unique products
+        return response()->json(array_slice($uniqueProducts, 0, 10));
+    }
+    // ============= END AUTO-SUGGESTION API =============
 }

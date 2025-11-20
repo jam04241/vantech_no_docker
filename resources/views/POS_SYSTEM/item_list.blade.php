@@ -37,7 +37,7 @@
 
         <div class="gap-3">
             <a href="{{ route('customer.addCustomer') }}" class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2
-                                focus:ring-indigo-500 transition duration-150 ease-in-out">Add Customer</a>
+                                            focus:ring-indigo-500 transition duration-150 ease-in-out">Add Customer</a>
         </div>
     </div>
     <div class="flex flex-col lg:flex-row gap-6 mt-6">
@@ -90,8 +90,7 @@
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden h-fit sticky top-6">
                 <!-- Customer Name Input -->
                 <div class="p-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
-                    <input type="text" id="customerName" placeholder="Enter customer name"
+                    <input type="text" id="customerName" placeholder="Product Serial No."
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out text-sm" />
                 </div>
                 <!-- Tab Buttons -->
