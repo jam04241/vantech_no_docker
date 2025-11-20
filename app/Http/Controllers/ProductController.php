@@ -24,7 +24,7 @@ class ProductController extends Controller
      */
     public function index() {}
 
-    public function create()
+ public function create()
     {
         $suppliers = Suppliers::orderBy('supplier_name')->get();
         return view('PRODUCT.add_product', array_merge(
@@ -34,12 +34,20 @@ class ProductController extends Controller
         ));
     }
 
-    public function store(ProductRequest $request)
+
+ public function store(ProductRequest $request)
     {
         $data = $request->validated();
+        
+        // If product is used (checkbox checked), set supplier_id to null
+        if ($request->has('is_used')) {
+            $data['supplier_id'] = null;
+        }
+        
         Product::create($data);
         return redirect()->route('product.add')->with('success', 'Product created successfully.');
     }
+
 
     /**
      * Apply reusable filters to product query.
@@ -188,6 +196,8 @@ class ProductController extends Controller
                 'price' => $first->price,
                 'serial_number' => $first->serial_number,
                 'warranty_period' => $first->warranty_period,
+                'product_condition' => $first->product_condition,
+                'created_at' => $first->created_at,
             ];
         })->values();
 

@@ -6,8 +6,10 @@
                 <th class="p-4 font-semibold">Product</th>
                 <th class="p-4 font-semibold">Serial Number</th>
                 <th class="p-4 font-semibold">Warranty</th>
+                <th class="p-4 font-semibold">Product Condition</th>
                 <th class="p-4 font-semibold">Brand</th>
                 <th class="p-4 font-semibold">Categories</th>
+                <th class="p-4 font-semibold">Supplier</th>
                 <th class="p-4 font-semibold">Date Added</th>
                 <th class="p-4">Actions</th>
             </tr>
@@ -28,6 +30,16 @@
                         </span>
                     </td>
                     <td class="p-4">
+                        @php
+                            // Determine condition based on supplier
+                            $condition = $product->supplier_id ? 'Brand New' : 'Second Hand';
+                            $conditionClass = $product->supplier_id ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                        @endphp
+                        <span class="text-xs px-2 py-1 font-bold rounded-full {{ $conditionClass }}">
+                            {{ $condition }}
+                        </span>
+                    </td>
+                    <td class="p-4">
                         <span class="text-blue-800 text-xs font-bold px-2 py-1 rounded-full">
                             {{ $product->brand?->brand_name ?? 'N/A' }}
                         </span>
@@ -35,6 +47,11 @@
                     <td class="p-4">
                         <span class="text-purple-800 text-xs font-bold px-2 py-1 rounded-full">
                             {{ $product->category?->category_name ?? 'N/A' }}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <span class="text-gray-800 text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $product->supplier?->supplier_name ?? 'N/A' }}
                         </span>
                     </td>
                     <td class="p-4 text-gray-600">
@@ -56,7 +73,7 @@
                 </tr>
             @empty
                 <tr class="border-t">
-                    <td colspan="7" class="p-8 text-center text-gray-500">
+                    <td colspan="9" class="p-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

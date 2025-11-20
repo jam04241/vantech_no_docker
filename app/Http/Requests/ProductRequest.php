@@ -23,14 +23,14 @@ class ProductRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'product_name' => 'required|string|max:255',
-            'warranty_period' => 'required|string|max:100',
-            'serial_number' => 'required|string|max:100|unique:products,serial_number',
-            'category_id' => 'required|exists:categories,id',
-            'brand_id' => 'required|exists:brands,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-            'price' => 'required|numeric|min:0'
-        ];
+         return [
+        'product_name' => 'required|string|max:255',
+        'serial_number' => 'nullable|string|max:255',
+        'warranty_period' => 'nullable|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'brand_id' => 'nullable|exists:brands,id',
+        'supplier_id' => 'nullable|exists:suppliers,id', // Changed to nullable
+        'is_used' => 'boolean'
+    ];
     }
 }
