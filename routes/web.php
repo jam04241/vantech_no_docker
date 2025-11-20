@@ -51,6 +51,10 @@
         return view('DASHBOARD/staff');
     })->name('staff');
 
+    Route::get('/staff/AddEmployee', function () {
+        return view(' Employee.employeeForm');
+    })->name('add.employee');
+
     Route::get('/tester', function () {
         return view('tester.testscanner');
     })->name('tester.testscanner');
@@ -68,6 +72,10 @@
     Route::get('/Receipt/Quotation', function () {
         return view('POS_SYSTEM.QuotationReceipt');
     })->name('pos.quotationreceipt');
+
+    Route::get('/PointOfSale/AddCustomer', function () {
+        return view('Customer.addCustomer');
+    })->name('customer.addCustomer');
 
 
     // ROUTE FOR DATABAASE
@@ -124,7 +132,7 @@
     // Store purchase order
     Route::get('/purchase/create', [PurchaseDetailsController::class, 'create'])->name('purchase.create');
     Route::post('/purchase/store', [PurchaseDetailsController::class, 'store'])->name('purchase.store');
-    
+
 
     // LOGIN FORM
     Route::get('/LOGIN_FORM', function () {

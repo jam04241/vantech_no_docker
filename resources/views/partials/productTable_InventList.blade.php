@@ -17,8 +17,9 @@
                 <td class="px-4 py-3 text-gray-600">{{ $product->brand?->brand_name ?? 'N/A' }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ $product->category?->category_name ?? 'N/A' }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ $product->quantity }}</td>
-                <td class="px-4 py-3 text-gray-800">
-                    ₱{{ number_format($product->price ?? 0, 2) }}
+                <td class="px-4 py-3 text-gray-600">₱{{ number_format($product->price ?? 0, 2) }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ $product->product_condition}}</td>
+
                 </td>
                 <td class="px-4 py-3">
                     @php
@@ -29,6 +30,7 @@
                             'price' => $product->price,
                             'brand_id' => $product->brand_id,
                             'category_id' => $product->category_id,
+                            'product_condition' => $product->product_condition
                         ];
                     @endphp
                     <button type="button"

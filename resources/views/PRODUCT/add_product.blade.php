@@ -14,6 +14,7 @@
 
 @section('content')
                 {{-- Action buttons --}}
+
                 <div class="flex items-center gap-3 mb-6">
                     <button id="openBrandModal"
                         class="inline-flex items-center gap-2 px-4 py-2 border border-black rounded-lg shadow-sm bg-white text-black hover:bg-gray-100 focus:ring-2 focus:ring-black transition duration-200 ease-in-out">
@@ -89,6 +90,22 @@
                             </div>
                         </div>
 
+            {{-- CONDITION CHECKBOX --}}
+            <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" id="is_used" name="is_used" value="1"
+                        class="mt-1 w-5 h-5 text-yellow-600 border-gray-300 rounded focus:ring-2 focus:ring-yellow-500"
+                        {{ old('is_used') ? 'checked' : '' }}>
+                    <div>
+                        <label for="is_used" class="block text-sm font-semibold text-gray-800 cursor-pointer">
+                            This is a Used Product
+                        </label>
+                        <p class="text-xs text-gray-600 mt-1">
+                            Check this box if the product is used/second-hand. Used products don't require a supplier.
+                        </p>
+                    </div>
+                </div>
+            </div>
             {{-- RELATIONAL FIELDS --}}
             <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
@@ -125,9 +142,9 @@
                     </div>
                     <div>
                      <label for="supplier_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            Supplier <span class="text-red-500">*</span>
+                            Supplier <span id="supplier" class="text-red-500">*</span>
                         </label>
-                        <select id="supplier_id" name="supplier_id" required
+                        <select id="supplier_id" name="supplier_id"
                             class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
                             <option value="">Select Supplier</option>
                             @foreach($suppliers as $supplier)
@@ -295,10 +312,36 @@
                     </div>
                 </div>
 
-                {{-- Include the QR code scanner library --}}
-
     <script>
+            // ============= USED PRODUCT CHECKBOX LOGIC =============
+            const isUsedCheckbox = document.getElementById('is_used');
+            const supplierSelect = document.getElementById('supplier_id');
+            const supplierRequired = document.getElementById('supplier');
 
+            function toggleSupplierField() {
+                if (isUsedCheckbox.checked) {
+                    // Disable supplier field for used products
+                    supplierSelect.disabled = true;
+                    supplierSelect.required = false;
+                    supplierSelect.value = '';
+                    supplierSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    supplierRequired.classList.add('hidden');
+                } else {
+                    // Enable supplier field for new products
+                    supplierSelect.disabled = false;
+                    supplierSelect.required = true;
+                    supplierSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    supplierRequired.classList.remove('hidden');
+                }
+            }
+
+            // Initialize on page load
+            toggleSupplierField();
+
+            // Listen for checkbox changes
+            isUsedCheckbox.addEventListener('change', toggleSupplierField);
+
+            // ============= QR SCANNER LOGIC =============
             let html5QrCode;
             let currentCameraId = null;
             let cameras = [];
@@ -327,23 +370,19 @@
 
                         html5QrCode = new Html5Qrcode("reader");
 
-                        // Enhanced configuration with autofocus
                         const config = {
                             fps: 10,
                             qrbox: { width: 500, height: 500 },
-                            // Video constraints for better focus and quality
                             videoConstraints: {
-                                focusMode: "continuous", // Enable continuous autofocus
-                                width: { ideal: 3840 },  // Higher resolution for clarity
+                                focusMode: "continuous",
+                                width: { ideal: 3840 },
                                 height: { ideal: 2160 },
-                                facingMode: "environment", // Prefer rear camera (usually better)
-                                // Additional focus enhancement
+                                facingMode: "environment",
                                 advanced: [
                                     { focusMode: "continuous" },
-                                    { focusDistance: { ideal: 0.1 } } // Focus at closer range for QR codes
+                                    { focusDistance: { ideal: 0.1 } }
                                 ]
                             }
-
                         };
 
                         html5QrCode.start(
@@ -352,30 +391,23 @@
                             (decodedText, decodedResult) => {
                                 onScanSuccess(decodedText, decodedResult);
                             },
-                            (error) => {
-                                // Ignore frequent scan failures - this is normal
-                            }
+                            (error) => {}
                         ).then(() => {
                             qrResult.textContent = 'Scanner started. Move camera to focus on QR code.';
-
-                            // Additional focus trigger after camera is active
                             setTimeout(() => {
                                 enhanceFocus();
                             }, 1500);
                         }).catch(err => {
                             console.error('Error with autofocus config:', err);
                             qrResult.textContent = 'Retrying with basic settings...';
-                            // Fallback to basic configuration
                             startScannerBasic(cameraId);
                         });
                     }
 
-                    // Fallback function without advanced focus constraints
                     function startScannerBasic(cameraId) {
                         const basicConfig = {
                             fps: 10,
                             qrbox: { width: 250, height: 250 }
-                            // No videoConstraints - let browser handle it
                         };
 
                         html5QrCode.start(
@@ -384,9 +416,7 @@
                             (decodedText, decodedResult) => {
                                 onScanSuccess(decodedText, decodedResult);
                             },
-                            (error) => {
-                                // Ignore scan failures
-                            }
+                            (error) => {}
                         ).then(() => {
                             document.getElementById('qrResult').textContent = 'Scanner started (basic mode).';
                         }).catch(err => {
@@ -395,12 +425,9 @@
                         });
                     }
 
-                    // Function to enhance focus after camera starts
                     function enhanceFocus() {
                         if (!html5QrCode) return;
-
                         try {
-                            // Try to re-apply focus constraints
                             html5QrCode.applyVideoConstraints({
                                 advanced: [{ focusMode: "continuous" }]
                             });
@@ -423,58 +450,43 @@
                     function onScanSuccess(decodedText, decodedResult) {
                         const qrResult = document.getElementById('qrResult');
                         qrResult.innerHTML = `<span class="text-green-600 font-medium">✅ Scanned: ${decodedText}</span>`;
-
-                        // Auto-fill the serial number field with scanned data
                         document.getElementById('serial_number').value = decodedText;
-
                         console.log('Scanned QR Code:', decodedText);
-
-                        // Auto-close modal after successful scan
                         setTimeout(() => {
                             qrScannerModal.classList.add('hidden');
                             stopQrScanner();
                         }, 1500);
                     }
 
-                    // Switch camera function
                     function switchCamera() {
                         if (cameras.length < 2) {
                             document.getElementById('qrResult').textContent = 'Only one camera available';
                             return;
                         }
-
                         stopQrScanner();
-
                         let currentIndex = cameras.findIndex(camera => camera.id === currentCameraId);
                         let nextIndex = (currentIndex + 1) % cameras.length;
                         currentCameraId = cameras[nextIndex].id;
-
-                        // Restart with new camera
                         startScanner(currentCameraId);
                         document.getElementById('qrResult').textContent = `Switched to ${cameras[nextIndex].label || 'Camera ' + (nextIndex + 1)}`;
                     }
 
-                    // Event listeners for QR scanner buttons
                     document.getElementById('switchCamera').addEventListener('click', switchCamera);
                     document.getElementById('stopScanner').addEventListener('click', () => {
                         stopQrScanner();
                         qrScannerModal.classList.add('hidden');
                     });
 
-                    // When opening the modal, initialize the scanner
                     document.getElementById('openCamera').addEventListener('click', () => {
                         qrScannerModal.classList.remove('hidden');
-                        // Use a slight delay to ensure the modal is visible before starting the scanner
                         setTimeout(initializeQrScanner, 300);
                     });
 
-                    // When closing the modal, stop the scanner
                     document.getElementById('closeQrModal').addEventListener('click', () => {
                         qrScannerModal.classList.add('hidden');
                         stopQrScanner();
                     });
 
-                    // Close modal by clicking outside
                     window.addEventListener('click', (e) => {
                         if (e.target === qrScannerModal) {
                             qrScannerModal.classList.add('hidden');
@@ -512,7 +524,7 @@
                 categoryModal.classList.remove('flex');
             });
 
-            // SweetAlert messages after form submission
+            // SweetAlert messages
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -539,37 +551,5 @@
                     confirmButtonColor: '#E11D48'
                 });
             @endif
-
-
-                        @if(session('success'))
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: '{{ session('success') }}',
-                                confirmButtonColor: '#4F46E5'
-                            });
-                        @endif
-
-                            @if(session('error'))
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Oops...',
-                                    text: '{{ session('error') }}',
-                                    confirmButtonColor: '#E11D48'
-                                });
-                            @endif
-
-                            @if($errors->any())
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Validation Error',
-                                    html: '{!! implode("<br>", $errors->all()) !!}',
-                                    confirmButtonColor: '#E11D48'
-                                });
-                            @endif
-
-
-
-
-                </script>
+    </script>
 @endsection

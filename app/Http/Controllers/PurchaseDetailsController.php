@@ -18,7 +18,7 @@ class PurchaseDetailsController extends Controller
         $suppliers = Suppliers::where('status', 'Active')->get();
         $bundles = Bundles::all();
         $products = Product::all();
-        
+
         return view('SUPPLIERS.suppliers_purchase', compact('suppliers', 'bundles', 'products'));
     }
 
@@ -26,7 +26,7 @@ class PurchaseDetailsController extends Controller
     {
         DB::transaction(function () use ($request) {
             $data = $request->validated();
-            
+
             foreach ($data['items'] as $item) {
                 // Ensure item_name exists (request rules already enforce this)
                 if (empty($item['item_name'])) {

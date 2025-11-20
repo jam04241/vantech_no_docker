@@ -9,6 +9,7 @@
                 <th class="p-4 font-semibold">Brand</th>
                 <th class="p-4 font-semibold">Category</th>
                 <th class="p-4 font-semibold">Condition</th>
+                <th class="p-4 font-semibold">Supplier</th>
                 <th class="p-4">Actions</th>
             </tr>
         </thead>
@@ -24,7 +25,7 @@
                     <td class="p-4 font-mono text-sm">{{ $product->serial_number ?? 'N/A' }}</td>
                     <td class="p-4">
                         <span class="text-green-800 text-xs px-2 py-1 font-bold rounded-full">
-                            {{ $product->warranty_period }}
+                            {{ $product->warranty_period ?? 'N/A' }}
                         </span>
                     </td>
                     <td class="p-4">
@@ -38,6 +39,21 @@
                         </span>
                     </td>
                     <td class="p-4">
+                        <span
+                            class="text-xs px-2 py-1 font-bold rounded-full {{ $product->product_condition === 'Second Hand' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                            {{ $product->product_condition }}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        @if($product->supplier)
+                            <span class="text-indigo-800 text-xs font-bold">
+                                {{$product->supplier->company_name ?? 'N/A' }}
+                            </span>
+                        @else
+                            <span class="text-gray-400 text-xs italic">N/A</span>
+                        @endif
+                    </td>
+                    <td class="p-4">
                         @php
                             $payload = [
                                 'id' => $product->id,
@@ -46,9 +62,8 @@
                                 'warranty_period' => $product->warranty_period,
                                 'brand_id' => $product->brand_id,
                                 'category_id' => $product->category_id,
-                                'condition' => $product->condition,
+                                'product_condition' => $product->product_condition,
                                 'supplier_id' => $product->supplier_id,
-                                'price' => $product->stock?->price,
                             ];
                         @endphp
                         <button type="button" data-product-modal data-product='@json($payload)'
@@ -60,7 +75,7 @@
                 </tr>
             @empty
                 <tr class="border-t">
-                    <td colspan="7" class="p-8 text-center text-gray-500">
+                    <td colspan="8" class="p-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

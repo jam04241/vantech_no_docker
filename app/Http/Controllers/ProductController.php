@@ -40,18 +40,43 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        DB::transaction(function () use ($data) {
-            $productData = collect($data)->except(['price'])->toArray();
-            $product = Product::create($productData);
+        // Determine product condition based on checkbox
+        $productCondition = $request->has('is_used') ? 'Second Hand' : 'Brand New';
 
-            Product_Stocks::create([
-                'product_id' => $product->id,
-                'price' => $data['price'],
-                'stock_quantity' => 1,
-            ]);
-        });
+        // If product is Second Hand, set supplier_id to null
+        if ($request->has('is_used')) {
+            $data['supplier_id'] = null;
+        }
 
-        return redirect()->route('product.add')->with('success', 'Product saved and stock updated successfully.');
+        // Add product condition to data
+        $data['product_condition'] = $productCondition;
+
+        // Get price before creating product (since it's not a product field)
+        $price = $data['price'] ?? 0;
+        unset($data['price']); // Remove price from product data as it's not in the products table
+
+        // Use transaction to ensure both product and stock are created successfully
+        DB::beginTransaction();
+
+        try {
+            // Create the product
+            $product = Product::create($data);
+
+            // Create the associated stock record
+            if ($product) {
+                Product_Stocks::create([
+                    'product_id' => $product->id,
+                    'stock_quantity' => 1, // Default quantity, adjust as needed
+                    'price' => $price,
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('product.add')->with('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to create product: ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -229,6 +254,7 @@ class ProductController extends Controller
                 $product->product_name,
                 $product->brand_id ?? 'null',
                 $product->category_id ?? 'null',
+                $product->product_condition ?? 'null',  // Added product_condition to group by
             ]);
         })->map(function ($group) {
             $first = $group->first();
@@ -239,6 +265,7 @@ class ProductController extends Controller
                 'category' => $first->category,
                 'brand_id' => $first->brand_id,
                 'category_id' => $first->category_id,
+                'product_condition' => $first->product_condition,  // Added product_condition to the mapped object
                 'quantity' => $group->count(),
                 'price' => $first->stock?->price ?? 0,
             ];
@@ -290,14 +317,14 @@ class ProductController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($product, $data) {
-        $productData = collect($data)->except(['price'])->toArray();
-        $productData['serial_number'] = $productData['serial_number'] ?? ($product->serial_number ?? 'N/A');
+            $productData = collect($data)->except(['price'])->toArray();
+            $productData['serial_number'] = $productData['serial_number'] ?? ($product->serial_number ?? 'N/A');
 
             $product->update($productData);
 
             $stock = Product_Stocks::firstOrNew(['product_id' => $product->id]);
             $stock->price = $data['price'];
-        $stock->stock_quantity = $stock->stock_quantity ?? 1;
+            $stock->stock_quantity = $stock->stock_quantity ?? 1;
             $stock->save();
         });
 

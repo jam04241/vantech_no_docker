@@ -36,9 +36,8 @@
         </select>
 
         <div class="gap-3">
-            <button
-                class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out">Add
-                Customer</button>
+            <a href="{{ route('customer.addCustomer') }}" class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2
+                                focus:ring-indigo-500 transition duration-150 ease-in-out">Add Customer</a>
         </div>
     </div>
     <div class="flex flex-col lg:flex-row gap-6 mt-6">
