@@ -1,6 +1,6 @@
 @extends('SIDEBAR.layouts')
-@section('title', 'Inventory')
-@section('name', 'Inventory')
+@section('title', 'Inventory List')
+@section('name', 'Inventory List')
 @section('content')
     @php
         $activeSort = $currentSort ?? request('sort', 'name_asc');
@@ -11,11 +11,22 @@
             hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
             class="w-1/3 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
 
-    <!-- Stats and Actions Container -->
-    <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Quick Stats -->
-        <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-           
+        <select name="category" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
+            hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
+            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
+            <option value="" {{ request('category') == '' ? 'selected' : '' }}>All Categories</option>
+            @isset($categories)
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                        {{ $category->category_name }}
+                    </option>
+                @endforeach
+            @endisset
+        </select>
+
+        <select name="brand" hx-get="{{ route('inventory.list') }}" hx-trigger="change" hx-target="#product-table-container"
+            hx-include="#filter-container" hx-swap="innerHTML"
+            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
 
             <option value="" {{ request('brand') == '' ? 'selected' : '' }}>All Brands</option>
             @isset($brands)
