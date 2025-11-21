@@ -102,6 +102,10 @@
     Route::get('/api/products/recent', [ProductController::class, 'getRecentProducts'])->name('products.recent');
     // ============= END AUTO-SUGGESTION API ROUTE =============
 
+    // ============= SERIAL NUMBER DUPLICATE CHECK API ROUTE =============
+    Route::get('/api/products/check-serial', [ProductController::class, 'checkSerialNumber'])->name('products.check-serial');
+    // ============= END SERIAL NUMBER DUPLICATE CHECK API ROUTE =============
+
     Route::get('/Suppliers', [SuppliersController::class, 'index'])->name('suppliers');
     Route::post('/suppliers', [SuppliersController::class, 'store'])->name('suppliers.store');
     Route::post('/suppliers/{supplier}/toggle-status', [SuppliersController::class, 'toggleStatus'])->name('suppliers.toggle-status');
@@ -127,6 +131,8 @@
     Route::get('/PointOfSale', [BrandController::class, 'posBrand'])->name('pos.brands');
     // POS CATEGORIES DROPDOWN (JSON API)
     Route::get('/PointOfSale/categories', [CategoryController::class, 'posCategories'])->name('pos.categories');
+    // POS PRODUCTS LIST WITH GROUPED STOCK
+    Route::get('/PointOfSale/products', [ProductController::class, 'posList'])->name('pos.products');
 
     //Suppliers Purchase Orders Route - use controller so view has required data
     Route::get('/suppliers/purchase-orders', [PurchaseDetailsController::class, 'create'])

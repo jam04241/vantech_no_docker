@@ -397,4 +397,71 @@ class ProductController extends Controller
         return response()->json(array_slice($uniqueProducts, 0, 10));
     }
     // ============= END AUTO-SUGGESTION API =============
+
+    /**
+     * Display products for POS system with grouped stock counts
+     * Groups products by name, brand, category, condition, and price
+     * Counts total stock for each group
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
+    public function posList(Request $request)
+    {
+        $query = Product::with('brand', 'category', 'stock');
+
+        // Apply reusable filters
+        $query = $this->applyProductFilters($query, $request);
+
+        $productsCollection = $query->get();
+
+        // ============= MAP INDIVIDUAL PRODUCTS WITH SERIAL NUMBERS =============
+        // Each product is mapped individually with its own serial number
+        // This allows scanning any serial number, even with same brand/name/price
+        $grouped = $productsCollection->map(function ($product) {
+            return (object) [
+                'id' => $product->id,
+                'product_name' => $product->product_name,
+                'serial_number' => $product->serial_number, // Each product has its own serial
+                'brand' => $product->brand,
+                'category' => $product->category,
+                'brand_id' => $product->brand_id,
+                'category_id' => $product->category_id,
+                'product_condition' => $product->product_condition,
+                'image_path' => $product->image_path,
+                'stock' => 1, // Each individual product = 1 unit
+                'price' => $product->stock?->price ?? 0,
+            ];
+        })->values();
+        // ============= END MAPPING =============
+
+        $data = array_merge(
+            $this->loadBrands(),
+            $this->loadCategories(),
+            compact('grouped')
+        );
+
+        return view('POS_SYSTEM.item_list', $data);
+    }
+
+    /**
+     * Check if a serial number already exists in the database
+     * API endpoint for duplicate serial number validation
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkSerialNumber(Request $request)
+    {
+        $serial = $request->query('serial');
+
+        if (!$serial) {
+            return response()->json(['exists' => false]);
+        }
+
+        // Check if serial number exists in products table
+        $exists = Product::where('serial_number', $serial)->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
 }

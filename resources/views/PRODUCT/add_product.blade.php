@@ -400,19 +400,61 @@
             }
             // ============= END AUTO-SUGGESTION PRODUCT NAME FUNCTIONALITY =============
 
-            // Handle form submission
+            // Handle form submission with serial number validation
             const form = document.querySelector('form');
             if (form) {
-                form.addEventListener('submit', function() {
-                    // Scroll to top of the page
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                    // Clear any stored scroll position
-                    localStorage.removeItem('formScrollPosition');
-                    // Show any pending SweetAlert messages
-                    showSweetAlerts();
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const serialNumber = document.getElementById('serial_number').value.trim();
+                    
+                    // Validate serial number is not empty
+                    if (!serialNumber) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Serial Number Required',
+                            text: 'Please enter a serial number before saving.',
+                            confirmButtonColor: '#E11D48'
+                        });
+                        return;
+                    }
+                    
+                    // Check if serial number already exists
+                    try {
+                        const response = await fetch(`/api/products/check-serial?serial=${encodeURIComponent(serialNumber)}`);
+                        const data = await response.json();
+                        
+                        if (data.exists) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Duplicate Serial Number',
+                                html: `<p>Serial number <strong>${serialNumber}</strong> is already registered in the system.</p>
+                                       <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Please use a different serial number.</p>`,
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#f59e0b'
+                            });
+                            return;
+                        }
+                        
+                        // Serial number is unique, proceed with form submission
+                        // Scroll to top of the page
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                        // Clear any stored scroll position
+                        localStorage.removeItem('formScrollPosition');
+                        // Submit the form
+                        form.submit();
+                    } catch (error) {
+                        console.error('Error checking serial number:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while checking the serial number. Please try again.',
+                            confirmButtonColor: '#E11D48'
+                        });
+                    }
                 });
             }
         });
