@@ -70,7 +70,7 @@
         <div class="gap-3">
             <a href="{{ route('customer.addCustomer') }}"
                 class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2
-                                                                                                                                                                                                                    focus:ring-indigo-500 transition duration-150 ease-in-out">Add
+                                                                                                                                                                                                                                                                    focus:ring-indigo-500 transition duration-150 ease-in-out">Add
                 Customer</a>
         </div>
     </div>
@@ -190,6 +190,7 @@
                 name: product.product_name,
                 price: product.price,
                 serialNumber: product.serial_number, // Store serial number
+                warranty: product.warranty_period || '1 Year', // Store warranty from database
                 qty: 1 // Each scanned item = 1 unit
             });
 
@@ -222,24 +223,27 @@
                 subtotal += itemSubtotal;
 
                 html += `
-                                                                                                                                                        <li class="py-3 px-3 hover:bg-gray-100 transition">
-                                                                                                                                                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
-                                                                                                                                                                <div class="col-span-5">
-                                                                                                                                                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
-                                                                                                                                                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
-                                                                                                                                                                </div>
-                                                                                                                                                                <div class="col-span-3 text-center">
-                                                                                                                                                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
-                                                                                                                                                                </div>
-                                                                                                                                                                <div class="col-span-3 text-right">
-                                                                                                                                                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
-                                                                                                                                                                </div>
-                                                                                                                                                                <div class="col-span-1 text-center">
-                                                                                                                                                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
-                                                                                                                                                                </div>
-                                                                                                                                                            </div>
-                                                                                                                                                        </li>
-                                                                                                                                                    `;
+                                                                                                                                                                                                        <li class="py-3 px-3 hover:bg-gray-100 transition">
+                                                                                                                                                                                                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
+                                                                                                                                                                                                                <div class="col-span-4">
+                                                                                                                                                                                                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
+                                                                                                                                                                                                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                <div class="col-span-2 text-center">
+                                                                                                                                                                                                                    <span class="text-gray-700 text-xs">${item.warranty}</span>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                <div class="col-span-2 text-center">
+                                                                                                                                                                                                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                <div class="col-span-3 text-right">
+                                                                                                                                                                                                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                <div class="col-span-1 text-center">
+                                                                                                                                                                                                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        </li>
+                                                                                                                                                                                                    `;
             });
 
             purchaseList.innerHTML = html;
@@ -275,7 +279,8 @@
         function updatePurchaseTotal() {
             const subtotal = parseFloat(document.getElementById('purchaseSubtotalDisplay').textContent) || 0;
             const discount = parseFloat(document.getElementById('purchaseDiscountInput').value) || 0;
-            const vat = (subtotal - discount) * 0.12;
+            // CALCULATION HERE
+            const vat = (subtotal - discount) * 0.03;
             const total = subtotal - discount + vat;
 
             document.getElementById('purchaseDiscountDisplay').textContent = discount.toFixed(2);
@@ -287,7 +292,7 @@
         function updateQuotationTotal() {
             const subtotal = parseFloat(document.getElementById('quotationSubtotalDisplay').textContent) || 0;
             const discount = parseFloat(document.getElementById('quotationDiscountInput').value) || 0;
-            const vat = (subtotal - discount) * 0.12;
+            const vat = (subtotal - discount) * 0.03;
             const total = subtotal - discount + vat;
 
             document.getElementById('quotationDiscountDisplay').textContent = discount.toFixed(2);
@@ -317,7 +322,7 @@
                 icon: 'question',
                 title: 'Switch Tab?',
                 html: `<p>You have <strong>${scannedSerials.length}</strong> scanned product(s). Are you sure you want to switch tabs?</p>
-                                                                                                                                                   <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Your current transaction will be removed.</p>`,
+                                                                                                                                                                                                   <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Your current transaction will be removed.</p>`,
                 showCancelButton: true,
                 confirmButtonColor: '#6366f1',
                 cancelButtonColor: '#d33',
@@ -367,17 +372,17 @@
         function showConfirmation(title, text, icon, confirmButtonText, confirmButtonColor, actionType) {
             const productSerialNo = document.getElementById('productSerialNo').value.trim();
 
-            // Validate product serial number
-            if (!productSerialNo && actionType === 'checkout') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Product Serial No. Required',
-                    text: 'Please enter a product serial number before proceeding.',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#6366f1'
-                });
-                return;
-            }
+            // // Validate product serial number
+            // if (!productSerialNo && actionType === 'checkout') {
+            //     Swal.fire({
+            //         icon: 'warning',
+            //         title: 'Product Serial No. Required',
+            //         text: 'Please enter a product serial number before proceeding.',
+            //         confirmButtonText: 'OK',
+            //         confirmButtonColor: '#6366f1'
+            //     });
+            //     return;
+            // }
 
             Swal.fire({
                 title: title,
@@ -467,17 +472,6 @@
         }
 
         // Event Listeners
-        document.getElementById('checkout-btn').addEventListener('click', function () {
-            showConfirmation(
-                'Confirm Purchase',
-                'Are you sure you want to proceed with this purchase?',
-                'question',
-                'Yes, Proceed!',
-                '#6366f1',
-                'checkout'
-            );
-        });
-
         document.getElementById('print-quotation-btn').addEventListener('click', function () {
             showConfirmation(
                 'Confirm Print',
@@ -499,5 +493,212 @@
                 'pcbuild'
             );
         });
+
+        // Checkout Modal Functions
+        function openCheckoutModal() {
+            const checkoutModal = document.getElementById('checkoutModal');
+            if (checkoutModal) {
+                checkoutModal.classList.remove('hidden');
+                checkoutModal.classList.add('flex');
+                // Pre-fill amount with current total
+                const totalAmount = document.getElementById('purchaseTotalDisplay').textContent;
+                document.getElementById('amount').value = totalAmount;
+            }
+        }
+
+        function closeCheckoutModal() {
+            const checkoutModal = document.getElementById('checkoutModal');
+            if (checkoutModal) {
+                checkoutModal.classList.add('hidden');
+                checkoutModal.classList.remove('flex');
+            }
+        }
+
+        // Handle checkout form submission with SweetAlert flow
+        function handleCheckout(event) {
+            event.preventDefault();
+
+            const customerName = document.getElementById('customerName').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const amount = document.getElementById('amount').value;
+
+            // Get order items
+            const orderListItems = document.querySelectorAll('#purchaseOrderList li');
+            if (orderListItems.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Items',
+                    text: 'Please add items to the order before checkout.',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+
+            // Close modal first
+            closeCheckoutModal();
+
+            // Show confirmation alert
+            Swal.fire({
+                icon: 'question',
+                title: 'Confirm Purchase',
+                html: `<p><strong>${customerName}</strong></p><p>Payment Method: <strong>${paymentMethod}</strong></p><p>Amount: <strong>₱${parseFloat(amount).toFixed(2)}</strong></p>`,
+                showCancelButton: true,
+                confirmButtonColor: '#6366f1',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Proceed!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show processing timer
+                    showCheckoutProcessing(customerName, paymentMethod, amount);
+                }
+            });
+        }
+
+        // Processing timer for checkout
+        function showCheckoutProcessing(customerName, paymentMethod, amount) {
+            let timerInterval;
+
+            Swal.fire({
+                title: '🛒 Processing Purchase',
+                html: `<p>Customer: <strong>${customerName}</strong></p><p>Processing order in <b></b> seconds...</p>`,
+                timer: 3000,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("b");
+                    timerInterval = setInterval(() => {
+                        const secondsLeft = Math.ceil(Swal.getTimerLeft() / 1000);
+                        timer.textContent = secondsLeft;
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.timer) {
+                    showCheckoutSuccess(customerName, paymentMethod, amount);
+                }
+            });
+        }
+
+        // Success message and redirect
+        function showCheckoutSuccess(customerName, paymentMethod, amount) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Purchase Complete!',
+                html: `<p>Order for <strong>${customerName}</strong> has been processed successfully.</p>`,
+                confirmButtonText: 'View Receipt',
+                confirmButtonColor: '#6366f1'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Prepare order data
+                    const orderListItems = document.querySelectorAll('#purchaseOrderList li');
+                    const orderData = {
+                        customerName: customerName,
+                        paymentMethod: paymentMethod,
+                        amount: amount,
+                        subtotal: document.getElementById('purchaseSubtotalDisplay').textContent,
+                        discount: document.getElementById('purchaseDiscountDisplay').textContent,
+                        vat: document.getElementById('purchaseVAT').textContent,
+                        total: document.getElementById('purchaseTotalDisplay').textContent,
+                        items: []
+                    };
+
+                    // Collect order items from orderItems array (more reliable)
+                    orderItems.forEach(item => {
+                        const subtotal = (item.price * item.qty).toFixed(2);
+
+                        orderData.items.push({
+                            productName: item.name,
+                            price: item.price.toFixed(2),
+                            warranty: item.warranty || '1 Year',
+                            quantity: item.qty,
+                            subtotal: subtotal
+                        });
+                    });
+
+                    // Store data in sessionStorage for receipt page
+                    sessionStorage.setItem('receiptData', JSON.stringify(orderData));
+
+                    // Redirect to receipt page
+                    window.location.href = '{{ route("pos.purchasereceipt") }}';
+                }
+            });
+        }
+
+        // Attach checkout form submission handler
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', handleCheckout);
+        }
     </script>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
+            <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                onclick="closeCheckoutModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h3>
+            <form id="checkoutForm">
+                <!-- Customer Name -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
+                    <input type="text" id="customerName" name="customerName"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        placeholder="Enter customer name" required>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                    <select id="paymentMethod" name="paymentMethod"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        required>
+                        <option value="">Select Payment Method</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Gcash">Gcash</option>
+                        <option value="BPI">BPI</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Amount -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3 text-gray-700 font-semibold">₱</span>
+                        <input type="number" id="amount" name="amount" step="0.01" min="0"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-8 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                            placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeCheckoutModal()"
+                        class="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition duration-150">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition duration-150 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Proceed
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection

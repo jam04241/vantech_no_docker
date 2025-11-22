@@ -20,6 +20,10 @@
             .print-container {
                 box-shadow: none !important;
                 margin: 0 !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                overflow: hidden;
             }
         }
 

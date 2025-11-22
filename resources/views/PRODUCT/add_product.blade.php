@@ -176,10 +176,16 @@
 
                                 <div>
                                     <label for="warranty" class="block text-sm font-medium text-gray-700 mb-2">Warranty</label>
-                                    <input type="text" id="warranty" name="warranty_period"
-                                        value="{{ old('warranty_period') }}"
-                                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                                        placeholder="e.g. 1 year" required>
+                                        <select id="warranty" name="warranty_period" value="{{ old('warranty_period') }}"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
+                                            <option value="" selected hidden> Select Warranty</option>
+                                            <option value="3 days">3 days</option>
+                                            <option value="7 days">7 days</option>
+                                            <option value="10 days">10 days</option>
+                                            <option value="15 days">15 days</option>
+                                            <option value="30 days">30 days</option>
+                                            <option value="1 year">1 year</option>
+                                        </select>
                                 </div>
                             </div>
                         </div>
@@ -282,22 +288,22 @@
             // Get the product name input and suggestions dropdown
             const productNameInput = document.getElementById('name');
             const suggestionsDropdown = document.getElementById('productSuggestions');
-            
+
             // Event listener for input changes to fetch suggestions
             if (productNameInput) {
                 productNameInput.addEventListener('input', async function() {
                     const searchTerm = this.value.trim();
-                    
+
                     // Show suggestions only if there's input
                     if (searchTerm.length > 0) {
                         try {
                             // Fetch recent products from API
                             const response = await fetch(`/api/products/recent?search=${encodeURIComponent(searchTerm)}`);
                             const products = await response.json();
-                            
+
                             // Clear previous suggestions
                             suggestionsDropdown.innerHTML = '';
-                            
+
                             if (products.length > 0) {
                                 // Display suggestions
                                 products.forEach(product => {
@@ -309,7 +315,7 @@
                                             Brand: ${product.brand_name} | Category: ${product.category_name} | Price: ₱${parseFloat(product.price).toFixed(2)}
                                         </div>
                                     `;
-                                    
+
                                     // Click handler to fill form fields
                                     suggestionItem.addEventListener('click', function() {
                                         // ============= AUTO-FILL FORM FIELDS FROM SUGGESTION =============
@@ -318,14 +324,14 @@
                                         document.getElementById('category_id').value = product.category_id || '';
                                         document.getElementById('price').value = product.price || '';
                                         // ============= END AUTO-FILL FORM FIELDS =============
-                                        
+
                                         // Hide suggestions dropdown
                                         suggestionsDropdown.classList.add('hidden');
                                     });
-                                    
+
                                     suggestionsDropdown.appendChild(suggestionItem);
                                 });
-                                
+
                                 // Show suggestions dropdown
                                 suggestionsDropdown.classList.remove('hidden');
                             } else {
@@ -341,7 +347,7 @@
                         suggestionsDropdown.classList.add('hidden');
                     }
                 });
-                
+
                 // Hide suggestions when clicking outside
                 document.addEventListener('click', function(event) {
                     if (event.target !== productNameInput && !suggestionsDropdown.contains(event.target)) {
@@ -356,9 +362,9 @@
             if (form) {
                 form.addEventListener('submit', async function(e) {
                     e.preventDefault();
-                    
+
                     const serialNumber = document.getElementById('serial_number').value.trim();
-                    
+
                     // Validate serial number is not empty
                     if (!serialNumber) {
                         Swal.fire({
@@ -369,12 +375,12 @@
                         });
                         return;
                     }
-                    
+
                     // Check if serial number already exists
                     try {
                         const response = await fetch(`/api/products/check-serial?serial=${encodeURIComponent(serialNumber)}`);
                         const data = await response.json();
-                        
+
                         if (data.exists) {
                             Swal.fire({
                                 icon: 'warning',
@@ -386,7 +392,7 @@
                             });
                             return;
                         }
-                        
+
                         // Serial number is unique, proceed with form submission
                         // Scroll to top of the page
                         window.scrollTo({
@@ -417,7 +423,7 @@
                     icon: 'success',
                     title: 'Success!',
                     text: '{{ session('success') }}',
-                    confirmButtonColor: '#4F46E5',
+                    confirmButtonColor: '#4F46E5'
                 });
             @endif
 
@@ -426,8 +432,7 @@
                     icon: 'error',
                     title: 'Oops...',
                     text: '{{ session('error') }}',
-                    confirmButtonColor: '#E11D48',
-                    timer: 3000
+                    confirmButtonColor: '#E11D48'
                 });
             @endif
 
@@ -436,8 +441,7 @@
                     icon: 'error',
                     title: 'Validation Error',
                     html: '{!! implode('<br>', $errors->all()) !!}',
-                    confirmButtonColor: '#E11D48',
-                    timer: 3000
+                    confirmButtonColor: '#E11D48'
                 });
             @endif
         }
@@ -528,7 +532,7 @@
             if (addProductForm) {
                 addProductForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     Swal.fire({
                         title: 'Confirm Product Registration',
                         text: 'Are you sure you want to register this product?',

@@ -19,6 +19,9 @@
     {{-- SweetAlert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    {{-- Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+
     <style>
         .sidebar {
             transition: all 0.3s ease;
@@ -234,9 +237,10 @@
         <nav class="space-y-4">
             <!-- Dashboard -->
             <a href="{{ route('dashboard') }}" class="sidebar-item">
-<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10h16V10" />
-</svg>
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l9-9 9 9M4 10v10h16V10" />
+                </svg>
 
                 Dashboard
             </a>
@@ -296,10 +300,10 @@
 
             {{-- STAFF FOR CREATE AND MANAGE ACCOUNT --}}
             <a href="{{ route('staff') }}" class="sidebar-item">
-            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M5.121 17.804A7 7 0 0112 14a7 7 0 016.879 3.804M12 12a5 5 0 100-10 5 5 0 000 10z" />
-            </svg>
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5.121 17.804A7 7 0 0112 14a7 7 0 016.879 3.804M12 12a5 5 0 100-10 5 5 0 000 10z" />
+                </svg>
 
                 Staff
             </a>
@@ -333,7 +337,7 @@
             <div class="topbar-nav">
                 <!-- POS Button -->
                 <div class="relative group">
-                    <a href="{{ route("pos.brands") }}"
+                    <a href="{{ route("pos.itemlist") }}"
                         class="sidebar-item flex items-center justify-center w-8 h-8 bg-[#46647F] hover:bg-[#3a5469] text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 p-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -67,7 +67,7 @@
                     @isset($suppliers)
                         @foreach ($suppliers as $supplier)
                             <option value="{{ $supplier->id }}" {{ request('supplier') == $supplier->id ? 'selected' : '' }}>
-                                {{ $supplier->supplier_name }}
+                                {{ $supplier->company_name }}
                             </option>
                         @endforeach
                     @endisset
@@ -102,9 +102,15 @@
         </div>
     </div>
 
-    {{-- TABLE --}}
+    {{-- Inventory Product table --}}
     <div id="product-table-container">
         @include('partials.productTable_Inventory')
+    </div>
+    {{-- Inventory Stock Out --}}
+    <div class="py-6 rounded-xl" id="product-table-container">
+
+        @include(' partials/productTable_stockout')
+
     </div>
 
     {{-- ================= EDIT MODALS ================= --}}
@@ -185,12 +191,17 @@
                         </select>
                     </div>
                     <div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Warranty</label>
-                            <input type="text" name="warranty_period"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
-                        </div>
-
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Warranty</label>
+                        <select name="warranty_period"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
+                            <option value="" selected hidden>Select Warranty</option>
+                            <option value="3 days">3 days</option>
+                            <option value="7 days">7 days</option>
+                            <option value="10 days">10 days</option>
+                            <option value="15 days">15 days</option>
+                            <option value="30 days">30 days</option>
+                            <option value="1 year">1 year</option>
+                        </select>
                     </div>
                 </div>
 
@@ -204,8 +215,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
                         <select name="supplier_id"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                            required>
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
                             @foreach ($suppliers ?? collect() as $supplier)
                                 <option value="{{ $supplier->id }}">{{ $supplier->company_name ?? $supplier->supplier_name }}
                                 </option>

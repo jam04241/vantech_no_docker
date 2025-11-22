@@ -49,8 +49,9 @@
                     <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                         <div
                             class="grid grid-cols-12 gap-1 px-3 py-2 bg-gray-100 text-xs font-semibold text-gray-700 border-b border-gray-200">
-                            <div class="col-span-5">Product</div>
-                            <div class="col-span-3 text-center">Price</div>
+                            <div class="col-span-4">Product</div>
+                            <div class="col-span-2 text-center">Warranty</div>
+                            <div class="col-span-2 text-center">Price</div>
                             <div class="col-span-3 text-right">Subtotal</div>
                             <div class="col-span-1 text-center">Remove</div>
                         </div>
@@ -76,12 +77,12 @@
                             <input type="number" id="purchaseDiscountInput" value="0"
                                 class="w-20 px-2 py-1 border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 step="0.01" oninput="updatePurchaseTotal()" placeholder="0.00" />
-                            <span class="text-red-500 font-medium w-24 text-right">-₱<span
-                                    id="purchaseDiscountDisplay">0.00</span></span>
+                            <span class="text-red-500 font-medium w-24 text-right" hidden>-₱<span
+                                    id="purchaseDiscountDisplay" hidden>0.00</span></span>
                         </div>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-700">VAT (12%)</span>
+                        <span class="text-gray-700">VAT (3%)</span>
                         <span class="font-medium text-gray-900">₱<span id="purchaseVAT">0.00</span></span>
                     </div>
                     <div
@@ -93,7 +94,7 @@
 
                 <!-- Button -->
                 <div class="mt-5">
-                    <button id="checkout-btn"
+                    <button id="checkout-btn" onclick="openCheckoutModal()"
                         class="w-full bg-indigo-600 text-white py-3 rounded-lg text-base font-semibold shadow hover:bg-indigo-700 transition duration-150 flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path
@@ -123,8 +124,9 @@
                         <div
                             class="grid grid-cols-12 gap-1 px-3 py-2 bg-gray-100 text-xs font-semibold text-gray-700 border-b border-gray-200">
                             <div class="col-span-5">Product</div>
-                            <div class="col-span-3 text-center">Price</div>
-                            <div class="col-span-3 text-right">Subtotal</div>
+                            <div class="col-span-2 text-center">Price</div>
+                            <div class="col-span-2 text-right">Warranty</div>
+                            <div class="col-span-2 text-right">Subtotal</div>
                             <div class="col-span-1 text-center">Remove</div>
                         </div>
                         <ul id="quotationOrderList"
@@ -188,6 +190,73 @@
             </div>
 
         </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
+        <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            onclick="closeCheckoutModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h3>
+        <form id="checkoutForm" onsubmit="handleCheckout(event)">
+            <!-- Customer Name -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
+                <input type="text" id="customerName" name="customerName"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                    placeholder="Enter customer name" required>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                <select id="paymentMethod" name="paymentMethod"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                    required>
+                    <option value="">Select Payment Method</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Gcash">Gcash</option>
+                    <option value="BPI">BPI</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
+
+            <!-- Amount -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-700 font-semibold">₱</span>
+                    <input type="number" id="amount" name="amount" step="0.01" min="0"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-8 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        placeholder="0.00" required>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button type="button" onclick="closeCheckoutModal()"
+                    class="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition duration-150">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition duration-150 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Print Receipt
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -262,12 +331,99 @@
     }
 
     /**
+     * Open checkout modal
+     */
+    function openCheckoutModal() {
+        const checkoutModal = document.getElementById('checkoutModal');
+        if (checkoutModal) {
+            checkoutModal.classList.remove('hidden');
+            checkoutModal.classList.add('flex');
+            // Pre-fill amount with current total
+            const totalAmount = document.getElementById('purchaseTotalDisplay').textContent;
+            document.getElementById('amount').value = totalAmount;
+        }
+    }
+
+    /**
+     * Close checkout modal
+     */
+    function closeCheckoutModal() {
+        const checkoutModal = document.getElementById('checkoutModal');
+        if (checkoutModal) {
+            checkoutModal.classList.add('hidden');
+            checkoutModal.classList.remove('flex');
+        }
+    }
+
+    /**
+     * Handle checkout form submission
+     */
+    function handleCheckout(event) {
+        event.preventDefault();
+
+        const customerName = document.getElementById('customerName').value;
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        const amount = document.getElementById('amount').value;
+
+        // Get order items
+        const orderListItems = document.querySelectorAll('#purchaseOrderList li');
+        if (orderListItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Items',
+                text: 'Please add items to the order before checkout.',
+                confirmButtonColor: '#f59e0b'
+            });
+            return;
+        }
+
+        // Prepare order data
+        const orderData = {
+            customerName: customerName,
+            paymentMethod: paymentMethod,
+            amount: amount,
+            subtotal: document.getElementById('purchaseSubtotalDisplay').textContent,
+            discount: document.getElementById('purchaseDiscountDisplay').textContent,
+            vat: document.getElementById('purchaseVAT').textContent,
+            total: document.getElementById('purchaseTotalDisplay').textContent,
+            items: []
+        };
+
+        // Collect order items
+        orderListItems.forEach(item => {
+            const productName = item.querySelector('[data-product-name]')?.textContent || '';
+            const price = item.querySelector('[data-price]')?.textContent || '0.00';
+            const quantity = item.querySelector('[data-quantity]')?.textContent || '1';
+            const subtotal = item.querySelector('[data-subtotal]')?.textContent || '0.00';
+
+            orderData.items.push({
+                productName: productName,
+                price: price,
+                quantity: quantity,
+                subtotal: subtotal
+            });
+        });
+
+        // Store data in sessionStorage for receipt page
+        sessionStorage.setItem('receiptData', JSON.stringify(orderData));
+
+        // Redirect to receipt page
+        window.location.href = '{{ route("pos.purchasereceipt") }}';
+    }
+
+    /**
      * Handle barcode input with API lookup
      * This script runs when purchaseFrame is used as a standalone component
      * Searches by serial number and groups by product attributes
      * Includes debouncing and prevents duplicate rapid scans
      */
     document.addEventListener('DOMContentLoaded', function () {
+        // Checkout button event listener
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', openCheckoutModal);
+        }
+
         const productSerialInput = document.getElementById('productSerialNo');
 
         if (productSerialInput) {

@@ -547,6 +547,7 @@ class ProductController extends Controller
             'image_path' => $foundProduct->image_path,
             'stock' => $totalQuantity, // Total quantity of products in this group
             'price' => $price,
+            'warranty_period' => $foundProduct->warranty_period,
         ];
 
         return response()->json(['product' => $product, 'message' => 'Product found'], 200);

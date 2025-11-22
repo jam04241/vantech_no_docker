@@ -73,16 +73,27 @@
                                 'price' => $product->stock?->price ?? 0,
                             ];
                         @endphp
-                        <button type="button" data-product-modal data-product='@json($payload)'
-                            data-action="{{ route('products.update', $product->id) }}"
-                            class="text-blue-600 hover:text-blue-900 transition-colors duration-200 px-3 py-1 rounded-lg border border-blue-200 hover:bg-blue-50 text-sm font-semibold">
-                            Edit
-                        </button>
+                        <div class="flex space-x-2">
+                            <!-- Edit Button -->
+                            <button type="button" data-product-modal data-product='@json($payload)'
+                                data-action="{{ route('products.update', $product->id) }}"
+                                class="bg-[#46647F] hover:bg-[#3a556f] text-white transition-colors duration-200 px-3 py-2 rounded-lg text-sm font-semibold flex items-center space-x-1">
+                                <i class="fa-regular fa-pen-to-square w-4 h-4"></i>
+                                <span>Edit</span>
+                            </button>
+
+                            <!-- Stock Out Button -->
+                            <button type="button"
+                                class="bg-red-600 hover:bg-red-700 text-white transition-colors duration-200 px-3 py-2 rounded-lg text-sm font-semibold flex items-center space-x-1">
+                                <i class="fa-solid fa-box-archive w-4 h-4"></i>
+                                <span>Stock Out</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             @empty
                 <tr class="border-t">
-                    <td colspan="8" class="p-8 text-center text-gray-500">
+                    <td colspan="9" class="p-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
