@@ -196,12 +196,12 @@
                                             {{-- Status --}}
                                             <td class="p-4">
                                                 <span class="inline-flex items-center px-4 py-2 rounded-full text-md font-medium 
-                                                            {{ $supplier->status === 'active'
+                                                                                {{ $supplier->status === 'active'
                             ? 'bg-green-100 text-green-800 border border-green-200'
                             : 'bg-red-100 text-red-800 border border-red-200' }}">
                                                     <span
                                                         class="w-2 h-2 rounded-full mr-2 
-                                                                {{ $supplier->status === 'active' ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                                                                                    {{ $supplier->status === 'active' ? 'bg-green-500' : 'bg-red-500' }}"></span>
                                                     {{ ucfirst($supplier->status) }}
                                                 </span>
                                             </td>
@@ -211,7 +211,7 @@
                                                 <div class="flex justify-center items-center space-x-3">
                                                     {{-- Toggle --}}
                                                     <button onclick="toggleStatus('{{ $supplier->id }}')" class="p-3 rounded-lg transition duration-200 
-                                                                {{ $supplier->status === 'active'
+                                                                                    {{ $supplier->status === 'active'
                             ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
                             : 'bg-green-50 text-green-600 hover:bg-green-100' }}"
                                                         title="{{ $supplier->status === 'active' ? 'Deactivate' : 'Activate' }}">
@@ -233,16 +233,6 @@
                                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                    </button>
-
-                                                    {{-- Delete --}}
-                                                    <button onclick="deleteSupplier('{{ $supplier->id }}')"
-                                                        class="p-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition duration-200"
-                                                        title="Delete Supplier">
-                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
                                                     </button>
                                                 </div>
