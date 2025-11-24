@@ -5,6 +5,19 @@
     Key Feature: Multiple serials of same product increase quantity
 -->
 <div class="container w-full lg:w-1/2">
+    <!-- Success Message Container -->
+    @if(session('success') && session('from_customer_add'))
+        <div id="customerSuccessMessage" class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
+            <div class="flex justify-between items-center">
+                <p>{{ session('success') }}</p>
+                <button type="button" class="text-green-700"
+                    onclick="document.getElementById('customerSuccessMessage').style.display = 'none';">
+                    <span class="text-2xl">&times;</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden h-fit sticky top-6">
         <!-- Barcode Input -->
         <div class="p-4 bg-white border-b border-gray-200">
@@ -33,9 +46,10 @@
                     <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                         <div
                             class="grid grid-cols-12 gap-1 px-3 py-2 bg-gray-100 text-xs font-semibold text-gray-700 border-b border-gray-200">
-                            <div class="col-span-4">Product</div>
+                            <div class="col-span-1 text-center">No.</div>
+                            <div class="col-span-3">Product</div>
                             <div class="col-span-2 text-center">Warranty</div>
-                            <div class="col-span-2 text-center">Price</div>
+                            <div class="col-span-2 text-center">Unit Price</div>
                             <div class="col-span-3 text-right">Subtotal</div>
                             <div class="col-span-1 text-center">Remove</div>
                         </div>
@@ -105,11 +119,14 @@
         <h3 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h3>
         <form id="checkoutForm" onsubmit="handleCheckout(event)">
             <!-- Customer Name -->
-            <div class="mb-4">
+            <div class="mb-4 relative">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
                 <input type="text" id="customerName" name="customerName"
                     class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                    placeholder="Enter customer name" required>
+                    placeholder="Enter customer name" required autocomplete="off">
+                <div id="customerSuggestions"
+                    class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto z-10 hidden">
+                </div>
             </div>
 
             <!-- Payment Method -->
@@ -161,6 +178,16 @@
 
 <!-- POS Product Lookup Script (Serial Number Search) -->
 <script>
+    // Auto-hide success message after 5 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        const successMessage = document.getElementById('customerSuccessMessage');
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+    });
+
     // Debounce timer to prevent rapid API calls
     let scanDebounceTimer = null;
     let lastFetchTime = 0;
@@ -281,38 +308,111 @@
             return;
         }
 
-        // Prepare order data
-        const orderData = {
-            customerName: customerName,
-            paymentMethod: paymentMethod,
+        // Validate customer name is filled
+        if (!customerName || customerName.trim() === '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Please select a customer before checkout.',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
+
+        // Get customer ID from orderItems array (first item has customer info)
+        let customerId = null;
+        if (typeof orderItems !== 'undefined' && orderItems.length > 0) {
+            customerId = orderItems[0].customerId;
+        }
+
+        if (!customerId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Customer ID not found. Please select a customer from the suggestions.',
+                confirmButtonColor: '#ef4444'
+            });
+            console.log('Debug: orderItems =', orderItems);
+            return;
+        }
+
+        // Prepare order data for API
+        const checkoutData = {
+            customer_id: customerId,
+            payment_method: paymentMethod,
             amount: amount,
-            subtotal: document.getElementById('purchaseSubtotalDisplay').textContent,
-            discount: document.getElementById('purchaseDiscountDisplay').textContent,
-            vat: document.getElementById('purchaseVAT').textContent,
-            total: document.getElementById('purchaseTotalDisplay').textContent,
             items: []
         };
 
-        // Collect order items
-        orderListItems.forEach(item => {
-            const productName = item.querySelector('[data-product-name]')?.textContent || '';
-            const price = item.querySelector('[data-price]')?.textContent || '0.00';
-            const quantity = item.querySelector('[data-quantity]')?.textContent || '1';
-            const subtotal = item.querySelector('[data-subtotal]')?.textContent || '0.00';
-
-            orderData.items.push({
-                productName: productName,
-                price: price,
-                quantity: quantity,
-                subtotal: subtotal
+        // Collect order items with product details
+        if (typeof orderItems !== 'undefined') {
+            orderItems.forEach(item => {
+                checkoutData.items.push({
+                    product_id: item.id,
+                    serial_number: item.serialNumber,
+                    unit_price: item.price,
+                    quantity: item.qty,
+                    total_price: item.price * item.qty
+                });
             });
-        });
+        }
 
-        // Store data in sessionStorage for receipt page
-        sessionStorage.setItem('receiptData', JSON.stringify(orderData));
+        // Send checkout data to API
+        fetch('{{ route("checkout.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify(checkoutData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Store data in sessionStorage for receipt page
+                    const receiptData = {
+                        customerName: customerName,
+                        paymentMethod: paymentMethod,
+                        amount: amount,
+                        subtotal: document.getElementById('purchaseSubtotalDisplay').textContent,
+                        discount: document.getElementById('purchaseDiscountDisplay').textContent,
+                        vat: document.getElementById('purchaseVAT').textContent,
+                        total: document.getElementById('purchaseTotalDisplay').textContent,
+                        items: checkoutData.items
+                    };
+                    sessionStorage.setItem('receiptData', JSON.stringify(receiptData));
 
-        // Redirect to receipt page
-        window.location.href = '{{ route("pos.purchasereceipt") }}';
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Processed!',
+                        text: 'Your order has been successfully recorded.',
+                        confirmButtonText: 'View Receipt',
+                        confirmButtonColor: '#6366f1'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to receipt page
+                            window.location.href = '{{ route("pos.purchasereceipt") }}';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to process order',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Checkout error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while processing your order.',
+                    confirmButtonColor: '#ef4444'
+                });
+            });
     }
 
     /**
@@ -424,4 +524,82 @@
             });
         }
     });
+
+    /**
+     * Customer Name Autosuggestion
+     * Fetches customers by first name, last name, or contact number
+     */
+    let customerSearchDebounceTimer = null;
+    const customerNameInput = document.getElementById('customerName');
+    const customerSuggestionsContainer = document.getElementById('customerSuggestions');
+
+    if (customerNameInput) {
+        customerNameInput.addEventListener('input', function (e) {
+            clearTimeout(customerSearchDebounceTimer);
+            const query = e.target.value.trim();
+
+            if (query.length < 2) {
+                customerSuggestionsContainer.classList.add('hidden');
+                return;
+            }
+
+            customerSearchDebounceTimer = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/customers/search?query=${encodeURIComponent(query)}`, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        console.error('Failed to fetch customers');
+                        return;
+                    }
+
+                    const customers = await response.json();
+
+                    if (customers.length === 0) {
+                        customerSuggestionsContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    // Build suggestions HTML
+                    customerSuggestionsContainer.innerHTML = customers.map(customer => `
+                        <div class="px-4 py-2 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0 text-sm"
+                            onclick="selectCustomer('${customer.first_name}', '${customer.last_name}', ${customer.id})">
+                            <div class="font-medium text-gray-900">${customer.full_name}</div>
+                            <div class="text-xs text-gray-600">${customer.contact_no}</div>
+                        </div>
+                    `).join('');
+
+                    customerSuggestionsContainer.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching customers:', error);
+                }
+            }, 300);
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (e.target !== customerNameInput && !customerSuggestionsContainer.contains(e.target)) {
+                customerSuggestionsContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    /**
+     * Select customer from suggestions
+     * Populates the customer name field with full name and stores customer ID in orderItems
+     */
+    function selectCustomer(firstName, lastName, customerId) {
+        document.getElementById('customerName').value = `${firstName} ${lastName}`;
+        document.getElementById('customerSuggestions').classList.add('hidden');
+
+        // Store customer ID in all order items
+        if (typeof orderItems !== 'undefined') {
+            orderItems.forEach(item => {
+                item.customerId = customerId;
+            });
+        }
+    }
 </script>

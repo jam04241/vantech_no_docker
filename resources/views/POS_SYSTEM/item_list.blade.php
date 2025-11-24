@@ -17,6 +17,20 @@
     }
 </style>
 @section('content_items')
+    <!-- Success Message Container -->
+    @if(session('success') && session('from_customer_add'))
+        <div id="customerSuccessMessage"
+            class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full">
+            <div class="flex justify-between items-center">
+                <p>{{ session('success') }}</p>
+                <button type="button" class="text-green-700"
+                    onclick="document.getElementById('customerSuccessMessage').style.display = 'none';">
+                    <span class="text-2xl">&times;</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
     <div class="flex items-center space-between gap-2 w-full sm:w-auto flex-1 flex-wrap">
 
         {{-- Search Bar --}}
@@ -69,8 +83,8 @@
 
         <div class="gap-3">
             <a href="{{ route('customer.addCustomer') }}"
-                class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2
-                                                                                                                                                                                                                                                                        focus:ring-indigo-500 transition duration-150 ease-in-out">Add
+                class=" px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2>
+                                                                                                                                                                                                                                                                                            focus:ring-indigo-500 transition duration-150 ease-in-out">Add
                 Customer</a>
         </div>
     </div>
@@ -219,29 +233,33 @@
             orderItems.forEach((item, index) => {
                 const itemSubtotal = item.price * item.qty; // Price × Quantity
                 subtotal += itemSubtotal;
+                const sequenceNumber = index + 1; // Sequence number starts from 1
 
                 html += `
-                                                                                                                                                                                                            <li class="py-3 px-3 hover:bg-gray-100 transition">
-                                                                                                                                                                                                                <div class="grid grid-cols-12 gap-1 items-center text-xs">
-                                                                                                                                                                                                                    <div class="col-span-4">
-                                                                                                                                                                                                                        <p class="font-medium text-gray-900 truncate">${item.name}</p>
-                                                                                                                                                                                                                        <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    <div class="col-span-2 text-center">
-                                                                                                                                                                                                                        <span class="text-gray-700 text-xs">${item.warranty}</span>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    <div class="col-span-2 text-center">
-                                                                                                                                                                                                                        <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    <div class="col-span-3 text-right">
-                                                                                                                                                                                                                        <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    <div class="col-span-1 text-center">
-                                                                                                                                                                                                                        <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                            </li>
-                                                                                                                                                                                                        `;
+                        <li class="py-3 px-3 hover:bg-gray-100 transition">
+                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
+                                <div class="col-span-1 text-center">
+                                    <span class="font-semibold text-gray-900">${sequenceNumber}</span>
+                                </div>
+                                <div class="col-span-3">
+                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
+                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="text-gray-700 text-xs">${item.warranty}</span>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
+                                </div>
+                                <div class="col-span-3 text-right">
+                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
+                                </div>
+                                <div class="col-span-1 text-center">
+                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
+                                </div>
+                            </div>
+                        </li>
+                    `;
             });
 
             purchaseList.innerHTML = html;
@@ -324,7 +342,7 @@
             Swal.fire({
                 title: title,
                 html: html,
-                timer: 3000,
+                timer: 2000,
                 timerProgressBar: true,
                 allowOutsideClick: false,
                 didOpen: () => {
@@ -565,4 +583,16 @@
             </form>
         </div>
     </div>
+
+    <!-- Auto-hide success message after 5 seconds -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successMessage = document.getElementById('customerSuccessMessage');
+            if (successMessage) {
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
 @endsection

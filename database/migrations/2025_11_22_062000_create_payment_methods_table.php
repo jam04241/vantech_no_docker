@@ -15,7 +15,10 @@ return new class extends Migration
     {
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_purchase_order_id')->constrained('customer_purchase_orders', 'id')->onDelete('cascade');
             $table->string('method_name');
+            $table->date('payment_date');
+            $table->decimal('amount', 10, 2);
             $table->timestamps();
         });
     }

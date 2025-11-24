@@ -15,14 +15,13 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id(); // BIGINT unsigned, auto-increment
-            $table->string('firstName');
-            $table->string('middleName');
-            $table->string('lastName');
-            $table->string('email')->unique();
-            $table->string('contactNo');
-            $table->string('street');
-            $table->string('brgy');
-            $table->string('cityProvince');
+            $table->string('first_name');
+            $table->string('middle_name')->nullable();
+            $table->string('last_name');
+            $table->string('contact_no');
+            $table->string('street')->nullable();
+            $table->string('brgy')->nullable();
+            $table->string('city_province')->nullable();
             $table->timestamps();
         });
     }

@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\PurchaseDetailsController;
 use App\Http\Controllers\ProductStocksController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -67,6 +69,7 @@ Route::get('/Total Stocks', function () {
     return view('partials.total_stock');
 })->name('inventory.stocktotal');
 
+
 //USE FOR CHART.JS
 
 // Route::get('/api/sales/metrics', [SalesController::class, 'getMetrics']);
@@ -89,6 +92,8 @@ Route::get('/staff/AddEmployee', function () {
 Route::get('/PointOfSale/AddCustomer', function () {
     return view('Customer.addCustomer');
 })->name('customer.addCustomer');
+
+Route::post('/PointOfSale/AddCustomer/create', [CustomerController::class, 'store'])->name('create.customer');
 
 Route::get('/PointOfSale/purchaseFrame', function () {
     return view('POS_SYSTEM.purchaseFrame');
@@ -123,6 +128,14 @@ Route::get('/api/products/check-serial', [ProductController::class, 'checkSerial
 // Used by purchaseFrame component to fetch product by serial number
 Route::get('/api/products/search-pos', [ProductController::class, 'getProductBySerialNumber'])->name('products.search-pos');
 // ============= END POS PRODUCT LOOKUP API ROUTE =============
+
+// ============= CUSTOMER AUTOSUGGESTION API ROUTE =============
+Route::get('/api/customers/search', [CustomerController::class, 'searchCustomers'])->name('customers.search');
+// ============= END CUSTOMER AUTOSUGGESTION API ROUTE =============
+
+// ============= CHECKOUT API ROUTE =============
+Route::post('/api/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+// ============= END CHECKOUT API ROUTE =============
 
 // Suppliers routes
 Route::get('/Suppliers', [SuppliersController::class, 'index'])->name('suppliers');

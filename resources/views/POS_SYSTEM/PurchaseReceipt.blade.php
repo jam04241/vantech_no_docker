@@ -102,6 +102,8 @@
                     <div>
                         <p class="text-sm"><span class="font-semibold">Name:</span> <span
                                 id="receiptCustomerName">IVAN</span></p>
+                        <p class="text-sm"><span class="font-semibold">Contact No.:</span> <span
+                                id="receiptContactNo">IVAN</span></p>
                         <p class="text-sm"><span class="font-semibold">Payment Method:</span> <span
                                 id="receiptPaymentMethod">Cash</span></p>
                     </div>
@@ -148,6 +150,7 @@
                         <span class="text-sm font-semibold" id="receiptVATAmount">₱0.00</span>
                     </div>
                     <div class="flex justify-between border-t-2 border-gray-800 pt-2">
+                        <span></span>
                         <span class="text-xl font-bold text-pink-600" id="receiptTotalAmount">₱0.00</span>
                     </div>
                 </div>

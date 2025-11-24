@@ -13,7 +13,7 @@ class PaymentMethodRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,6 +25,8 @@ class PaymentMethodRequest extends FormRequest
     {
         return [
             'method_name' => 'required|string|max:255',
+            'payment_date' => 'required|date',
+            'amount' => 'required|numeric|min:0',
         ];
     }
 }

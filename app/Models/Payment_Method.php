@@ -9,6 +9,9 @@ class Payment_Method extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'customer_purchase_order_id',
         'method_name',
+        'payment_date',
+        'amount',
     ];
 }

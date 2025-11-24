@@ -13,7 +13,7 @@ class Customer_purchaseOrderedRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,13 @@ class Customer_purchaseOrderedRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'product_id' => 'required|exists:products,id',
+            'customer_id' => 'required|exists:customers,id',
+            'quantity' => 'required|integer|min:1',
+            'unit_price' => 'required|numeric|min:0',
+            'total_price' => 'required|numeric|min:0',
+            'order_date' => 'required|date',
+            'status' => 'required|in:Success',
         ];
     }
 }

@@ -1,5 +1,6 @@
 @extends('POS_SYSTEM.sidebar.app')
 
+
 @section('title', 'Add Customer')
 @section('name', 'Add Customer')
 <style>
@@ -26,8 +27,8 @@
                 Add New Customer
             </h2>
 
-            {{-- <form action="{{ route('customers.store') }}" method="POST" class="space-y-8">
-                @csrf --}}
+            <form id="customerForm" action="{{ route('create.customer') }}" method="POST" class="space-y-8">
+                @csrf
 
                 {{-- CUSTOMER NAME SECTION --}}
                 <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 mb-4">
@@ -88,33 +89,35 @@
                         {{-- Street --}}
                         <div>
                             <label for="street" class="block text-sm font-medium text-gray-700 mb-2">
-                                Street Address <span class="text-red-500">*</span>
+                                Street Address
                             </label>
                             <input type="text" id="street" name="street" value="{{ old('street') }}"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
-                                placeholder="Enter street address" required>
+                                placeholder="Enter street address">
                         </div>
 
                         <div class="grid md:grid-cols-2 gap-4">
                             {{-- Barangay --}}
                             <div>
-                                <label for="barangay" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Barangay <span class="text-red-500">*</span>
+                                <label for="brgy" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Barangay
                                 </label>
-                                <input type="text" id="barangay" name="barangay" value="{{ old('barangay') }}"
+                                <input type="text" id="brgy" name="brgy" value="{{ old('brgy') }}"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
-                                    placeholder="Enter barangay" required>
+                                    placeholder="Enter barangay">
                             </div>
 
                             {{-- City/Province --}}
                             <div>
+                                <!-- City/Province -->
                                 <label for="city_province" class="block text-sm font-medium text-gray-700 mb-2">
-                                    City/Province <span class="text-red-500">*</span>
+                                    City/Province
                                 </label>
                                 <input type="text" id="city_province" name="city_province"
                                     value="{{ old('city_province') }}"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
-                                    placeholder="Enter city/province" required>
+                                    placeholder="Enter city/province">
+
                             </div>
                         </div>
                     </div>
@@ -131,18 +134,9 @@
                         Contact Details
                     </h3>
                     <div class="grid md:grid-cols-2 gap-6">
-                        {{-- Email --}}
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address
-                            </label>
-                            <input type="email" id="email" name="email" value="{{ old('email') }}"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
-                                placeholder="Enter email address">
-                        </div>
 
                         {{-- Contact Number --}}
-                        <div>
+                        <div class="mt-4">
                             <label for="contact_no" class="block text-sm font-medium text-gray-700 mb-2">
                                 Contact Number <span class="text-red-500">*</span>
                             </label>
@@ -162,9 +156,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        Cancel
+                        Clear
                     </button>
-                    <button type="submit"
+                    <button type="button" onclick="confirmAddCustomer()"
                         class="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -178,6 +172,56 @@
     </div>
 
     <script>
+        // Confirm Add Customer with SweetAlert
+        function confirmAddCustomer() {
+            const firstName = document.getElementById('first_name').value.trim();
+            const middleName = document.getElementById('middle_name').value.trim();
+            const lastName = document.getElementById('last_name').value.trim();
+            const contactNo = document.getElementById('contact_no').value.trim();
+            const street = document.getElementById('street').value.trim();
+            const brgy = document.getElementById('brgy').value.trim();
+            const cityProvince = document.getElementById('city_province').value.trim();
+
+            // Validate required fields
+            if (!firstName || !lastName || !contactNo) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Required Fields',
+                    text: 'Please fill in all required fields marked with *',
+                    confirmButtonColor: '#F59E0B'
+                });
+                return;
+            }
+
+            // Build address string if any address field is filled
+            let addressInfo = '';
+            if (street || brgy || cityProvince) {
+                const addressParts = [street, brgy, cityProvince].filter(part => part);
+                addressInfo = `<p class="mt-2"><strong>Address:</strong> ${addressParts.join(', ')}</p>`;
+            }
+
+            Swal.fire({
+                icon: 'question',
+                title: 'Confirm Customer Addition',
+                html: `<div class="text-left">
+                            <p><strong>Name:</strong> ${firstName} ${middleName ? middleName + ' ' : ''}${lastName}</p>
+                            <p><strong>Contact:</strong> ${contactNo}</p>
+                            ${addressInfo}
+                          </div>`,
+                showCancelButton: true,
+                confirmButtonColor: '#2563EB',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Yes, Add Customer',
+                cancelButtonText: 'Cancel',
+                focusConfirm: false,
+                focusCancel: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('customerForm').submit();
+                }
+            });
+        }
+
         // SweetAlert messages
         @if(session('success'))
             Swal.fire({
