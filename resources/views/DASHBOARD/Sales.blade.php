@@ -6,26 +6,28 @@
         <h1 class="text-4xl font-bold mb-6">Sales Dashboard</h1>
 
         <!-- Date Range Filter -->
-        <div class="mb-6 flex gap-4 flex-wrap">
-            <div class="flex gap-2">
+        <div class="mb-6 flex gap-4 flex-wrap items-center">
+            <div class="flex gap-2 items-center">
                 <input type="date" id="startDate"
                     class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <input type="date" id="endDate"
                     class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button onclick="filterSales()"
+                <button id="filterBtn"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Filter</button>
+                <button id="clearBtn"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">Clear</button>
             </div>
+            <div class="text-sm text-gray-600 ml-auto">Showing results for selected date range</div>
         </div>
 
         <!-- Key Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <!-- Total Sales Card -->
             <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Total Sales</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="totalSales">₱0.00</p>
-                        <p class="text-green-600 text-xs mt-2">+12% from last period</p>
+                        <p class="text-green-600 text-xs mt-2" id="totalSalesChange">—</p>
                     </div>
                     <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -35,13 +37,12 @@
                 </div>
             </div>
 
-            <!-- Orders Count Card -->
             <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Total Orders</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="totalOrders">0</p>
-                        <p class="text-green-600 text-xs mt-2">+8% from last period</p>
+                        <p class="text-green-600 text-xs mt-2" id="totalOrdersChange">—</p>
                     </div>
                     <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -50,13 +51,12 @@
                 </div>
             </div>
 
-            <!-- Average Order Value Card -->
             <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Avg Order Value</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="avgOrderValue">₱0.00</p>
-                        <p class="text-green-600 text-xs mt-2">+5% from last period</p>
+                        <p class="text-green-600 text-xs mt-2" id="avgOrderValueChange">—</p>
                     </div>
                     <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -65,13 +65,12 @@
                 </div>
             </div>
 
-            <!-- Revenue Card -->
             <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Revenue</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="revenue">₱0.00</p>
-                        <p class="text-green-600 text-xs mt-2">+15% from last period</p>
+                        <p class="text-green-600 text-xs mt-2" id="revenueChange">—</p>
                     </div>
                     <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -84,29 +83,15 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Sales Trend Chart -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Sales Trend</h2>
                 <canvas id="salesTrendChart"></canvas>
             </div>
 
-            {{-- <!-- Revenue by Category Chart -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Revenue by Category</h2>
-                <canvas id="categoryChart"></canvas>
-            </div> --}}
-
-            <!-- Top Products Chart -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Top Products</h2>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Top Products (by quantity sold)</h2>
                 <canvas id="topProductsChart"></canvas>
             </div>
-
-            {{-- <!-- Sales by Hour Chart -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Sales by Hour</h2>
-                <canvas id="hourlyChart"></canvas>
-            </div> --}}
         </div>
 
         <!-- Recent Transactions Table -->
@@ -125,16 +110,7 @@
                         </tr>
                     </thead>
                     <tbody id="transactionsTable">
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-600">#ORD001</td>
-                            <td class="px-4 py-3 text-gray-600">John Doe</td>
-                            <td class="px-4 py-3 font-semibold text-gray-800">₱2,500.00</td>
-                            <td class="px-4 py-3 text-gray-600">3</td>
-                            <td class="px-4 py-3 text-gray-600">Nov 22, 2025</td>
-                            <td class="px-4 py-3"><span
-                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Completed</span>
-                            </td>
-                        </tr>
+                        <!-- populated by JS -->
                     </tbody>
                 </table>
             </div>
@@ -145,93 +121,108 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // Initialize charts with sample data
-        let salesTrendChart, categoryChart, topProductsChart, hourlyChart;
+        let salesTrendChart, topProductsChart;
+
+        function moneyFormat(value) {
+            return '₱' + Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function loadSalesData() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+
+            // Build query string only with provided dates
+            let url = '/api/sales-data';
+            const params = new URLSearchParams();
+            if (start) params.append('start', start);
+            if (end) params.append('end', end);
+            if ([...params].length) url += '?' + params.toString();
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to fetch sales data');
+                const data = await res.json();
+
+                // Update metrics
+                document.getElementById('totalSales').textContent = moneyFormat(data.totalSales);
+                document.getElementById('totalOrders').textContent = data.totalOrders;
+                document.getElementById('avgOrderValue').textContent = moneyFormat(data.avgOrderValue);
+                document.getElementById('revenue').textContent = moneyFormat(data.totalSales);
+
+                // Sales trend
+                salesTrendChart.data.labels = data.salesTrendLabels.length ? data.salesTrendLabels : ['No data'];
+                salesTrendChart.data.datasets[0].data = data.salesTrend.length ? data.salesTrend : [0];
+                salesTrendChart.update();
+
+                // Top products
+                topProductsChart.data.labels = data.topProductsLabels.length ? data.topProductsLabels : ['No products'];
+                topProductsChart.data.datasets[0].data = data.topProductsValues.length ? data.topProductsValues : [0];
+                topProductsChart.update();
+
+                // Recent transactions
+                const tbody = document.getElementById('transactionsTable');
+                tbody.innerHTML = '';
+                data.recentTransactions.forEach(tx => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b hover:bg-gray-50';
+                    tr.innerHTML = `
+                            <td class="px-4 py-3 text-gray-600">${tx.order_ref}</td>
+                            <td class="px-4 py-3 text-gray-600">${tx.customer}</td>
+                            <td class="px-4 py-3 font-semibold text-gray-800">${moneyFormat(tx.amount)}</td>
+                            <td class="px-4 py-3 text-gray-600">${tx.items}</td>
+                            <td class="px-4 py-3 text-gray-600">${tx.date}</td>
+                            <td class="px-4 py-3"><span class="px-3 py-1 ${tx.status.toLowerCase() === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} rounded-full text-xs font-semibold">${tx.status}</span></td>
+                        `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error(err);
+                // Optionally show UI feedback
+            }
+        }
 
         function initializeCharts() {
-            // Sales Trend Chart
-            const salesTrendCtx = document.getElementById('salesTrendChart').getContext('2d');
-            salesTrendChart = new Chart(salesTrendCtx, {
+            // Sales Trend
+            const salesCtx = document.getElementById('salesTrendChart').getContext('2d');
+            salesTrendChart = new Chart(salesCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    labels: [],
                     datasets: [{
                         label: 'Sales (₱)',
-                        data: [12000, 15000, 13000, 18000, 22000, 25000, 20000],
+                        data: [],
                         borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        backgroundColor: 'rgba(59,130,246,0.08)',
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#3b82f6',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        tension: 0.3,
+                        pointRadius: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        }
-                    },
+                    plugins: { legend: { display: true } },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                callback: function (value) {
-                                    return '₱' + value.toLocaleString();
-                                }
-                            }
+                            ticks: { callback: (v) => '₱' + Number(v).toLocaleString() }
                         }
                     }
                 }
             });
 
-            // Revenue by Category Chart
-            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-            categoryChart = new Chart(categoryCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Laptops', 'Desktops', 'Peripherals', 'Accessories', 'Software'],
-                    datasets: [{
-                        data: [35, 25, 20, 15, 5],
-                        backgroundColor: [
-                            '#3b82f6',
-                            '#10b981',
-                            '#f59e0b',
-                            '#ef4444',
-                            '#8b5cf6'
-                        ],
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Top Products Chart
-            const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
-            topProductsChart = new Chart(topProductsCtx, {
+            // Top Products (horizontal bar)
+            const topCtx = document.getElementById('topProductsChart').getContext('2d');
+            topProductsChart = new Chart(topCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                    labels: [],
                     datasets: [{
                         label: 'Units Sold',
-                        data: [45, 38, 32, 28, 22],
-                        backgroundColor: '#10b981',
-                        borderRadius: 5,
+                        data: [],
+                        borderRadius: 6,
                         borderSkipped: false
                     }]
                 },
@@ -239,77 +230,28 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            beginAtZero: true
-                        }
+                        x: { beginAtZero: true }
                     }
                 }
             });
 
-            // Sales by Hour Chart
-            const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
-            hourlyChart = new Chart(hourlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM'],
-                    datasets: [{
-                        label: 'Sales (₱)',
-                        data: [2000, 3500, 4200, 5800, 6200, 5500, 4800, 3200, 2100],
-                        backgroundColor: '#f59e0b',
-                        borderRadius: 5,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function (value) {
-                                    return '₱' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
+            loadSalesData();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeCharts();
+
+            document.getElementById('filterBtn').addEventListener('click', function () {
+                loadSalesData();
             });
 
-            // Update metrics
-            updateMetrics();
-        }
-
-        function updateMetrics() {
-            document.getElementById('totalSales').textContent = '₱125,000.00';
-            document.getElementById('totalOrders').textContent = '45';
-            document.getElementById('avgOrderValue').textContent = '₱2,777.78';
-            document.getElementById('revenue').textContent = '₱125,000.00';
-        }
-
-        function filterSales() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            if (startDate && endDate) {
-                console.log('Filtering sales from', startDate, 'to', endDate);
-                // TODO: Make API call to fetch filtered data
-                // Example: fetch(`/api/sales?start=${startDate}&end=${endDate}`)
-            }
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', initializeCharts);
+            document.getElementById('clearBtn').addEventListener('click', function () {
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                loadSalesData();
+            });
+        });
     </script>
 @endsection

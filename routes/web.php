@@ -69,6 +69,10 @@ Route::get('/Total Stocks', function () {
     return view('partials.total_stock');
 })->name('inventory.stocktotal');
 
+Route::get('/Audit', function () {
+    return view('DASHBOARD.audit');
+})->name('audit.logs');
+
 
 //USE FOR CHART.JS
 
@@ -138,12 +142,11 @@ Route::post('/api/checkout', [CheckoutController::class, 'store'])->name('checko
 // ============= END CHECKOUT API ROUTE =============
 
 // Suppliers routes
-Route::get('/Suppliers', [SuppliersController::class, 'index'])->name('suppliers');
+Route::get('/suppliers', [SuppliersController::class, 'index'])->name('suppliers');
 Route::post('/suppliers', [SuppliersController::class, 'store'])->name('suppliers.store');
+Route::get('/suppliers/{id}', [SuppliersController::class, 'show']);
+Route::post('/suppliers/{id}', [SuppliersController::class, 'update']);
 Route::post('/suppliers/{supplier}/toggle-status', [SuppliersController::class, 'toggleStatus'])->name('suppliers.toggle-status');
-Route::get('/suppliers/{supplier}/edit', [SuppliersController::class, 'edit'])->name('suppliers.edit');
-Route::put('/suppliers/{supplier}', [SuppliersController::class, 'update'])->name('suppliers.update');
-Route::delete('/suppliers/{supplier}', [SuppliersController::class, 'destroy'])->name('suppliers.destroy');
 
 // Inventory fetch 
 Route::get('/inventory', [ProductController::class, 'show'])->name('inventory'); // For inventory view

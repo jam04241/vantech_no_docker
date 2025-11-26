@@ -11,6 +11,7 @@
                 <th class="p-4 font-semibold" hidden>Price</th>
                 <th class="p-4 font-semibold">Condition</th>
                 <th class="p-4 font-semibold">Supplier</th>
+                <th class="p-4 font-semibold">Added On</th>
                 <th class="p-4">Actions</th>
             </tr>
         </thead>
@@ -53,6 +54,9 @@
                         @else
                             <span class="text-gray-400 text-xs italic">N/A</span>
                         @endif
+                    </td>
+                    <td>
+                        <span>{{ $product->created_at->format('Y-m-d') }}</span>
                     </td>
                     <td class="p-4" hidden>
                         <span class="text-purple-800 text-xs font-bold px-2 py-1 rounded-full">

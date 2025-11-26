@@ -297,6 +297,15 @@
                     <a href="{{ route('suppliers.list') }}" class="dropdown-item">Purchase Orders</a>
                 </div>
             </details>
+        <a href="{{ route('audit.logs') }}" class="sidebar-item">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 2h6l4 4v6m-4 10H7a2 2 0 01-2-2V4a2 2 0 012-2h2m5 14a4 4 0 100-8 4 4 0 000 8zm5 5l-3.5-3.5">
+                </path>
+            </svg>
+            Audit Logs
+        </a>
+
 
             {{-- STAFF FOR CREATE AND MANAGE ACCOUNT --}}
             <a href="{{ route('staff') }}" class="sidebar-item">

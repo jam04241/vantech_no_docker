@@ -69,7 +69,10 @@
                                         class="text-red-500">*</span></label>
                                 <input type="text" id="name" name="product_name" value="{{ old('product_name') }}"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                                    placeholder="Enter product name" required autocomplete="off">
+                                    placeholder="Enter product name" >
+                                    @if ($errors->has('name'))
+                                        <span class="text-danger">{{ $errors->first('name') }}</span>
+                                    @endif
                                 <div id="productSuggestions"
                                     class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden z-50 max-h-48 overflow-y-auto">
                                 </div>
@@ -83,6 +86,9 @@
                                     value="{{ old('serial_number') }}"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter serial number (optional)" autofocus required>
+                                    @if ($errors->has('serial_number'))
+                                        <span class="text-danger">{{ $errors->first('serial_number') }}</span>
+                                    @endif
                             </div>
                         </div>
                     </div>
@@ -129,6 +135,9 @@
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->category_name }}</option>
                                     @endforeach
+                                    @if ($errors->has('category_id'))
+                                        <span class="text-danger">{{ $errors->first('category_id') }}</span>
+                                    @endif
                                 </select>
                             </div>
 
@@ -142,6 +151,9 @@
                                         <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
                                             {{ $brand->brand_name }}</option>
                                     @endforeach
+                                    @if ($errors->has('brand_id'))
+                                        <span class="text-danger">{{ $errors->first('brand_id') }}</span>
+                                    @endif
                                 </select>
                             </div>
 
@@ -157,6 +169,9 @@
                                             {{ $supplier->supplier_name }} - {{ $supplier->company_name }}
                                         </option>
                                     @endforeach
+                                    @if ($errors->has('supplier_id'))
+                                        <span class="text-danger">{{ $errors->first('supplier_id') }}</span>
+                                    @endif
                                 </select>
                             </div>
                         </div>
@@ -193,6 +208,9 @@
                                     <option value="30 days">30 days</option>
                                     <option value="1 year">1 year</option>
                                 </select>
+                                @if ($errors->has('warranty_period'))
+                                    <span class="text-danger">{{ $errors->first('warranty_period') }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
