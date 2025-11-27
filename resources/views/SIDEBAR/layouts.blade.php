@@ -317,6 +317,16 @@
                 Staff
             </a>
 
+        <a href="" class="sidebar-item">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 2h6l4 4v14a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 
+                       012-2h2zm3 8a3 3 0 110 6 3 3 0 010-6zm0 6c2.21 0 4 
+                       1.79 4 4H8c0-2.21 1.79-4 4-4z" />
+            </svg>
+            Customer Records
+        </a>
+
+
             <!-- Logout -->
             <button id="logout-btn" class="sidebar-item w-full text-left">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

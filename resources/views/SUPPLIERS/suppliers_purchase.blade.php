@@ -3,6 +3,11 @@
 @section('name', 'PURCHASE ORDERS')
 
 @section('content')
+    @php
+        // Fetch suppliers directly in PHP
+        $suppliers = \App\Models\Suppliers::where('status', 'active')->get();
+    @endphp
+
     <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
         <!-- Header -->
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -13,7 +18,6 @@
         <form action="{{ route('purchase.store') }}" method="POST">
             @csrf
             <div class="p-6">
-                {{-- Hidden inputs: items JSON and status --}}
                 <input type="hidden" name="items" id="itemsInput">
                 <input type="hidden" name="status" id="statusInput" value="Pending">
 
@@ -27,15 +31,13 @@
                             <select id="supplierSelect" name="supplier_id" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
                                 <option value="" selected disabled>Choose a supplier...</option>
-                                @forelse($suppliers as $supplier)
+                                @foreach($suppliers as $supplier)
                                     <option value="{{ $supplier->id }}" data-company="{{ $supplier->company_name }}"
                                         data-contact="{{ $supplier->supplier_name }}" data-address="{{ $supplier->address }}"
                                         data-status="{{ $supplier->status }}">
                                         {{ $supplier->supplier_name }} - {{ $supplier->company_name }}
                                     </option>
-                                @empty
-                                    <option value="" disabled>No active suppliers found</option>
-                                @endforelse
+                                @endforeach
                             </select>
                         </div>
 
@@ -130,7 +132,6 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize variables
             let rowCount = 0;
-            const bundles = @json($bundles ?? []);
             const bundleTypes = ['product', 'pack', 'bundle'];
 
             // Set current date as default
@@ -366,8 +367,7 @@
 
                 const statusBadge = document.getElementById('statusBadge');
                 statusBadge.textContent = status;
-                statusBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-medium ${status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`;
+                statusBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-medium ${status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
 
                 document.getElementById('supplierDetails').classList.remove('hidden');
             }

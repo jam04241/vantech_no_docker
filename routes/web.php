@@ -60,6 +60,12 @@ Route::get('/Receipt/Quotation', function () {
 Route::get('/PointOfSale', [BrandController::class, 'posBrand'])->name('pos.itemlist');
 
 // POS ITEM LIST
+Route::get('/Suppliers/Create_Orders', function () {
+    return view('SUPPLIERS.suppliers_purchase');
+})->name('Supplier.CreateOrders');
+
+
+
 
 Route::get('/Stock-Out', function () {
     return view('INVENTORY.stock_out');
@@ -113,6 +119,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('products');
 Route::post('/products', [ProductController::class, 'store'])->name('products.store');
 Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 Route::put('/products/{product}/price', [ProductStocksController::class, 'updatePrice'])->name('products.update_price');
+Route::put('/products/{product}/update-price', [ProductController::class, 'updatePrice'])->name('products.update_price');
 
 
 // ============= AUTO-SUGGESTION API ROUTE =============
@@ -159,8 +166,8 @@ Route::get('/PointOfSale/categories', [CategoryController::class, 'posCategories
 
 
 // Purchase Details Routes
-Route::get('/suppliers/purchase-orders', [PurchaseDetailsController::class, 'create'])
-    ->name('suppliers.purchase-orders');
+
+
 Route::get('/purchase/create', [PurchaseDetailsController::class, 'create'])->name('purchase.create');
 Route::post('/purchase/store', [PurchaseDetailsController::class, 'store'])->name('purchase.store');
 

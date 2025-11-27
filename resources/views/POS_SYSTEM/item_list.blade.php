@@ -137,7 +137,8 @@
     <script>
         // Store order items
         let orderItems = [];
-        const allProducts = @json($grouped);
+        
+        
 
         // Filter and sort products by category, brand, condition, and search query
         function filterProducts() {

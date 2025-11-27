@@ -24,10 +24,10 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
-    {
-        Schema::table('products', function (Blueprint $table) {
-            $table->foreignId('supplier_id')->nullable(false)->change();
-        });
-    }
+   public function down()
+{
+    Schema::table('products', function (Blueprint $table) {
+        $table->unsignedBigInteger('supplier_id')->nullable()->change();
+    });
+}
 };

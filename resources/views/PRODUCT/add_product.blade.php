@@ -303,279 +303,290 @@
                     </form>
                 </div>
             </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Focus on serial number field on page load
-                const serialNumberInput = document.getElementById('serial_number');
-                if (serialNumberInput) {
-                    serialNumberInput.focus();
-                }
+       <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Focus on serial number field on page load
+        const serialNumberInput = document.getElementById('serial_number');
+        if (serialNumberInput) {
+            serialNumberInput.focus();
+        }
 
-                // ============= AUTO-SUGGESTION PRODUCT NAME FUNCTIONALITY =============
-                // Get the product name input and suggestions dropdown
-                const productNameInput = document.getElementById('name');
-                const suggestionsDropdown = document.getElementById('productSuggestions');
+        // ============= AUTO-SUGGESTION PRODUCT NAME FUNCTIONALITY =============
+        const productNameInput = document.getElementById('name');
+        const suggestionsDropdown = document.getElementById('productSuggestions');
 
-                // Event listener for input changes to fetch suggestions
-                if (productNameInput) {
-                    productNameInput.addEventListener('input', async function() {
-                        const searchTerm = this.value.trim();
+        // Event listener for input changes to fetch suggestions
+        if (productNameInput) {
+            productNameInput.addEventListener('input', async function() {
+                const searchTerm = this.value.trim();
 
-                        // Show suggestions only if there's input
-                        if (searchTerm.length > 0) {
-                            try {
-                                // Fetch recent products from API
-                                const response = await fetch(`/api/products/recent?search=${encodeURIComponent(searchTerm)}`);
-                                const products = await response.json();
+                // Show suggestions only if there's input
+                if (searchTerm.length > 0) {
+                    try {
+                        // Fetch recent products from API
+                        const response = await fetch(`/api/products/recent?search=${encodeURIComponent(searchTerm)}`);
+                        const products = await response.json();
 
-                                // Clear previous suggestions
-                                suggestionsDropdown.innerHTML = '';
+                        // Clear previous suggestions
+                        suggestionsDropdown.innerHTML = '';
 
-                                if (products.length > 0) {
-                                    // Display suggestions
-                                    products.forEach(product => {
-                                        const suggestionItem = document.createElement('div');
-                                        suggestionItem.className = 'px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-200 transition duration-150';
-                                        suggestionItem.innerHTML = `
-                                            <div class="font-medium text-gray-800">${product.product_name}</div>
-                                            <div class="text-sm text-gray-600">
-                                                Brand: ${product.brand_name} | Category: ${product.category_name} | Price: ₱${parseFloat(product.price).toFixed(2)}
-                                            </div>
-                                        `;
+                        if (products.length > 0) {
+                            // Display suggestions
+                            products.forEach(product => {
+                                const suggestionItem = document.createElement('div');
+                                suggestionItem.className = 'px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-200 transition duration-150';
+                                suggestionItem.innerHTML = `
+                                    <div class="font-medium text-gray-800">${product.product_name}</div>
+                                    <div class="text-sm text-gray-600">
+                                        Brand: ${product.brand_name} | Category: ${product.category_name} | Price: ₱${parseFloat(product.price).toFixed(2)}
+                                    </div>
+                                `;
 
-                                        // Click handler to fill form fields
-                                        suggestionItem.addEventListener('click', function() {
-                                            // ============= AUTO-FILL FORM FIELDS FROM SUGGESTION =============
-                                            productNameInput.value = product.product_name;
-                                            document.getElementById('brand_id').value = product.brand_id || '';
-                                            document.getElementById('category_id').value = product.category_id || '';
-                                            document.getElementById('price').value = product.price || '';
-                                            // ============= END AUTO-FILL FORM FIELDS =============
-
-                                            // Hide suggestions dropdown
-                                            suggestionsDropdown.classList.add('hidden');
-                                        });
-
-                                        suggestionsDropdown.appendChild(suggestionItem);
-                                    });
-
-                                    // Show suggestions dropdown
-                                    suggestionsDropdown.classList.remove('hidden');
-                                } else {
-                                    // Hide dropdown if no suggestions
+                                // Click handler to fill form fields
+                                suggestionItem.addEventListener('click', function() {
+                                    productNameInput.value = product.product_name;
+                                    document.getElementById('brand_id').value = product.brand_id || '';
+                                    document.getElementById('category_id').value = product.category_id || '';
+                                    document.getElementById('price').value = product.price || '';
                                     suggestionsDropdown.classList.add('hidden');
-                                }
-                            } catch (error) {
-                                console.error('Error fetching suggestions:', error);
-                                suggestionsDropdown.classList.add('hidden');
-                            }
-                        } else {
-                            // Hide dropdown if input is empty
-                            suggestionsDropdown.classList.add('hidden');
-                        }
-                    });
-
-                    // Hide suggestions when clicking outside
-                    document.addEventListener('click', function(event) {
-                        if (event.target !== productNameInput && !suggestionsDropdown.contains(event.target)) {
-                            suggestionsDropdown.classList.add('hidden');
-                        }
-                    });
-                }
-                // ============= END AUTO-SUGGESTION PRODUCT NAME FUNCTIONALITY =============
-
-                // Handle form submission with serial number validation
-                const form = document.querySelector('form');
-                if (form) {
-                    form.addEventListener('submit', async function(e) {
-                        e.preventDefault();
-
-                        const serialNumber = document.getElementById('serial_number').value.trim();
-
-                        // Validate serial number is not empty
-                        if (!serialNumber) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Serial Number Required',
-                                text: 'Please enter a serial number before saving.',
-                                confirmButtonColor: '#E11D48'
-                            });
-                            return;
-                        }
-
-                        // Check if serial number already exists
-                        try {
-                            const response = await fetch(`/api/products/check-serial?serial=${encodeURIComponent(serialNumber)}`);
-                            const data = await response.json();
-
-                            if (data.exists) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Duplicate Serial Number',
-                                    html: `<p>Serial number <strong>${serialNumber}</strong> is already registered in the system.</p>
-                                           <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Please use a different serial number.</p>`,
-                                    confirmButtonText: 'OK',
-                                    confirmButtonColor: '#f59e0b'
                                 });
-                                return;
-                            }
 
-                            // Serial number is unique, proceed with form submission
-                            // Scroll to top of the page
-                            window.scrollTo({
-                                top: 0,
-                                behavior: 'smooth'
+                                suggestionsDropdown.appendChild(suggestionItem);
                             });
-                            // Clear any stored scroll position
-                            localStorage.removeItem('formScrollPosition');
-                            // Submit the form
-                            form.submit();
-                        } catch (error) {
-                            console.error('Error checking serial number:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'An error occurred while checking the serial number. Please try again.',
-                                confirmButtonColor: '#E11D48'
-                            });
+
+                            // Show suggestions dropdown
+                            suggestionsDropdown.classList.remove('hidden');
+                        } else {
+                            // Hide dropdown if no suggestions
+                            suggestionsDropdown.classList.add('hidden');
                         }
-                    });
+                    } catch (error) {
+                        console.error('Error fetching suggestions:', error);
+                        suggestionsDropdown.classList.add('hidden');
+                    }
+                } else {
+                    // Hide dropdown if input is empty
+                    suggestionsDropdown.classList.add('hidden');
                 }
             });
 
-            // Function to show SweetAlert messages
-            function showSweetAlerts() {
-                @if(session('success'))
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: '{{ session('success') }}',
-                        confirmButtonColor: '#4F46E5'
-                    });
-                @endif
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(event) {
+                if (event.target !== productNameInput && !suggestionsDropdown.contains(event.target)) {
+                    suggestionsDropdown.classList.add('hidden');
+                }
+            });
+        }
 
-                @if(session('error'))
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: '{{ session('error') }}',
-                        confirmButtonColor: '#E11D48'
-                    });
+        // Function to show SweetAlert messages
+        function showSweetAlerts() {
+            @if(session('success'))
+                // Clear form if success flag is present
+                @if(session('clear_form'))
+                    document.getElementById('addProductForm').reset();
+                    document.getElementById('is_used').checked = false;
+                    toggleSupplierField();
                 @endif
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#4F46E5',
+                    didClose: () => {
+                        // Focus on serial number after success
+                        const serialNumberInput = document.getElementById('serial_number');
+                        if (serialNumberInput) {
+                            serialNumberInput.focus();
+                            serialNumberInput.select();
+                        }
+                    }
+                });
+            @endif
 
-                @if($errors->any())
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation Error',
-                        html: '{!! implode('<br>', $errors->all()) !!}',
-                        confirmButtonColor: '#E11D48'
-                    });
-                @endif
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Registration Failed',
+                    html: `{!! session('error') !!}`,
+                    confirmButtonColor: '#E11D48',
+                    didClose: () => {
+                        // Focus on problematic field
+                        const serialNumberInput = document.getElementById('serial_number');
+                        if (serialNumberInput) {
+                            serialNumberInput.focus();
+                            serialNumberInput.select();
+                        }
+                    }
+                });
+            @endif
+
+            @if($errors->any())
+                let errorMessages = '';
+                @foreach($errors->all() as $error)
+                    errorMessages += '• {{ $error }}<br>';
+                @endforeach
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: `Please fix the following issues:<br><br>${errorMessages}`,
+                    confirmButtonColor: '#E11D48',
+                    didClose: () => {
+                        // Focus on first error field
+                        @if($errors->has('serial_number'))
+                            document.getElementById('serial_number').focus();
+                        @elseif($errors->has('product_name'))
+                            document.getElementById('name').focus();
+                        @elseif($errors->has('category_id'))
+                            document.getElementById('category_id').focus();
+                        @endif
+                    }
+                });
+            @endif
+        }
+
+        // Show SweetAlert messages
+        showSweetAlerts();
+
+        // Focus on serial number field after page load
+        if (serialNumberInput) {
+            setTimeout(() => {
+                serialNumberInput.focus();
+                serialNumberInput.select();
+            }, 100);
+        }
+
+        // Initialize checkbox state
+        toggleSupplierField();
+    });
+
+    // ============= USED PRODUCT CHECKBOX LOGIC =============
+    const isUsedCheckbox = document.getElementById('is_used');
+    const supplierSelect = document.getElementById('supplier_id');
+    const supplierRequired = document.getElementById('supplier');
+
+    function toggleSupplierField() {
+        if (isUsedCheckbox.checked) {
+            // Disable supplier field for used products
+            supplierSelect.disabled = true;
+            supplierSelect.required = false;
+            supplierSelect.value = '';
+            supplierSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+            supplierRequired.classList.add('hidden');
+        } else {
+            // Enable supplier field for new products
+            supplierSelect.disabled = false;
+            supplierSelect.required = true;
+            supplierSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            supplierRequired.classList.remove('hidden');
+        }
+    }
+
+    // Listen for checkbox changes
+    if (isUsedCheckbox) {
+        isUsedCheckbox.addEventListener('change', toggleSupplierField);
+    }
+
+    // Enhanced form submission handler
+    const addProductForm = document.getElementById('addProductForm');
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const serialNumber = document.getElementById('serial_number').value.trim();
+            const productName = document.getElementById('name').value.trim();
+            const category = document.getElementById('category_id').value;
+
+            // Basic validation
+            if (!serialNumber) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Serial Number',
+                    text: 'Serial number is required to register the product.',
+                    confirmButtonColor: '#E11D48'
+                }).then(() => {
+                    document.getElementById('serial_number').focus();
+                });
+                return;
             }
 
-            // After page load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Show SweetAlert messages
-                showSweetAlerts();
+            if (!productName) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Product Name',
+                    text: 'Product name is required.',
+                    confirmButtonColor: '#E11D48'
+                }).then(() => {
+                    document.getElementById('name').focus();
+                });
+                return;
+            }
 
-                // Focus on serial number field after page load
-                const serialNumberInput = document.getElementById('serial_number');
-                if (serialNumberInput) {
-                    // Small timeout to ensure the field is ready to receive focus
-                    setTimeout(() => {
-                        serialNumberInput.focus();
-                        serialNumberInput.select();
-                    }, 100);
+            if (!category) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Category',
+                    text: 'Please select a category for the product.',
+                    confirmButtonColor: '#E11D48'
+                }).then(() => {
+                    document.getElementById('category_id').focus();
+                });
+                return;
+            }
+
+            // Show confirmation
+            Swal.fire({
+                title: 'Register Product',
+                html: `<p>Are you sure you want to register this product?</p>
+                       <div style="text-align: left; margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                           <strong>Product:</strong> ${productName}<br>
+                           <strong>Serial No:</strong> ${serialNumber}<br>
+                           <strong>Category:</strong> ${document.getElementById('category_id').options[document.getElementById('category_id').selectedIndex].text}
+                       </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4F46E5',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Yes, Register Now',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form directly - validation will happen on server
+                    addProductForm.submit();
                 }
-
-                // Initialize checkbox state
-                toggleSupplierField();
             });
+        });
+    }
 
-            // ============= USED PRODUCT CHECKBOX LOGIC =============
-                const isUsedCheckbox = document.getElementById('is_used');
-                const supplierSelect = document.getElementById('supplier_id');
-                const supplierRequired = document.getElementById('supplier');
+    // Brand Modal
+    const brandModal = document.getElementById('brandModal');
+    document.getElementById('openBrandModal').addEventListener('click', () => {
+        brandModal.classList.remove('hidden');
+        brandModal.classList.add('flex');
+    });
+    document.getElementById('closeBrandModal').addEventListener('click', () => {
+        brandModal.classList.add('hidden');
+        brandModal.classList.remove('flex');
+    });
+    document.getElementById('cancelBrandModal').addEventListener('click', () => {
+        brandModal.classList.add('hidden');
+        brandModal.classList.remove('flex');
+    });
 
-                function toggleSupplierField() {
-                    if (isUsedCheckbox.checked) {
-                        // Disable supplier field for used products
-                        supplierSelect.disabled = true;
-                        supplierSelect.required = false;
-                        supplierSelect.value = '';
-                        supplierSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
-                        supplierRequired.classList.add('hidden');
-                    } else {
-                        // Enable supplier field for new products
-                        supplierSelect.disabled = false;
-                        supplierSelect.required = true;
-                        supplierSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                        supplierRequired.classList.remove('hidden');
-                    }
-                }
-
-                // Listen for checkbox changes
-                if (isUsedCheckbox) {
-                    isUsedCheckbox.addEventListener('change', toggleSupplierField);
-                    // Initialize on page load
-                    toggleSupplierField();
-                }
-
-                // Brand Modal
-                const brandModal = document.getElementById('brandModal');
-                document.getElementById('openBrandModal').addEventListener('click', () => {
-                    brandModal.classList.remove('hidden');
-                    brandModal.classList.add('flex');
-                });
-                document.getElementById('closeBrandModal').addEventListener('click', () => {
-                    brandModal.classList.add('hidden');
-                    brandModal.classList.remove('flex');
-                });
-                document.getElementById('cancelBrandModal').addEventListener('click', () => {
-                    brandModal.classList.add('hidden');
-                    brandModal.classList.remove('flex');
-                });
-
-                // Category Modal
-                const categoryModal = document.getElementById('categoryModal');
-                document.getElementById('openCategoryModal').addEventListener('click', () => {
-                    categoryModal.classList.remove('hidden');
-                    categoryModal.classList.add('flex');
-                });
-                document.getElementById('closeCategoryModal').addEventListener('click', () => {
-                    categoryModal.classList.add('hidden');
-                    categoryModal.classList.remove('flex');
-                });
-                document.getElementById('cancelCategoryModal').addEventListener('click', () => {
-                    categoryModal.classList.add('hidden');
-                    categoryModal.classList.remove('flex');
-                });
-
-                // SweetAlert messages
-                // SweetAlert messages are now handled by the showSweetAlerts() function
-
-                // ADDED: SweetAlert confirmation for product registration
-                const addProductForm = document.getElementById('addProductForm');
-                if (addProductForm) {
-                    addProductForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-
-                        Swal.fire({
-                            title: 'Confirm Product Registration',
-                            text: 'Are you sure you want to register this product?',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonColor: '#4F46E5',
-                            cancelButtonColor: '#6B7280',
-                            confirmButtonText: 'Yes, Register',
-                            cancelButtonText: 'Cancel'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Submit the form if confirmed
-                                addProductForm.submit();
-                            }
-                        });
-                    });
-                }
-        </script>
+    // Category Modal
+    const categoryModal = document.getElementById('categoryModal');
+    document.getElementById('openCategoryModal').addEventListener('click', () => {
+        categoryModal.classList.remove('hidden');
+        categoryModal.classList.add('flex');
+    });
+    document.getElementById('closeCategoryModal').addEventListener('click', () => {
+        categoryModal.classList.add('hidden');
+        categoryModal.classList.remove('flex');
+    });
+    document.getElementById('cancelCategoryModal').addEventListener('click', () => {
+        categoryModal.classList.add('hidden');
+        categoryModal.classList.remove('flex');
+    });
+</script>
 @endsection

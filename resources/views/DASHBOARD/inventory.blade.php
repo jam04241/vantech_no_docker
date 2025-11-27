@@ -5,14 +5,6 @@
     @php
         $activeSort = $currentSort ?? request('sort', 'name_asc');
     @endphp
-    {{-- <div class="flex items-center gap-3 mb-4">
-        <a href="#" class="px-4 py-2 rounded-lg bg-gray-600 text-white font-medium shadow ">
-            Brand History
-        </a>
-        <a href="#" class="px-4 py-2 rounded-lg bg-gray-600 text-white font-medium shadow">
-            Categories History
-        </a>
-    </div> --}}
 
     <div class="py-6 rounded-xl">
         <div class="flex flex-col sm:flex-row justify-between gap-3">
@@ -105,12 +97,6 @@
     {{-- Inventory Product table --}}
     <div id="product-table-container">
         @include('partials.productTable_Inventory')
-    </div>
-    {{-- Inventory Stock Out --}}
-    <div class="py-6 rounded-xl" id="product-table-container">
-
-        @include(' partials/productTable_stockout')
-
     </div>
 
     {{-- ================= EDIT MODALS ================= --}}

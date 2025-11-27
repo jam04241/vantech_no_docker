@@ -19,8 +19,13 @@ class Product extends Model
         'warranty_period',
         'serial_number',
         'product_condition',
+        
         // Define fillable attributes here
     ];
+
+    protected $attributes = [
+    'archived' => false,
+    ];  
     
     public function category()
     {
@@ -40,5 +45,42 @@ class Product extends Model
     public function stock()
     {
         return $this->hasOne(Product_Stocks::class, 'product_id');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('archived', false);
+    }
+
+    /**
+     * Scope a query to only include archived products.
+     */
+    public function scopeArchived($query)
+    {
+        return $query->where('archived', true);
+    }
+
+    /**
+     * Check if the product is archived.
+     */
+    public function isArchived()
+    {
+        return $this->archived === true;
+    }
+
+    /**
+     * Archive the product.
+     */
+    public function archive()
+    {
+        $this->update(['archived' => true]);
+    }
+
+    /**
+     * Unarchive the product.
+     */
+    public function unarchive()
+    {
+        $this->update(['archived' => false]);
     }
 }

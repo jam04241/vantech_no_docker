@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class SuppliersController extends Controller
 {
+  
    public function index(Request $request)
     {
+        $suppliers = Suppliers::where('status', 'active')->get();
+        $bundles = []; // Add your bundle logic
         $search = $request->get('search');
         
         // Build query with search functionality
@@ -37,6 +40,15 @@ class SuppliersController extends Controller
         $inactiveCount = Suppliers::where('status', 'inactive')->count();
         
         return view('DASHBOARD.suppliers', compact('suppliers', 'totalSuppliers', 'activeCount', 'inactiveCount', 'search'));
+    }
+
+    // ADD THIS METHOD FOR PURCHASE ORDERS PAGE
+    public function purchaseOrders()
+    {
+        $suppliers = Suppliers::where('status', 'active')->get();
+        $bundles = []; // You can populate this with your actual bundles data
+        
+        return view('DASHBOARD.purchase-orders-create', compact('suppliers', 'bundles'));
     }
 
     public function store(SupplierRequest $request)
@@ -117,6 +129,5 @@ class SuppliersController extends Controller
                 'message' => 'Error updating status: ' . $e->getMessage()
             ], 500);
         }
-    
-}
+    }
 }

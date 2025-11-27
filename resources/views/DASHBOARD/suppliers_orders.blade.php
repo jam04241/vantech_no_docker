@@ -54,7 +54,7 @@
             </div>
 
             <div>
-                <a href="{{ route('suppliers.purchase-orders') }}"
+                <a href="{{ route('Supplier.CreateOrders') }}"
                     class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-50 transition duration-200">
                     + New Purchase Order
                 </a>
@@ -194,7 +194,7 @@
                                     </svg>
                                     <p class="text-lg font-medium mb-2">No purchase orders found</p>
                                     <p class="text-sm mb-4">Get started by creating your first purchase order</p>
-                                    <a href="{{ route('suppliers.purchase-orders') }}"
+                                    <a href="{{ route('Supplier.CreateOrders') }}"
                                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
                                         Create Purchase Order
                                     </a>

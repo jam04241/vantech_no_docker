@@ -18,6 +18,7 @@ class ProductRequest extends FormRequest
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
+            'archived' => 'boolean',
             'is_used' => 'boolean', // Checkbox to indicate if the product is used
             'price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/' // Added price validation
         ];
@@ -26,7 +27,15 @@ class ProductRequest extends FormRequest
     public function messages()
     {
         return [
-            'product_condition.in' => 'Product condition must be either Brand New or Second Hand.',
+            'serial_number.required' => 'Serial number is required to register the product.',
+            'serial_number.unique' => 'This serial number is already registered in the system. Please use a different serial number.',
+            'product_name.required' => 'Product name is required.',
+            'category_id.required' => 'Please select a product category.',
+            'category_id.exists' => 'The selected category is invalid.',
+            'price.required' => 'Product price is required.',
+            'price.numeric' => 'Price must be a valid number.',
+            'price.min' => 'Price must be at least 0.01.',
+            'price.regex' => 'Price format is invalid. Use format like 100.00',
         ];
     }
 }
