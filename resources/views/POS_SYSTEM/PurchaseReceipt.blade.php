@@ -189,10 +189,6 @@
                         <span
                             class="text-sm text-red-700 font-semibold">-₱{{ number_format($receiptData['discount'] ?? 0, 2) }}</span>
                     </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-sm font-medium">VAT(3%)</span>
-                        <span class="text-sm font-semibold">₱{{ number_format($receiptData['vat'] ?? 0, 2) }}</span>
-                    </div>
                     <div class="flex justify-between border-t-2 border-gray-800 pt-2">
                         <span class="text-lg font-bold">Total Amount</span>
                         <span
@@ -202,7 +198,7 @@
             </div>
 
             <!-- Warranty Terms -->
-            <div class="mb-8">
+            <div class="mb-2">
                 <h3 class="text-lg font-bold mb-3">WARRANTY TERMS & CONDITIONS</h3>
                 <div class="text-sm text-gray-700 space-y-2">
                     <p>1. A warranty which indicates the date it was sold (month, day, year) or a serial number and a
@@ -210,21 +206,17 @@
                         sold by Vantech Computers.</p>
                     <p>2. Keep all the boxes.</p>
                     <p>3. All Vantech products carry standard one (1) year warranty except:</p>
-                    <p class="pl-4">- Fans, Lower Brand PSU, UPS, Peripherals (Keyboard, mouse, mousepad), AVR,<br>
+                    <p class="pl-4">Fans, Lower Brand PSU, UPS, Peripherals (Keyboard, mouse, mousepad), AVR,<br>
                         Generic/Gaming Case, Headset, Speakers, WiFi Dongle, Webcam, LAN Wire, Flash drive,<br>
                         Software (OS, MS Office, etc</p>
                 </div>
             </div>
 
             <!-- Signatures -->
-            <div class="flex justify-between mt-12">
-                <div class="text-center">
+            <div class="flex justify-end mt-4">
+                <div class="justify-end text-right">
                     <p class="text-sm mb-8">Prepared by:</p>
-                    <p class="text-sm font-semibold border-t border-gray-300 pt-2">ANDREW SUICO</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-sm mb-8">Received by:</p>
-                    <p class="text-sm border-t border-gray-300 pt-2">_______________________</p>
+                    <p class="text-sm font-semibold">{{ strtoupper($preparedBy ?? 'N/A') }}</p>
                 </div>
             </div>
 

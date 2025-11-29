@@ -136,7 +136,7 @@ class ProductController extends Controller
 
     protected function applySorting($query, Request $request)
     {
-        $sort = $request->get('sort', 'created_desc');
+        $sort = $request->get('sort', 'name_asc');
 
         switch ($sort) {
             case 'name_desc':
@@ -189,6 +189,28 @@ class ProductController extends Controller
         }
 
         return $query;
+    }
+
+    /**
+     * Get base query for POS products - consistent filtering logic
+     */
+    protected function getPOSProductsQuery()
+    {
+        return Product::with('brand', 'category', 'stock')
+            ->whereHas('stock', function ($query) {
+                $query->where('stock_quantity', '>', 0);
+            });
+    }
+
+    /**
+     * Validate product availability for POS operations
+     */
+    protected function validateProductAvailability(Product $product)
+    {
+        if (!$product->stock || $product->stock->stock_quantity <= 0) {
+            return false;
+        }
+        return true;
     }
 
     public function show(Request $request): View
@@ -467,16 +489,12 @@ class ProductController extends Controller
     }
 
     /**
-     * Display products for POS system - Show individual products (not grouped)
+     * Display products for POS system - Show individual products with consistent logic
      */
     public function posList(Request $request)
     {
-        // Load products with brand, category, and stock relationships
-        // Only include products that have stock_quantity > 0
-        $query = Product::with('brand', 'category', 'stock')
-            ->whereHas('stock', function ($query) {
-                $query->where('stock_quantity', '>', 0);
-            });
+        // Use consistent base query
+        $query = $this->getPOSProductsQuery();
 
         // Apply reusable filters
         $query = $this->applyProductFilters($query, $request);
@@ -486,8 +504,11 @@ class ProductController extends Controller
             $query = $this->applyProductSearch($query, $request->search);
         }
 
-        // Get individual products (not grouped) with pagination
-        $products = $query->paginate(2);
+        // Apply sorting (consistent with other methods)
+        $query = $this->applySorting($query, $request);
+
+        // Get individual products - Show all available products with pagination
+        $products = $query->paginate(50)->withQueryString();
 
         $data = array_merge(
             $this->loadBrands(),
@@ -499,7 +520,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Get product by serial number with real stock check
+     * Get product by serial number - Simplified and consistent with posList
      */
     public function getProductBySerialNumber(Request $request)
     {
@@ -513,36 +534,23 @@ class ProductController extends Controller
             return response()->json(['product' => null, 'message' => 'Invalid serial number format'], 400);
         }
 
-        // Find product by serial number - only products with stock > 0
-        $foundProduct = Product::with('brand', 'category', 'stock')
+        // Find product by serial number using consistent query
+        $foundProduct = $this->getPOSProductsQuery()
             ->where('serial_number', $serialNumber)
-            ->whereHas('stock', function ($query) {
-                $query->where('stock_quantity', '>', 0);
-            })
             ->first();
 
         if (!$foundProduct) {
             return response()->json(['product' => null, 'message' => 'Serial number not found or product out of stock'], 404);
         }
 
-        $price = $foundProduct->stock?->price ?? 0;
-
-        // For Brand New products, count all with same attributes and price
-        // For Second Hand, each is unique
-        if ($foundProduct->product_condition === 'Brand New') {
-            $totalQuantity = Product::where('product_name', $foundProduct->product_name)
-                ->where('brand_id', $foundProduct->brand_id)
-                ->where('category_id', $foundProduct->category_id)
-                ->where('product_condition', $foundProduct->product_condition)
-                ->whereHas('stock', function ($query) use ($price) {
-                    $query->where('price', $price)
-                        ->where('stock_quantity', '>', 0);
-                })
-                ->count();
-        } else {
-            // For Second Hand, just check this specific product's stock
-            $totalQuantity = $foundProduct->stock ? $foundProduct->stock->stock_quantity : 0;
+        // Validate availability using helper method
+        if (!$this->validateProductAvailability($foundProduct)) {
+            return response()->json(['product' => null, 'message' => 'Product is out of stock'], 404);
         }
+
+        // Simplified: Return actual stock quantity of this specific product
+        $price = $foundProduct->stock?->price ?? 0;
+        $stockQuantity = $foundProduct->stock?->stock_quantity ?? 0;
 
         $product = (object) [
             'id' => $foundProduct->id,
@@ -554,7 +562,7 @@ class ProductController extends Controller
             'category_id' => $foundProduct->category_id,
             'product_condition' => $foundProduct->product_condition,
             'image_path' => $foundProduct->image_path,
-            'stock' => $totalQuantity,
+            'stock' => $stockQuantity,
             'price' => $price,
             'warranty_period' => $foundProduct->warranty_period,
         ];

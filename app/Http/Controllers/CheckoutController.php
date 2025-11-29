@@ -19,7 +19,7 @@ class CheckoutController extends Controller
         Log::info('Request data:', $request->all());
 
         DB::beginTransaction();
-        
+
         try {
             // Validate required fields
             $request->validate([
@@ -99,7 +99,6 @@ class CheckoutController extends Controller
                 'amount' => $amount,
                 'subtotal' => $request->subtotal ?? 0,
                 'discount' => $request->discount ?? 0,
-                'vat' => $request->vat ?? 0,
                 'total' => $amount,
                 'items' => $this->getReceiptItemsData($items),
                 'purchase_order_ids' => $purchaseOrderIds
@@ -113,7 +112,6 @@ class CheckoutController extends Controller
                 'message' => 'Purchase completed successfully!',
                 'redirect_url' => route('pos.purchasereceipt')
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Checkout failed:', [
@@ -134,11 +132,11 @@ class CheckoutController extends Controller
     public function showReceipt()
     {
         $receiptData = session('receiptData');
-        
+
         if (!$receiptData) {
             return redirect()->route('pos.itemlist')->with('error', 'No receipt data found. Please complete a purchase first.');
         }
-        
+
         // Get customer contact info if available
         $customerContact = 'N/A';
         if (isset($receiptData['customerId'])) {
@@ -147,8 +145,17 @@ class CheckoutController extends Controller
                 $customerContact = $customer->contact_no;
             }
         }
-        
-        return view('POS_SYSTEM.PurchaseReceipt', compact('receiptData', 'customerContact'));
+
+        // Get authenticated user's full name
+        $authenticatedUser = auth()->user();
+        $preparedBy = 'N/A';
+        if ($authenticatedUser) {
+            $preparedBy = trim($authenticatedUser->first_name . ' ' .
+                ($authenticatedUser->middle_name ? $authenticatedUser->middle_name . ' ' : '') .
+                $authenticatedUser->last_name);
+        }
+
+        return view('POS_SYSTEM.PurchaseReceipt', compact('receiptData', 'customerContact', 'preparedBy'));
     }
 
     /**
@@ -176,7 +183,7 @@ class CheckoutController extends Controller
     private function getReceiptItemsData($items)
     {
         $receiptItems = [];
-        
+
         foreach ($items as $item) {
             $product = Product::find($item['product_id']);
             if ($product) {
@@ -190,7 +197,7 @@ class CheckoutController extends Controller
                 ];
             }
         }
-        
+
         return $receiptItems;
     }
 }
