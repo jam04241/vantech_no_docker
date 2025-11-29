@@ -63,18 +63,17 @@ class ProductController extends Controller
             }
 
             DB::commit();
-            
+
             return redirect()->route('product.add')
                 ->with('success', 'Product "' . $data['product_name'] . '" has been successfully registered!')
                 ->with('clear_form', true);
-                
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             if (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'serial_number')) {
                 return back()->with('error', 'Serial number "' . $data['serial_number'] . '" already exists. Please use a different serial number.')->withInput();
             }
-            
+
             return back()->with('error', 'Failed to create product: ' . $e->getMessage())->withInput();
         }
     }
@@ -192,40 +191,40 @@ class ProductController extends Controller
         return $query;
     }
 
-   public function show(Request $request): View
-{
-    $query = Product::with('brand', 'category', 'supplier', 'stock');
+    public function show(Request $request): View
+    {
+        $query = Product::with('brand', 'category', 'supplier', 'stock');
 
-    // Apply filters
-    $query = $this->applyProductFilters($query, $request);
+        // Apply filters
+        $query = $this->applyProductFilters($query, $request);
 
-    // Apply search
-    if ($request->filled('search')) {
-        $query = $this->applyProductSearch($query, $request->search);
+        // Apply search
+        if ($request->filled('search')) {
+            $query = $this->applyProductSearch($query, $request->search);
+        }
+
+        $query = $this->applySorting($query, $request);
+
+        // Get products with pagination (50 per page)
+        $products = $query->paginate(50)->withQueryString();
+
+        $suppliers = Suppliers::where('status', 'active')->orderBy('supplier_name')->get();
+
+        $data = array_merge(
+            $this->loadBrands(),
+            $this->loadCategories(),
+            compact('products', 'suppliers'),
+            ['currentSort' => $request->get('sort', 'created_desc')]
+        );
+
+        // If HTMX request, return only the table partial
+        if ($request->header('HX-Request')) {
+            return view('partials.productTable_Inventory', $data);
+        }
+
+        // Otherwise return full view
+        return view('DASHBOARD.inventory', $data);
     }
-
-    $query = $this->applySorting($query, $request);
-
-    // Get products with pagination (50 per page)
-    $products = $query->paginate(50)->withQueryString();
-
-    $suppliers = Suppliers::where('status', 'active')->orderBy('supplier_name')->get();
-
-    $data = array_merge(
-        $this->loadBrands(),
-        $this->loadCategories(),
-        compact('products', 'suppliers'),
-        ['currentSort' => $request->get('sort', 'created_desc')]
-    );
-
-    // If HTMX request, return only the table partial
-    if ($request->header('HX-Request')) {
-        return view('partials.productTable_Inventory', $data);
-    }
-
-    // Otherwise return full view
-    return view('DASHBOARD.inventory', $data);
-}
 
     public function inventoryList(Request $request)
     {
@@ -240,7 +239,7 @@ class ProductController extends Controller
         }
 
         // Only show products with stock > 0
-        $query->whereHas('stock', function($q) {
+        $query->whereHas('stock', function ($q) {
             $q->where('stock_quantity', '>', 0);
         });
 
@@ -257,7 +256,7 @@ class ProductController extends Controller
             ]);
         })->map(function ($group) {
             $first = $group->first();
-            
+
             // Calculate total quantity from stock_quantity, not product count
             $quantity = $group->sum(function ($product) {
                 return $product->stock ? $product->stock->stock_quantity : 0;
@@ -278,8 +277,6 @@ class ProductController extends Controller
                 'quantity' => $quantity, // Real stock quantity
                 'price' => $first->stock?->price ?? 0,
                 'serial_number' => $first->serial_number ?? 'N/A',
-                'stock_status' => $stock_status,
-                'status_color' => $status_color,
             ];
         })->values();
 
@@ -302,13 +299,14 @@ class ProductController extends Controller
 
         // Convert to array for pagination
         $productsArray = $productsSorted->toArray();
-        
+
         // Manual pagination for collection
         $page = $request->get('page', 1);
+        // Inventory List Pagination 
         $perPage = 50;
         $offset = ($page - 1) * $perPage;
         $paginatedItems = array_slice($productsArray, $offset, $perPage);
-        
+
         // Create LengthAwarePaginator instance
         $products = new \Illuminate\Pagination\LengthAwarePaginator(
             $paginatedItems,
@@ -377,7 +375,7 @@ class ProductController extends Controller
                         ->get();
 
                     foreach ($productsToUpdate as $prod) {
-                        if ($prod->stock) { 
+                        if ($prod->stock) {
                             $prod->stock->price = $newPrice;
                             $prod->stock->save();
                         }
@@ -389,7 +387,6 @@ class ProductController extends Controller
 
             return redirect()->route('inventory.list')
                 ->with('success');
-
         } catch (\Exception $e) {
             return redirect()->route('inventory.list')
                 ->with('error', 'Failed to update price: ' . $e->getMessage());
@@ -426,7 +423,7 @@ class ProductController extends Controller
 
         $query = Product::with('brand', 'category', 'stock')
             ->orderBy('created_at', 'desc')
-            ->limit(50);
+            ->limit(10);
 
         if (!empty($search)) {
             $query->where('product_name', 'like', '%' . $search . '%');
@@ -490,7 +487,7 @@ class ProductController extends Controller
         }
 
         // Get individual products (not grouped) with pagination
-        $products = $query->paginate(50);
+        $products = $query->paginate(2);
 
         $data = array_merge(
             $this->loadBrands(),
@@ -539,7 +536,7 @@ class ProductController extends Controller
                 ->where('product_condition', $foundProduct->product_condition)
                 ->whereHas('stock', function ($query) use ($price) {
                     $query->where('price', $price)
-                          ->where('stock_quantity', '>', 0);
+                        ->where('stock_quantity', '>', 0);
                 })
                 ->count();
         } else {

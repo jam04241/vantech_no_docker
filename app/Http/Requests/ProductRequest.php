@@ -18,7 +18,6 @@ class ProductRequest extends FormRequest
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
-            'archived' => 'boolean',
             'is_used' => 'boolean', // Checkbox to indicate if the product is used
             'price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/' // Added price validation
         ];

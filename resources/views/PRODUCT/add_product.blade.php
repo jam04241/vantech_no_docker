@@ -391,7 +391,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: '{{ session('success') }}',
+                    text: '{!! session('success') !!}',
                     confirmButtonColor: '#4F46E5',
                     didClose: () => {
                         // Focus on serial number after success

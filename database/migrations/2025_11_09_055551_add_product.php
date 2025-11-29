@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers', 'id')->onDelete('cascade'); // Make nullable
             $table->string('warranty_period');
             $table->enum('product_condition', ['Brand New', 'Second Hand'])->default('Brand New');
-            $table->string('serial_number');
+            $table->string('serial_number')->unique();
             $table->timestamps();
         });
     }

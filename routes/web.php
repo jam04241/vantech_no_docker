@@ -140,16 +140,10 @@ Route::put('/products/{product}/update-price', [ProductController::class, 'updat
 
 
 // ============= AUTO-SUGGESTION API ROUTE =============
+// ============= API ROUTES (ACCESSIBLE BY ALL AUTHENTICATED USERS) =============
 Route::get('/api/products/recent', [ProductController::class, 'getRecentProducts'])->name('products.recent');
-// ============= END AUTO-SUGGESTION API ROUTE =============
-
-// ============= SERIAL NUMBER DUPLICATE CHECK API ROUTE =============
-Route::get('/api/products/check-serial', [ProductController::class, 'checkSerialNumber'])->name('products.check-serial');
-// ============= END SERIAL NUMBER DUPLICATE CHECK API ROUTE =============
-
-
-// ============= CUSTOMER AUTOSUGGESTION API ROUTE =============
-Route::get('/api/customers/search', [CustomerController::class, 'searchCustomers'])->name('customers.search');
+Route::get('/api/customers/search', [CustomerController::class, 'search']);
+Route::get('/api/products/search-pos', [ProductController::class, 'getProductBySerialNumber']);
 // ============= END CUSTOMER AUTOSUGGESTION API ROUTE =============
 
 

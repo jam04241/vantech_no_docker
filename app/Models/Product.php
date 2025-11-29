@@ -19,12 +19,10 @@ class Product extends Model
         'warranty_period',
         'serial_number',
         'product_condition',
+        // Define fillable attributes here
     ];
 
-    protected $attributes = [
-    'archived' => false,
-    ];  
-    
+
     public function category()
     {
         return $this->belongsTo(Category::class);
