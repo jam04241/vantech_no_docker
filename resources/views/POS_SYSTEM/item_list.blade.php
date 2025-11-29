@@ -80,56 +80,80 @@
         @include('POS_SYSTEM.purchaseFrame')
     </div>
 
-    <!-- Minimalist Add Customer Modal -->
-    <div id="addCustomerModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
-        <div class="bg-white w-full max-w-lg rounded-lg shadow-lg overflow-hidden">
-            <!-- Header -->
-            <div class="flex justify-between items-center px-4 py-3 border-b">
-                <h3 class="text-base font-medium text-gray-800">Add Customer</h3>
-                <button type="button" onclick="closeAddCustomerModal()" class="text-gray-500 hover:text-gray-700">
-                    ✕
-                </button>
+    <!-- Add Customer Modal (Consistent with Customer_record.blade.php) -->
+    <div id="addCustomerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto hidden">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center pb-3 border-b">
+                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Add New Customer</h3>
+                    <button type="button" onclick="closeAddCustomerModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <form id="customerForm" class="space-y-4 mt-4">
+                    @csrf
+                    <input type="hidden" id="customerId" name="id">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">First Name *</label>
+                        <input type="text" id="firstName" name="first_name" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Last Name *</label>
+                        <input type="text" id="lastName" name="last_name" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Contact Number *</label>
+                        <input type="text" id="contactNo" name="contact_no" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Gender *</label>
+                        <select id="gender" name="gender" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Street</label>
+                        <input type="text" id="street" name="street"
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Barangay</label>
+                        <input type="text" id="brgy" name="brgy"
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">City/Province</label>
+                        <input type="text" id="cityProvince" name="city_province"
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" onclick="closeAddCustomerModal()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submitBtn"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                            Save Customer
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <!-- Form Body -->
-            <form method="POST" action="{{ route('customer.store') }}" class="px-4 py-4 space-y-4">
-                @csrf
-
-                <!-- Personal Info -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input type="text" name="first_name" required class="w-full border rounded px-2 py-1 text-sm"
-                        placeholder="First Name *" value="{{ old('first_name') }}">
-                    <input type="text" name="middle_name" class="w-full border rounded px-2 py-1 text-sm"
-                        placeholder="Middle Name" value="{{ old('middle_name') }}">
-                    <input type="text" name="last_name" required class="w-full border rounded px-2 py-1 text-sm"
-                        placeholder="Last Name *" value="{{ old('last_name') }}">
-                </div>
-
-                <!-- Contact Info -->
-                <input type="tel" name="contact_no" required class="w-full border rounded px-2 py-1 text-sm"
-                    placeholder="Contact Number *" value="{{ old('contact_no') }}">
-
-                <!-- Address -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input type="text" name="street" class="md:col-span-3 w-full border rounded px-2 py-1 text-sm"
-                        placeholder="Street" value="{{ old('street') }}">
-                    <input type="text" name="brgy" class="w-full border rounded px-2 py-1 text-sm" placeholder="Barangay"
-                        value="{{ old('brgy') }}">
-                    <input type="text" name="city_province" class="md:col-span-2 w-full border rounded px-2 py-1 text-sm"
-                        placeholder="City / Province" value="{{ old('city_province') }}">
-                </div>
-
-                <!-- Footer Buttons -->
-                <div class="flex justify-end gap-2 pt-3 border-t">
-                    <button type="button" onclick="closeAddCustomerModal()"
-                        class="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-100">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-3 py-1 rounded text-sm bg-gray-800 text-white hover:bg-gray-700">
-                        Add Customer
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -137,8 +161,8 @@
     <script>
         // Store order items
         let orderItems = [];
-        
-        
+
+
 
         // Filter and sort products by category, brand, condition, and search query
         function filterProducts() {
@@ -304,35 +328,35 @@
                 });
 
                 html += `
-                        <li class="py-3 px-3 hover:bg-gray-100 transition"
-                            data-product-id="${item.id}"
-                            data-serial-number="${item.serialNumber}"
-                            data-unit-price="${item.price}"
-                            data-quantity="${item.qty}"
-                            data-total-price="${itemSubtotal}">
-                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
-                                <div class="col-span-1 text-center">
-                                    <span class="font-semibold text-gray-900">${sequenceNumber}</span>
-                                </div>
-                                <div class="col-span-3">
-                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
-                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
-                                </div>
-                                <div class="col-span-2 text-center">
-                                    <span class="text-gray-700 text-xs">${item.warranty}</span>
-                                </div>
-                                <div class="col-span-2 text-center">
-                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
-                                </div>
-                                <div class="col-span-3 text-right">
-                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
-                                </div>
-                                <div class="col-span-1 text-center">
-                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
-                                </div>
-                            </div>
-                        </li>
-                    `;
+                                        <li class="py-3 px-3 hover:bg-gray-100 transition"
+                                            data-product-id="${item.id}"
+                                            data-serial-number="${item.serialNumber}"
+                                            data-unit-price="${item.price}"
+                                            data-quantity="${item.qty}"
+                                            data-total-price="${itemSubtotal}">
+                                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
+                                                <div class="col-span-1 text-center">
+                                                    <span class="font-semibold text-gray-900">${sequenceNumber}</span>
+                                                </div>
+                                                <div class="col-span-3">
+                                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
+                                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
+                                                </div>
+                                                <div class="col-span-2 text-center">
+                                                    <span class="text-gray-700 text-xs">${item.warranty}</span>
+                                                </div>
+                                                <div class="col-span-2 text-center">
+                                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
+                                                </div>
+                                                <div class="col-span-3 text-right">
+                                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
+                                                </div>
+                                                <div class="col-span-1 text-center">
+                                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    `;
             });
 
             purchaseList.innerHTML = html;
@@ -391,16 +415,84 @@
 
         // Customer Modal Functions
         function openAddCustomerModal() {
-            const modal = document.getElementById('addCustomerModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('addCustomerModal').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Add New Customer';
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerId').value = '';
+            document.getElementById('submitBtn').textContent = 'Save Customer';
         }
 
         function closeAddCustomerModal() {
-            const modal = document.getElementById('addCustomerModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            document.getElementById('addCustomerModal').classList.add('hidden');
         }
+
+        // Customer Form Submission Handler
+        document.getElementById('customerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const customerId = document.getElementById('customerId').value;
+            const isEditing = customerId !== '';
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            // Create form data object
+            const formData = {
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                contact_no: document.getElementById('contactNo').value,
+                gender: document.getElementById('gender').value,
+                street: document.getElementById('street').value,
+                brgy: document.getElementById('brgy').value,
+                city_province: document.getElementById('cityProvince').value,
+                _token: document.querySelector('input[name="_token"]').value
+            };
+
+            const url = isEditing ? `/customers/${customerId}` : '/customers';
+            const method = isEditing ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: isEditing ? 'Customer updated successfully!' : 'Customer added successfully!',
+                    }).then(() => {
+                        closeAddCustomerModal();
+                        document.getElementById('customerForm').reset();
+                    });
+                } else {
+                    // Handle validation errors
+                    if (data.errors) {
+                        let errorMessage = 'Please fix the following errors:\n';
+                        Object.values(data.errors).forEach(error => {
+                            errorMessage += `• ${error[0]}\n`;
+                        });
+                        Swal.fire('Validation Error', errorMessage, 'error');
+                    } else {
+                        throw new Error(data.message || 'Failed to save customer');
+                    }
+                }
+            } catch (error) {
+                Swal.fire('Error', error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = isEditing ? 'Update Customer' : 'Save Customer';
+            }
+        });
 
         // Close modal when clicking outside
         document.getElementById('addCustomerModal').addEventListener('click', function (e) {

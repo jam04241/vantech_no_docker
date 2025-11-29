@@ -19,12 +19,11 @@ class CustomerController extends Controller
         try {
             $data = $request->validated();
             Customer::create($data);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Customer added successfully.'
             ]);
-                
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -51,17 +50,42 @@ class CustomerController extends Controller
             $customer = Customer::findOrFail($id);
             $data = $request->validated();
             $customer->update($data);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Customer updated successfully.'
             ]);
-                
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update customer. Please try again.'
             ], 500);
         }
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $customers = Customer::where('first_name', 'LIKE', "%{$query}%")
+            ->orWhere('last_name', 'LIKE', "%{$query}%")
+            ->orWhere('contact_no', 'LIKE', "%{$query}%")
+            ->limit(10)
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    'id' => $customer->id,
+                    'first_name' => $customer->first_name,
+                    'last_name' => $customer->last_name,
+                    'full_name' => $customer->first_name . ' ' . $customer->last_name,
+                    'contact_no' => $customer->contact_no
+                ];
+            });
+
+        return response()->json($customers);
     }
 }
