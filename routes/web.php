@@ -12,6 +12,8 @@ use App\Http\Controllers\PurchaseDetailsController;
 use App\Http\Controllers\ProductStocksController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\SalesController;
+use App\Http\Controllers\DashboardController;
 
 use Illuminate\Support\Facades\DB;
 
@@ -40,15 +42,16 @@ Route::middleware(['auth'])->group(function () {
     })->name('redirect');
 
     // ============= DASHBOARD (ACCESSIBLE BY ALL AUTHENTICATED USERS) =============
-    Route::get('/Dashboard', function () {
-        return view('DASHBOARD.homepage');
-    })->name('dashboard');
+    Route::get('/Dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // ============= ADMIN ONLY ROUTES =============
     Route::middleware(['admin.only'])->group(function () {
         // Place admin-only routes here
         Route::get('/POS', function () {
             return view('DASHBOARD.Sales');
         })->name('Sales');
+
+        // Sales Dashboard Route
+        Route::get('/sales', [SalesController::class, 'index'])->name('sales.dashboard');
 
         Route::get('/staff/Records', function () {
             return view('DASHBOARD.staff_record');

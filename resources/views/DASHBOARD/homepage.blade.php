@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Key Metrics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Employees Card -->
         <div class="bg-white p-6 rounded-xl shadow border border-gray-200 hover:shadow-lg transition">
             <div class="flex justify-between items-start">
@@ -69,85 +69,90 @@
     </div>
 
     <!-- Dashboard Insights Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Top Selling Products -->
-        <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
-                    </path>
-                </svg>
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+                <div class="bg-indigo-100 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
                 Top Selling Products
             </h2>
-            <div class="space-y-3" id="topProducts">
-                <div class="text-gray-500 text-sm">Loading...</div>
+            <div class="h-64 overflow-y-auto space-y-3 pr-2" id="topProducts">
+                <div class="text-gray-500 text-center py-8">Loading...</div>
             </div>
         </div>
 
         <!-- Low Stock Alert -->
-        <div class="bg-white rounded-xl shadow border border-yellow-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4v2m0 4v2M6.228 6.228a9 9 0 1012.544 0M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z">
-                    </path>
-                </svg>
+        <div class="bg-white rounded-xl shadow-lg border border-yellow-200 p-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-3">
+                <div class="bg-yellow-100 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z">
+                        </path>
+                    </svg>
+                </div>
                 Low Stock Alert
             </h2>
-            <div class="space-y-3" id="lowStockItems">
-                <div class="text-gray-500 text-sm">Loading...</div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Recent Activity
-            </h2>
-            <div class="space-y-3" id="recentActivity">
-                <div class="text-gray-500 text-sm">Loading...</div>
+            <div class="h-64 overflow-y-auto space-y-3 pr-2" id="lowStockItems">
+                <div class="text-gray-500 text-center py-8">Loading...</div>
             </div>
         </div>
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Supplier Status -->
-        <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Supplier Status</h2>
-            <div class="space-y-3">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Supplier Status</h2>
+            <div class="space-y-6">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Active Suppliers</span>
-                    <span class="text-2xl font-bold text-green-600" id="activeSuppliers">0</span>
+                    <span class="text-gray-600 font-medium">Active Suppliers</span>
+                    <span class="text-2xl font-bold text-green-600" id="activeSuppliers">-</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Inactive Suppliers</span>
-                    <span class="text-2xl font-bold text-red-600" id="inactiveSuppliers">0</span>
+                    <span class="text-gray-600 font-medium">Inactive Suppliers</span>
+                    <span class="text-2xl font-bold text-red-600" id="inactiveSuppliers">-</span>
                 </div>
-                <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-4">
-                    <div class="h-full bg-green-500" id="supplierBar" style="width: 0%"></div>
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Active Percentage</span>
+                        <span id="supplierPercentage">0%</span>
+                    </div>
+                    <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-500 rounded-full transition-all duration-500" id="supplierBar"
+                            style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Inventory Status -->
-        <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Inventory Status</h2>
-            <div class="space-y-3">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Inventory Status</h2>
+            <div class="space-y-6">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-600">New Products</span>
-                    <span class="text-2xl font-bold text-blue-600" id="newProducts">0</span>
+                    <span class="text-gray-600 font-medium">Brand New</span>
+                    <span class="text-2xl font-bold text-blue-600" id="brandNewProducts">-</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Used Products</span>
-                    <span class="text-2xl font-bold text-orange-600" id="usedProducts">0</span>
+                    <span class="text-gray-600 font-medium">Used Products</span>
+                    <span class="text-2xl font-bold text-orange-600" id="usedProducts">-</span>
                 </div>
-                <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-4">
-                    <div class="h-full bg-blue-500" id="inventoryBar" style="width: 0%"></div>
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>New Products Percentage</span>
+                        <span id="inventoryPercentage">0%</span>
+                    </div>
+                    <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 rounded-full transition-all duration-500" id="inventoryBar"
+                            style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -155,69 +160,100 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize dashboard with sample data
-            // In production, these would be fetched from API endpoints
+            loadDashboardData();
 
-            // Update metrics
-            document.getElementById('employeeCount').textContent = '12';
-            document.getElementById('customerCount').textContent = '156';
-            document.getElementById('productCount').textContent = '342';
-            document.getElementById('todaysSales').textContent = '₱45,230.00';
-
-            // Supplier stats
-            document.getElementById('activeSuppliers').textContent = '8';
-            document.getElementById('inactiveSuppliers').textContent = '2';
-            document.getElementById('supplierBar').style.width = '80%';
-
-            // Inventory stats
-            document.getElementById('newProducts').textContent = '245';
-            document.getElementById('usedProducts').textContent = '97';
-            document.getElementById('inventoryBar').style.width = '72%';
-
-            // Top Products
-            const topProducts = [
-                { name: 'Dell Laptop XPS 13', sales: 45 },
-                { name: 'HP Monitor 24"', sales: 38 },
-                { name: 'Logitech Keyboard', sales: 32 }
-            ];
-
-            const topProductsHtml = topProducts.map(product => `
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <span class="text-gray-700 text-sm">${product.name}</span>
-                        <span class="text-indigo-600 font-semibold">${product.sales} sold</span>
-                    </div>
-                `).join('');
-            document.getElementById('topProducts').innerHTML = topProductsHtml;
-
-            // Low Stock Items
-            const lowStockItems = [
-                { name: 'USB-C Cable', stock: 3 },
-                { name: 'HDMI Cable', stock: 5 },
-                { name: 'Mouse Pad', stock: 2 }
-            ];
-
-            const lowStockHtml = lowStockItems.map(item => `
-                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <span class="text-gray-700 text-sm">${item.name}</span>
-                        <span class="text-yellow-600 font-semibold">${item.stock} left</span>
-                    </div>
-                `).join('');
-            document.getElementById('lowStockItems').innerHTML = lowStockHtml;
-
-            // Recent Activity
-            const activities = [
-                { action: 'Product Added', time: '2 hours ago' },
-                { action: 'Order Completed', time: '4 hours ago' },
-                { action: 'Supplier Updated', time: '1 day ago' }
-            ];
-
-            const activityHtml = activities.map(activity => `
-                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                        <span class="text-gray-700 text-sm">${activity.action}</span>
-                        <span class="text-gray-500 text-xs">${activity.time}</span>
-                    </div>
-                `).join('');
-            document.getElementById('recentActivity').innerHTML = activityHtml;
+            // Auto-refresh every 30 seconds
+            setInterval(loadDashboardData, 30000);
         });
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/dashboard/data');
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+                    updateMetrics(data.metrics);
+                    updateTopProducts(data.top_products);
+                    updateLowStockAlerts(data.low_stock_alerts);
+                    updateSupplierStatus(data.supplier_status);
+                    updateInventoryStatus(data.inventory_status);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Show fallback data
+                showFallbackData();
+            }
+        }
+
+        function updateMetrics(metrics) {
+            document.getElementById('employeeCount').textContent = metrics.employees;
+            document.getElementById('customerCount').textContent = metrics.customers;
+            document.getElementById('productCount').textContent = metrics.products;
+            document.getElementById('todaysSales').textContent = '₱' + new Intl.NumberFormat('en-PH').format(metrics.daily_sales);
+        }
+
+        function updateTopProducts(topProducts) {
+            const container = document.getElementById('topProducts');
+
+            if (topProducts.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">No sales data available</div>';
+                return;
+            }
+
+            const html = topProducts.map(product => `
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm">${product.name}</p>
+                                    <p class="text-xs text-gray-500">${product.price} • ${product.sold} sold</p>
+                                </div>
+                                <div class="text-lg font-bold text-indigo-600">${product.sold}</div>
+                            </div>
+                        `).join('');
+            container.innerHTML = html;
+        }
+
+        function updateLowStockAlerts(lowStockItems) {
+            const container = document.getElementById('lowStockItems');
+
+            if (lowStockItems.length === 0) {
+                container.innerHTML = '<div class="text-green-600 text-center py-8 font-medium">All items well stocked!</div>';
+                return;
+            }
+
+            const html = lowStockItems.map(item => `
+                            <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
+                                    <p class="text-xs text-yellow-600">${item.price} • ${item.left} left in stock</p>
+                                </div>
+                                <div class="text-lg font-bold text-yellow-600">${item.left}</div>
+                            </div>
+                        `).join('');
+            container.innerHTML = html;
+        }
+
+        function updateSupplierStatus(supplierStatus) {
+            document.getElementById('activeSuppliers').textContent = supplierStatus.active;
+            document.getElementById('inactiveSuppliers').textContent = supplierStatus.inactive;
+            document.getElementById('supplierPercentage').textContent = supplierStatus.percentage + '%';
+            document.getElementById('supplierBar').style.width = supplierStatus.percentage + '%';
+        }
+
+        function updateInventoryStatus(inventoryStatus) {
+            document.getElementById('brandNewProducts').textContent = inventoryStatus.brand_new;
+            document.getElementById('usedProducts').textContent = inventoryStatus.used;
+            document.getElementById('inventoryPercentage').textContent = inventoryStatus.percentage + '%';
+            document.getElementById('inventoryBar').style.width = inventoryStatus.percentage + '%';
+        }
+
+        function showFallbackData() {
+            // Show placeholder data when API fails
+            updateMetrics({ employees: 0, customers: 0, products: 0, daily_sales: 0 });
+            document.getElementById('topProducts').innerHTML = '<div class="text-gray-500 text-center py-8">Unable to load data</div>';
+            document.getElementById('lowStockItems').innerHTML = '<div class="text-gray-500 text-center py-8">Unable to load data</div>';
+            updateSupplierStatus({ active: 0, inactive: 0, percentage: 0 });
+            updateInventoryStatus({ brand_new: 0, used: 0, percentage: 0 });
+        }
     </script>
 @endsection

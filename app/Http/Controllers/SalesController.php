@@ -1,0 +1,260 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Product;
+use App\Models\Product_Stocks;
+use App\Models\Purchase_Details;
+use App\Models\CustomerPurchaseOrder;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+class SalesController extends Controller
+{
+    /**
+     * Display sales dashboard
+     */
+    public function index()
+    {
+        return view('DASHBOARD.Sales');
+    }
+
+    /**
+     * Get sales analytics data (API endpoint)
+     */
+    public function getSalesData(Request $request)
+    {
+        try {
+            $startDate = $request->get('start_date');
+            $endDate = $request->get('end_date');
+
+            // If no dates provided, use current month
+            if (!$startDate || !$endDate) {
+                $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+                $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+            }
+
+            // Validate date format
+            $startDate = Carbon::parse($startDate)->startOfDay();
+            $endDate = Carbon::parse($endDate)->endOfDay();
+
+            $data = [
+                'total_sales' => $this->getTotalSales($startDate, $endDate),
+                'total_orders' => $this->getTotalOrders($startDate, $endDate),
+                'avg_order_value' => 0, // Will calculate after getting revenue
+                'revenue' => $this->getRevenue($startDate, $endDate),
+                'sales_trend' => $this->getSalesTrend($startDate, $endDate),
+                'top_products' => $this->getTopProducts($startDate, $endDate),
+                'recent_transactions' => $this->getRecentTransactions($startDate, $endDate),
+                'date_range' => [
+                    'start' => $startDate->format('Y-m-d'),
+                    'end' => $endDate->format('Y-m-d')
+                ]
+            ];
+
+            // Calculate average order value
+            $data['avg_order_value'] = $data['total_orders'] > 0
+                ? round($data['revenue'] / $data['total_orders'], 2)
+                : 0;
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching sales data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate Total Sales (Quantity Sold x Sales Price for different products)
+     */
+    private function getTotalSales($startDate, $endDate)
+    {
+        // Get total sales from customer purchase orders (actual sold products)
+        $totalSales = CustomerPurchaseOrder::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Success')
+            ->sum('total_price');
+
+        return round($totalSales, 2);
+    }
+
+    /**
+     * Get Total Orders (from purchase_details with status = 'Received')
+     */
+    private function getTotalOrders($startDate, $endDate)
+    {
+        $totalOrders = Purchase_Details::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Received')
+            ->count();
+
+        return $totalOrders;
+    }
+
+    /**
+     * Calculate Revenue (Units Sold x Selling Price from customer_purchase_orders)
+     */
+    private function getRevenue($startDate, $endDate)
+    {
+        // Revenue from actual customer sales
+        $revenue = CustomerPurchaseOrder::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Success')
+            ->sum(DB::raw('quantity * unit_price'));
+
+        return round($revenue, 2);
+    }
+
+    /**
+     * Get sales trend data for chart
+     */
+    private function getSalesTrend($startDate, $endDate)
+    {
+        $salesTrend = [];
+
+        // Generate daily sales data
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $dailySales = CustomerPurchaseOrder::whereDate('order_date', $currentDate)
+                ->where('status', 'Success')
+                ->sum('total_price');
+
+            $salesTrend[] = [
+                'date' => $currentDate->format('Y-m-d'),
+                'sales' => round($dailySales, 2)
+            ];
+
+            $currentDate->addDay();
+        }
+
+        return $salesTrend;
+    }
+
+    /**
+     * Get top products by quantity sold
+     */
+    private function getTopProducts($startDate, $endDate)
+    {
+        $topProducts = CustomerPurchaseOrder::select(
+            'products.product_name',
+            DB::raw('SUM(customer_purchase_orders.quantity) as total_quantity'),
+            DB::raw('SUM(customer_purchase_orders.total_price) as total_sales')
+        )
+            ->join('products', 'customer_purchase_orders.product_id', '=', 'products.id')
+            ->whereBetween('customer_purchase_orders.order_date', [$startDate, $endDate])
+            ->where('customer_purchase_orders.status', 'Success')
+            ->groupBy('products.id', 'products.product_name')
+            ->orderBy('total_quantity', 'desc')
+            ->limit(8)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product_name' => strlen($item->product_name) > 20
+                        ? substr($item->product_name, 0, 20) . '...'
+                        : $item->product_name,
+                    'full_name' => $item->product_name,
+                    'quantity' => (int) $item->total_quantity,
+                    'sales' => round($item->total_sales, 2)
+                ];
+            });
+
+        return $topProducts;
+    }
+
+    /**
+     * Get recent transactions
+     */
+    private function getRecentTransactions($startDate, $endDate)
+    {
+        $transactions = CustomerPurchaseOrder::select(
+            'customer_purchase_orders.id',
+            DB::raw("CONCAT(customers.first_name, ' ', customers.last_name) as customer_name"),
+            'customer_purchase_orders.total_price',
+            'customer_purchase_orders.quantity',
+            'products.product_name',
+            'customer_purchase_orders.order_date',
+            'customer_purchase_orders.status'
+        )
+            ->join('customers', 'customer_purchase_orders.customer_id', '=', 'customers.id')
+            ->join('products', 'customer_purchase_orders.product_id', '=', 'products.id')
+            ->whereBetween('customer_purchase_orders.order_date', [$startDate, $endDate])
+            ->orderBy('customer_purchase_orders.order_date', 'desc')
+            ->limit(50) // Increased limit for better pagination
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'customer_name' => $transaction->customer_name,
+                    'amount' => round($transaction->total_price, 2),
+                    'quantity' => (int) $transaction->quantity,
+                    'product_name' => $transaction->product_name,
+                    'items' => $transaction->quantity . 'x ' . $transaction->product_name,
+                    'date' => Carbon::parse($transaction->order_date)->format('M d, Y'),
+                    'status' => $transaction->status
+                ];
+            });
+
+        return $transactions;
+    }
+    /**
+     * Get sales summary by date range (quick endpoint)
+     */
+    public function getSalesSummary(Request $request)
+    {
+        try {
+            $startDate = Carbon::parse($request->get('start_date', Carbon::now()->startOfMonth()));
+            $endDate = Carbon::parse($request->get('end_date', Carbon::now()->endOfMonth()));
+
+            $summary = [
+                'total_sales' => $this->getTotalSales($startDate, $endDate),
+                'total_orders' => $this->getTotalOrders($startDate, $endDate),
+                'revenue' => $this->getRevenue($startDate, $endDate),
+                'period' => $startDate->format('M d') . ' - ' . $endDate->format('M d, Y')
+            ];
+
+            $summary['avg_order_value'] = $summary['total_orders'] > 0
+                ? round($summary['revenue'] / $summary['total_orders'], 2)
+                : 0;
+
+            return response()->json([
+                'success' => true,
+                'data' => $summary
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching sales summary: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get real-time sales data (for live updates)
+     */
+    public function getRealTimeSales()
+    {
+        try {
+            $today = Carbon::today();
+
+            $realTimeData = [
+                'today_sales' => $this->getTotalSales($today, $today),
+                'today_orders' => $this->getTotalOrders($today, $today),
+                'today_revenue' => $this->getRevenue($today, $today),
+                'last_updated' => Carbon::now()->format('Y-m-d H:i:s')
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $realTimeData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching real-time data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}
