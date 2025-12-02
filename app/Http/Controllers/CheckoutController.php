@@ -93,7 +93,7 @@ class CheckoutController extends Controller
             // Store receipt data in session for receipt page
             $customer = Customer::find($customerId);
             $receiptData = [
-                'customerName' => $customer ? $customer->first_name . ' ' . $customer->last_name : 'Unknown Customer',
+                'customerName' => $customer->first_name . ' ' . $customer->last_name,
                 'customerId' => $customerId,
                 'paymentMethod' => $paymentMethod,
                 'amount' => $amount,
@@ -101,7 +101,8 @@ class CheckoutController extends Controller
                 'discount' => $request->discount ?? 0,
                 'total' => $amount,
                 'items' => $this->getReceiptItemsData($items),
-                'purchase_order_ids' => $purchaseOrderIds
+                'purchase_order_ids' => $purchaseOrderIds,
+                'displayTotalOnly' => $request->displayTotalOnly === 'true' ? true : false
             ];
 
             session(['receiptData' => $receiptData]);

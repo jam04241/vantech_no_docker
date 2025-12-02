@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\ServiceType;
+use App\Http\Requests\ServiceTypeRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ServiceTypeController extends Controller
 {
@@ -30,12 +32,33 @@ class ServiceTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ServiceTypeRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ServiceTypeRequest $request)
     {
-        //
+        try {
+            Log::info('ServiceType store request received', ['data' => $request->all()]);
+
+            $serviceType = ServiceType::create([
+                'name' => $request->validated()['name'],
+                'price' => $request->validated()['price'],
+            ]);
+
+            Log::info('ServiceType created successfully', ['id' => $serviceType->id, 'name' => $serviceType->name]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Service Type created successfully',
+                'data' => $serviceType
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('ServiceType store error: ' . $e->getMessage(), ['request' => $request->all(), 'trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating service type: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -63,13 +86,34 @@ class ServiceTypeController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ServiceTypeRequest  $request
      * @param  \App\Models\ServiceType  $serviceType
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ServiceType $serviceType)
+    public function update(ServiceTypeRequest $request, ServiceType $serviceType)
     {
-        //
+        try {
+            Log::info('ServiceType update request received', ['id' => $serviceType->id, 'data' => $request->all()]);
+
+            $serviceType->update([
+                'name' => $request->validated()['name'],
+                'price' => $request->validated()['price'],
+            ]);
+
+            Log::info('ServiceType updated successfully', ['id' => $serviceType->id, 'name' => $serviceType->name]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Service Type updated successfully',
+                'data' => $serviceType
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('ServiceType update error: ' . $e->getMessage(), ['service_type_id' => $serviceType->id, 'trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating service type: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

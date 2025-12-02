@@ -16,6 +16,8 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\ServiceReplacementController;
+use App\Http\Controllers\ServiceTypeController;
+use App\Http\Controllers\StockOutController;
 
 use Illuminate\Support\Facades\DB;
 
@@ -72,10 +74,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/Suppliers/Create_Orders', function () {
             return view('SUPPLIERS.suppliers_purchase');
         })->name('Supplier.CreateOrders');
-
-        Route::get('/Stock-Out', function () {
-            return view('INVENTORY.stock_out');
-        })->name('inventory.stockout');
 
         Route::get('/Total Stocks', function () {
             return view('partials.total_stock');
@@ -188,10 +186,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/customers', [CustomerController::class, 'getApiList']);
 
     // API: Service Types
-    Route::get('/api/service-types', function () {
-        $types = \App\Models\ServiceType::all();
-        return response()->json($types);
-    });
+    Route::get('/api/service-types', [ServiceTypeController::class, 'getApiList']);
+    Route::post('/api/service-types', [ServiceTypeController::class, 'store'])->name('api.service-types.store');
+    Route::put('/api/service-types/{serviceType}', [ServiceTypeController::class, 'update'])->name('api.service-types.update');
 
     // API: Service Items (distinct types from services)
     Route::get('/api/service-items', function () {
@@ -227,6 +224,9 @@ Route::middleware(['auth'])->group(function () {
     // Inventory_list fetch PRODUCTS
     Route::get('/inventory/list', [ProductController::class, 'inventoryList'])->name('inventory.list'); //inventory list with search and sorting
     Route::get('/inventory/list/categories', [CategoryController::class, 'inventoryListgetCategories'])->name('inventory.list.categories'); //dropdown categories
+
+    // Stock-Out Records (products with stock_quantity = 0)
+    Route::get('/inventory/stock-out', [StockOutController::class, 'index'])->name('inventory.stock-out');
 
     // Brand History and Category History fetch
     Route::get('/brandcategory/list', [CategoryController::class, 'brandHistory'])->name('brandcategory.brands'); //dropdown categories

@@ -328,35 +328,35 @@
                 });
 
                 html += `
-                                        <li class="py-3 px-3 hover:bg-gray-100 transition"
-                                            data-product-id="${item.id}"
-                                            data-serial-number="${item.serialNumber}"
-                                            data-unit-price="${item.price}"
-                                            data-quantity="${item.qty}"
-                                            data-total-price="${itemSubtotal}">
-                                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
-                                                <div class="col-span-1 text-center">
-                                                    <span class="font-semibold text-gray-900">${sequenceNumber}</span>
+                                            <li class="py-3 px-3 hover:bg-gray-100 transition"
+                                                data-product-id="${item.id}"
+                                                data-serial-number="${item.serialNumber}"
+                                                data-unit-price="${item.price}"
+                                                data-quantity="${item.qty}"
+                                                data-total-price="${itemSubtotal}">
+                                                <div class="grid grid-cols-12 gap-1 items-center text-xs">
+                                                    <div class="col-span-1 text-center">
+                                                        <span class="font-semibold text-gray-900">${sequenceNumber}</span>
+                                                    </div>
+                                                    <div class="col-span-3">
+                                                        <p class="font-medium text-gray-900 truncate">${item.name}</p>
+                                                        <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
+                                                    </div>
+                                                    <div class="col-span-2 text-center">
+                                                        <span class="text-gray-700 text-xs">${item.warranty}</span>
+                                                    </div>
+                                                    <div class="col-span-2 text-center">
+                                                        <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
+                                                    </div>
+                                                    <div class="col-span-3 text-right">
+                                                        <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
+                                                    </div>
+                                                    <div class="col-span-1 text-center">
+                                                        <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
+                                                    </div>
                                                 </div>
-                                                <div class="col-span-3">
-                                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
-                                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
-                                                </div>
-                                                <div class="col-span-2 text-center">
-                                                    <span class="text-gray-700 text-xs">${item.warranty}</span>
-                                                </div>
-                                                <div class="col-span-2 text-center">
-                                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
-                                                </div>
-                                                <div class="col-span-3 text-right">
-                                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
-                                                </div>
-                                                <div class="col-span-1 text-center">
-                                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    `;
+                                            </li>
+                                        `;
             });
 
             purchaseList.innerHTML = html;
@@ -391,19 +391,16 @@
         function updatePurchaseTotal() {
             const subtotal = parseFloat(document.getElementById('purchaseSubtotalDisplay').textContent) || 0;
             const discount = parseFloat(document.getElementById('purchaseDiscountInput').value) || 0;
-            // CALCULATION HERE
-            const vat = (subtotal - discount) * 0.03;
-            const total = subtotal - discount + vat;
+            // Calculate total without VAT
+            const total = subtotal - discount;
 
             document.getElementById('purchaseDiscountDisplay').textContent = discount.toFixed(2);
-            document.getElementById('purchaseVAT').textContent = vat.toFixed(2);
             document.getElementById('purchaseTotalDisplay').textContent = total.toFixed(2);
 
             console.log('💰 PURCHASE TOTALS (Line 53-54):');
-            console.log('   Unit Price (line 53): ₱' + subtotal.toFixed(2));
-            console.log('   Total Price (line 54): ₱' + total.toFixed(2));
+            console.log('   Subtotal: ₱' + subtotal.toFixed(2));
+            console.log('   Total Price (after discount): ₱' + total.toFixed(2));
             console.log('   Discount: ₱' + discount.toFixed(2));
-            console.log('   VAT (3%): ₱' + vat.toFixed(2));
         }
 
         // Event listeners for filters and search

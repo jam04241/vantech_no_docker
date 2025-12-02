@@ -7,6 +7,7 @@ use App\Models\ServiceType;
 use App\Http\Requests\ServiceRequest;
 use App\Traits\LoadsBrandData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ServicesController extends Controller
 {
@@ -16,7 +17,7 @@ class ServicesController extends Controller
      */
     public function index()
     {
-        $services = Service::with(['customer', 'serviceType', 'replacements'])->get();
+        $services = Service::with(['customer', 'serviceType'])->get();
         $serviceTypes = ServiceType::all();
         $customers = \App\Models\Customer::all();
 
@@ -34,9 +35,8 @@ class ServicesController extends Controller
     {
         $service = Service::create($request->validated());
 
-        $service->load(['customer', 'serviceType', 'replacements' => function ($q) {
-            $q->where('is_disabled', 0);
-        }]);
+        // Load relationships but exclude replacements to avoid table-not-found errors
+        $service->load(['customer', 'serviceType']);
 
         return response()->json([
             'success' => true,
@@ -50,10 +50,36 @@ class ServicesController extends Controller
      */
     public function show(Service $service)
     {
-        $service->load(['customer', 'serviceType', 'replacements' => function ($q) {
-            $q->where('is_disabled', 0);
-        }]);
-        return response()->json($service);
+        // Load customer, serviceType, and replacements relationships
+        $service->load(['customer', 'serviceType', 'replacements']);
+
+        return response()->json([
+            'id' => $service->id,
+            'customer_id' => $service->customer_id,
+            'service_type_id' => $service->service_type_id,
+            'customer' => $service->customer ? [
+                'id' => $service->customer->id,
+                'first_name' => $service->customer->first_name,
+                'last_name' => $service->customer->last_name,
+            ] : null,
+            'serviceType' => $service->serviceType ? [
+                'id' => $service->serviceType->id,
+                'name' => $service->serviceType->name,
+                'price' => $service->serviceType->price,
+            ] : null,
+            'type' => $service->type,
+            'brand' => $service->brand,
+            'model' => $service->model,
+            'date_in' => $service->date_in,
+            'date_out' => $service->date_out,
+            'description' => $service->description,
+            'action' => $service->action,
+            'status' => $service->status,
+            'total_price' => $service->total_price,
+            'replacements' => $service->replacements ?? [],
+            'created_at' => $service->created_at,
+            'updated_at' => $service->updated_at,
+        ]);
     }
 
     /**
@@ -63,9 +89,8 @@ class ServicesController extends Controller
     {
         $service->update($request->validated());
 
-        $service->load(['customer', 'serviceType', 'replacements' => function ($q) {
-            $q->where('is_disabled', 0);
-        }]);
+        // Load relationships but exclude replacements to avoid table-not-found errors
+        $service->load(['customer', 'serviceType']);
 
         return response()->json([
             'success' => true,
@@ -114,10 +139,8 @@ class ServicesController extends Controller
      */
     public function apiList(Request $request)
     {
-        $query = Service::with(['customer', 'serviceType', 'replacements' => function ($q) {
-            // Only load enabled replacements (is_disabled = 0)
-            $q->where('is_disabled', 0);
-        }]);
+        // Load customer, serviceType, and replacements relationships
+        $query = Service::with(['customer', 'serviceType', 'replacements']);
 
         // Filter by status (exclude Canceled from "All" filter)
         if ($request->has('status') && $request->status !== 'all') {
@@ -140,12 +163,46 @@ class ServicesController extends Controller
                     })
                     ->orWhere('type', 'like', "%{$search}%")
                     ->orWhere('brand', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
                     ->orWhere('total_price', 'like', "%{$search}%");
             });
         }
 
-        $services = $query->get();
+        $services = $query->get()->map(function ($service) {
+            return [
+                'id' => $service->id,
+                'customer_id' => $service->customer_id,
+                'service_type_id' => $service->service_type_id,
+                'customer' => $service->customer ? [
+                    'id' => $service->customer->id,
+                    'first_name' => $service->customer->first_name,
+                    'last_name' => $service->customer->last_name,
+                ] : null,
+                'serviceType' => $service->serviceType ? [
+                    'id' => $service->serviceType->id,
+                    'name' => $service->serviceType->name,
+                    'price' => $service->serviceType->price,
+                ] : null,
+                'type' => $service->type,
+                'brand' => $service->brand,
+                'model' => $service->model,
+                'date_in' => $service->date_in,
+                'date_out' => $service->date_out,
+                'description' => $service->description,
+                'action' => $service->action,
+                'status' => $service->status,
+                'total_price' => $service->total_price,
+                'replacements' => $service->replacements ?? [],
+                'created_at' => $service->created_at,
+                'updated_at' => $service->updated_at,
+            ];
+        });
+
+        Log::info('📋 API Services Response - Mapped:', [
+            'count' => $services->count(),
+            'first_service' => $services->first(),
+        ]);
 
         return response()->json($services);
     }

@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/htmx.org"></script>
     <style>
         .scrollbar-hide {
             overflow-y: auto;
@@ -55,6 +56,7 @@
         let serviceTypesData = [];
         let brandsData = [];
         let modelsData = [];
+        let allServices = []; // Store all loaded services for search
         let replacementCount = 0;
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -71,39 +73,55 @@
         // ============ FETCH DATA FUNCTIONS ============
         function loadCustomers() {
             fetch('/api/customers')
-                .then(response => response.json())
-                .then(data => {
-                    customersData = data;
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status} loading customers`);
+                    return response.json();
                 })
-                .catch(error => console.error('Error loading customers:', error));
+                .then(data => {
+                    customersData = Array.isArray(data) ? data : [];
+                    console.log('✅ Customers loaded:', customersData.length);
+                })
+                .catch(error => console.error('❌ Error loading customers:', error));
         }
 
         function loadServiceTypes() {
             fetch('/api/service-types')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status} loading service types`);
+                    return response.json();
+                })
                 .then(data => {
-                    serviceTypesData = data;
+                    serviceTypesData = Array.isArray(data) ? data : [];
+                    console.log('✅ Service types loaded:', serviceTypesData.length);
                     populateServiceTypeDropdown(data);
                 })
-                .catch(error => console.error('Error loading service types:', error));
+                .catch(error => console.error('❌ Error loading service types:', error));
         }
 
         function loadBrands() {
             fetch('/api/brands')
-                .then(response => response.json())
-                .then(data => {
-                    brandsData = data;
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status} loading brands`);
+                    return response.json();
                 })
-                .catch(error => console.error('Error loading brands:', error));
+                .then(data => {
+                    brandsData = Array.isArray(data) ? data : [];
+                    console.log('✅ Brands loaded:', brandsData.length);
+                })
+                .catch(error => console.error('❌ Error loading brands:', error));
         }
 
         function loadServiceItems() {
             fetch('/api/service-items')
-                .then(response => response.json())
-                .then(data => {
-                    modelsData = data;
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status} loading service items`);
+                    return response.json();
                 })
-                .catch(error => console.error('Error loading service items:', error));
+                .then(data => {
+                    modelsData = Array.isArray(data) ? data : [];
+                    console.log('✅ Service items loaded:', modelsData.length);
+                })
+                .catch(error => console.error('❌ Error loading service items:', error));
         }
 
         // Load all services from backend (NEW)
@@ -112,12 +130,36 @@
                 ? '/api/services'
                 : `/api/services?status=${status}`;
 
+            console.log('🔄 Loading services from:', url);
+
             fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    displayServices(data);
+                .then(response => {
+                    console.log('📥 API Response Status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
                 })
-                .catch(error => console.error('Error loading services:', error));
+                .then(data => {
+                    console.log('✅ Services loaded:', { count: Array.isArray(data) ? data.length : 0, data: data });
+                    console.log('📦 First service structure:', Array.isArray(data) && data.length > 0 ? data[0] : 'No services');
+                    allServices = Array.isArray(data) ? data : []; // Store services globally
+                    console.log('📦 Global allServices updated:', allServices.length, 'services');
+                    displayServices(allServices);
+                })
+                .catch(error => {
+                    console.error('❌ Error loading services:', error);
+                    document.getElementById('servicesContainer').innerHTML = `
+                        <div class="col-span-2 text-center py-8 text-red-500">
+                            <i class="fas fa-exclamation-triangle text-4xl mb-2"></i>
+                            <p class="font-semibold">Error Loading Services</p>
+                            <p class="text-xs mt-1">${error.message}</p>
+                            <button onclick="loadAllServices('all')" class="mt-3 px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">
+                                Retry
+                            </button>
+                        </div>
+                    `;
+                });
         }
 
         // Load services based on selected filters (for multiple status selection)
@@ -132,16 +174,36 @@
                 return;
             }
 
+            console.log('🔄 Loading filtered services for statuses:', activeStatuses);
+
             // Load services for all active statuses
             Promise.all(activeStatuses.map(status =>
-                fetch(`/api/services?status=${status}`).then(r => r.json())
+                fetch(`/api/services?status=${status}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status} for status ${status}`);
+                        }
+                        return response.json();
+                    })
             )).then(results => {
                 // Merge all results
-                const allServices = results.flat();
+                const mergedServices = results.flat();
                 // Remove duplicates by service ID
-                const uniqueServices = Array.from(new Map(allServices.map(s => [s.id, s])).values());
+                const uniqueServices = Array.from(new Map(mergedServices.map(s => [s.id, s])).values());
+                allServices = uniqueServices; // Store globally for search
+                console.log('✅ Filtered services loaded:', { count: uniqueServices.length, statuses: activeStatuses });
+                console.log('📦 Global allServices updated:', allServices.length, 'services');
                 displayServices(uniqueServices);
-            }).catch(error => console.error('Error loading filtered services:', error));
+            }).catch(error => {
+                console.error('❌ Error loading filtered services:', error);
+                document.getElementById('servicesContainer').innerHTML = `
+                    <div class="col-span-2 text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-2"></i>
+                        <p class="font-semibold">Error Loading Services</p>
+                        <p class="text-xs mt-1">${error.message}</p>
+                    </div>
+                `;
+            });
         }
 
         // ============ POPULATE DROPDOWNS ============
@@ -307,13 +369,25 @@
                     'Canceled': 'bg-gray-100 text-gray-800'
                 };
 
+                console.log(`📋 Service #${service.id}:`, {
+                    id: service.id,
+                    customer: service.customer,
+                    serviceType: service.serviceType,
+                    type: service.type,
+                    brand: service.brand,
+                    model: service.model,
+                    total_price: service.total_price,
+                    status: service.status,
+                    description: service.description
+                });
+
                 const card = document.createElement('div');
                 card.setAttribute('data-service-id', service.id);
                 card.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-md transition hover:border-[#151F28] cursor-pointer';
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h3 class="font-semibold text-gray-800 text-sm">#${index + 1} - ${service.customer?.first_name || 'N/A'}</h3>
+                            <h3 class="font-semibold text-gray-800 text-sm">#${index + 1} - ${service.serviceType?.name || 'N/A'}</h3>
                             <p class="text-xs text-gray-600 mt-0.5"><i class="fas fa-user mr-1"></i>${service.customer?.first_name || '-'} ${service.customer?.last_name || ''}</p>
                         </div>
                         <span class="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap ${statusColors[service.status] || 'bg-gray-100'}">
@@ -321,11 +395,10 @@
                         </span>
                     </div>
                     <div class="text-xs space-y-1 mb-2">
-                        <p class="text-gray-600"><span class="font-semibold">Service Type:</span> ${service.serviceType?.name || '-'}</p>
                         <p class="text-gray-600"><span class="font-semibold">Type of Item:</span> ${service.type || '-'}</p>
                         <p class="text-gray-600"><span class="font-semibold">Brand:</span> ${service.brand || '-'}</p>
                         <p class="text-gray-600"><span class="font-semibold">Model:</span> ${service.model || '-'}</p>
-                        <p class="text-gray-600"><span class="font-semibold">Price:</span> ₱${parseFloat(service.total_price || 0).toFixed(2)}</p>
+                        <p class="text-gray-600"><span class="font-semibold">Service Fee:</span> ₱${parseFloat(service.total_price || 0).toFixed(2)}</p>
                     </div>
                     <p class="text-xs text-gray-700 border-t pt-2 line-clamp-2">${service.description || '-'}</p>
                 `;
@@ -393,26 +466,87 @@
                 });
             });
 
-            // Search bar
+            // Search bar - Multi-field search
             const searchInput = document.getElementById('searchServices');
             if (searchInput) {
                 searchInput.addEventListener('input', debounce(function (e) {
-                    const search = e.target.value.trim();
-                    if (search.length > 0) {
-                        fetch(`/api/services?search=${encodeURIComponent(search)}`)
-                            .then(response => response.json())
-                            .then(data => displayServices(data))
-                            .catch(error => console.error('Search error:', error));
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    console.log('🔍 Search triggered:', { searchTerm, allServicesCount: allServices.length });
+
+                    if (searchTerm.length > 0) {
+                        console.log('🔍 Searching for:', searchTerm);
+
+                        // Get current active status filter
+                        const activeStatusBtn = document.querySelector('[data-filter].bg-[#151F28]');
+                        const currentFilter = activeStatusBtn?.getAttribute('data-filter') || 'all';
+                        console.log('📊 Current filter:', currentFilter);
+
+                        // Filter from allServices based on search and status
+                        let filtered = allServices;
+                        console.log('📦 Starting with:', filtered.length, 'services');
+
+                        // Apply status filter
+                        if (currentFilter === 'all') {
+                            filtered = allServices.filter(s => !['Completed', 'Canceled'].includes(s.status));
+                        } else {
+                            filtered = allServices.filter(s => s.status === currentFilter);
+                        }
+                        console.log('📊 After status filter:', filtered.length, 'services');
+
+                        // Apply multi-field search
+                        filtered = filtered.filter(service => {
+                            const fullName = `${service.customer?.first_name || ''} ${service.customer?.last_name || ''}`.toLowerCase();
+                            const serviceType = (service.serviceType?.name || '').toLowerCase();
+                            const typeOfItem = (service.type || '').toLowerCase();
+                            const brand = (service.brand || '').toLowerCase();
+                            const model = (service.model || '').toLowerCase();
+                            const price = (service.total_price || '').toString();
+                            const description = (service.description || '').toLowerCase();
+
+                            const matches = (
+                                fullName.includes(searchTerm) ||
+                                serviceType.includes(searchTerm) ||
+                                typeOfItem.includes(searchTerm) ||
+                                brand.includes(searchTerm) ||
+                                model.includes(searchTerm) ||
+                                price.includes(searchTerm) ||
+                                description.includes(searchTerm)
+                            );
+
+                            if (matches) {
+                                console.log('✓ Match found:', { fullName, serviceType, typeOfItem });
+                            }
+
+                            return matches;
+                        });
+
+                        console.log('✅ Search results:', filtered.length);
+                        displayServices(filtered);
                     } else {
-                        loadAllServices('all');
+                        // If search is cleared, reload based on current status filter
+                        const activeStatusBtn = document.querySelector('[data-filter].bg-[#151F28]');
+                        console.log('🔄 Search cleared, reloading with filter:', activeStatusBtn?.getAttribute('data-filter'));
+                        if (activeStatusBtn) {
+                            activeStatusBtn.click();
+                        }
                     }
                 }, 300));
             }
 
-            // Status change
+            // Status change (hidden input)
             document.getElementById('status').addEventListener('change', function (e) {
                 toggleReceiptButtons(e.target.value);
             });
+
+            // Status dropdown change (visible dropdown for editing)
+            const statusDropdown = document.getElementById('statusDropdown');
+            if (statusDropdown) {
+                statusDropdown.addEventListener('change', function (e) {
+                    const newStatus = e.target.value;
+                    document.getElementById('status').value = newStatus; // Sync hidden input
+                    toggleReceiptButtons(newStatus);
+                });
+            }
 
             // Save button
             document.getElementById('saveBtn').addEventListener('click', handleSaveService);
@@ -428,6 +562,186 @@
 
             // Add Replacement button
             document.getElementById('addReplacementBtn').addEventListener('click', handleAddReplacement);
+
+            // ============ SERVICE TYPE MODAL HANDLERS ============
+            // Add Service Type button
+            document.getElementById('addServiceTypeBtn').addEventListener('click', function () {
+                document.getElementById('addServiceTypeModal').classList.remove('hidden');
+            });
+
+            // Close Add Service Type Modal
+            document.getElementById('closeAddServiceTypeModal').addEventListener('click', function () {
+                document.getElementById('addServiceTypeModal').classList.add('hidden');
+                document.getElementById('addServiceTypeForm').reset();
+            });
+
+            document.getElementById('cancelAddServiceTypeModal').addEventListener('click', function () {
+                document.getElementById('addServiceTypeModal').classList.add('hidden');
+                document.getElementById('addServiceTypeForm').reset();
+            });
+
+            // Add Service Type Form Submit
+            document.getElementById('addServiceTypeForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const name = document.getElementById('service_type_name').value.trim();
+                const price = document.getElementById('service_type_price').value.trim();
+
+                if (!name || !price) {
+                    Swal.fire('Error', 'Please fill in all fields', 'error');
+                    return;
+                }
+
+                const payload = {
+                    name: name,
+                    price: parseFloat(price)
+                };
+
+                console.log('📤 Sending add service type payload:', payload);
+
+                try {
+                    const response = await fetch('/api/service-types', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF_TOKEN,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    console.log('📥 Response:', { status: response.status, result });
+
+                    if (response.ok && result.success) {
+                        console.log('✅ Service Type created:', result.data);
+                        Swal.fire('Success', 'Service Type created successfully!', 'success');
+                        document.getElementById('addServiceTypeModal').classList.add('hidden');
+                        document.getElementById('addServiceTypeForm').reset();
+                        loadServiceTypes(); // Reload service types
+                    } else {
+                        console.error('❌ Error creating service type:', result);
+                        let errorMsg = result.message || 'Failed to create service type';
+                        if (result.errors) {
+                            const errorList = Object.values(result.errors).flat().join(', ');
+                            errorMsg = errorList || errorMsg;
+                        }
+                        Swal.fire('Error', errorMsg, 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    Swal.fire('Error', 'An error occurred while creating service type', 'error');
+                }
+            });
+
+            // Edit Service Type button
+            document.getElementById('editServiceTypeBtn').addEventListener('click', function () {
+                const editSelect = document.getElementById('edit_service_type_select');
+                editSelect.innerHTML = '<option value="">Select a service type...</option>';
+                serviceTypesData.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.id;
+                    option.textContent = `${type.name} (₱${parseFloat(type.price).toFixed(2)})`;
+                    editSelect.appendChild(option);
+                });
+                document.getElementById('editServiceTypeModal').classList.remove('hidden');
+            });
+
+            // Close Edit Service Type Modal
+            document.getElementById('closeEditServiceTypeModal').addEventListener('click', function () {
+                document.getElementById('editServiceTypeModal').classList.add('hidden');
+                document.getElementById('editServiceTypeForm').reset();
+            });
+
+            document.getElementById('cancelEditServiceTypeModal').addEventListener('click', function () {
+                document.getElementById('editServiceTypeModal').classList.add('hidden');
+                document.getElementById('editServiceTypeForm').reset();
+            });
+
+            // Edit Service Type Select Change
+            document.getElementById('edit_service_type_select').addEventListener('change', function () {
+                const selectedId = this.value;
+                if (selectedId) {
+                    const selectedType = serviceTypesData.find(t => t.id == selectedId);
+                    if (selectedType) {
+                        document.getElementById('edit_service_type_name').value = selectedType.name;
+                        document.getElementById('edit_service_type_price').value = selectedType.price;
+                    }
+                }
+            });
+
+            // Edit Service Type Form Submit
+            document.getElementById('editServiceTypeForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const serviceTypeId = document.getElementById('edit_service_type_select').value;
+
+                if (!serviceTypeId) {
+                    Swal.fire('Error', 'Please select a service type to edit', 'error');
+                    return;
+                }
+
+                const name = document.getElementById('edit_service_type_name').value.trim();
+                const price = document.getElementById('edit_service_type_price').value.trim();
+
+                if (!name || !price) {
+                    Swal.fire('Error', 'Please fill in all fields', 'error');
+                    return;
+                }
+
+                const payload = {
+                    name: name,
+                    price: parseFloat(price)
+                };
+
+                console.log('📤 Sending update service type payload:', { serviceTypeId, ...payload });
+
+                try {
+                    const response = await fetch(`/api/service-types/${serviceTypeId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF_TOKEN,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    console.log('📥 Response:', { status: response.status, result });
+
+                    if (response.ok && result.success) {
+                        console.log('✅ Service Type updated:', result.data);
+                        Swal.fire('Success', 'Service Type updated successfully!', 'success');
+                        document.getElementById('editServiceTypeModal').classList.add('hidden');
+                        document.getElementById('editServiceTypeForm').reset();
+                        loadServiceTypes(); // Reload service types
+                    } else {
+                        console.error('❌ Error updating service type:', result);
+                        let errorMsg = result.message || 'Failed to update service type';
+                        if (result.errors) {
+                            const errorList = Object.values(result.errors).flat().join(', ');
+                            errorMsg = errorList || errorMsg;
+                        }
+                        Swal.fire('Error', errorMsg, 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    Swal.fire('Error', 'An error occurred while updating service type', 'error');
+                }
+            });
+
+            // Service Type Dropdown Change - Auto-fill Service Price
+            document.getElementById('serviceType').addEventListener('change', function () {
+                const selectedId = this.value;
+                if (selectedId) {
+                    const selectedType = serviceTypesData.find(t => t.id == selectedId);
+                    if (selectedType) {
+                        document.getElementById('totalPrice').value = selectedType.price;
+                        console.log('💰 Service price auto-filled:', selectedType.price);
+                    }
+                } else {
+                    document.getElementById('totalPrice').value = '';
+                }
+            });
         }
 
         // ============ SERVICE SELECTION & TOGGLE ============
@@ -449,22 +763,46 @@
 
                 // Fetch service details from backend
                 fetch(`/api/services/${serviceId}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('📥 Service detail response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: Failed to load service`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('✅ Service data loaded:', data);
                         selectedServiceData = data;
                         populateServiceForm(data);
                     })
                     .catch(error => {
-                        console.error('Error fetching service:', error);
-                        Swal.fire('Error', 'Failed to load service details', 'error');
+                        console.error('❌ Error fetching service:', error);
+                        Swal.fire('Error', 'Failed to load service details: ' + error.message, 'error');
                     });
             }
         }
 
         // ============ FORM POPULATION ============
         function populateServiceForm(data) {
+            console.log('📝 Populating form with service data:', {
+                id: data.id,
+                customer: data.customer,
+                serviceType: data.serviceType,
+                type: data.type,
+                description: data.description
+            });
+
+            if (!data.customer) {
+                console.warn('⚠️  Warning: Customer data is missing from service');
+            }
+            if (!data.serviceType) {
+                console.warn('⚠️  Warning: Service Type data is missing from service');
+            }
+
             document.getElementById('serviceIdInput').value = data.id;
-            document.getElementById('customerName').value = `${data.customer?.first_name || ''} ${data.customer?.last_name || ''}`;
+            document.getElementById('customerName').value = data.customer
+                ? `${data.customer.first_name || ''} ${data.customer.last_name || ''}`.trim()
+                : '';
             document.getElementById('customerId').value = data.customer_id || '';
             document.getElementById('serviceType').value = data.service_type_id || '';
             document.getElementById('type').value = data.type || '';
@@ -483,16 +821,26 @@
             document.getElementById('saveBtn').style.display = 'flex';
             document.getElementById('replacementCard').style.display = 'flex';
 
+            // Show status dropdown when editing
+            document.getElementById('statusContainer').style.display = 'block';
+            document.getElementById('statusDropdown').value = data.status || 'Pending';
+            document.getElementById('status').value = data.status || 'Pending';
+
             // Load replacements
             displayReplacements(data.replacements || []);
 
             // Toggle buttons based on status
             toggleReceiptButtons(data.status);
+
+            console.log('✅ Form populated successfully');
         }
 
         function clearServiceForm() {
             document.getElementById('serviceForm').reset();
             document.getElementById('serviceIdInput').value = '';
+            document.getElementById('status').value = 'Pending'; // Default to Pending
+            document.getElementById('statusDropdown').value = ''; // Clear visible dropdown
+            document.getElementById('statusContainer').style.display = 'none'; // Hide status dropdown
             document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create Service';
             document.getElementById('deleteBtn').style.display = 'none';
             document.getElementById('saveBtn').style.display = 'flex';
@@ -681,8 +1029,11 @@
                 new_item: newItem,
                 new_item_price: parseFloat(newPrice),
                 new_item_warranty: warranty || null,
-                is_disabled: 0  // Enable it immediately
+                is_disabled: false  // Enable it immediately (send as boolean)
             };
+
+            console.log('📤 Sending replacement data:', replacementData);
+            console.log('📤 Payload JSON:', JSON.stringify(replacementData));
 
             fetch('/api/service-replacements', {
                 method: 'POST',
@@ -693,14 +1044,35 @@
                 body: JSON.stringify(replacementData)
             })
                 .then(response => {
+                    console.log('📥 Response status:', response.status);
+                    console.log('📥 Response content-type:', response.headers.get('content-type'));
+
                     if (!response.ok) {
-                        throw new Error('Failed to add replacement');
+                        return response.text().then(text => {
+                            console.error('❌ Server response text:', text);
+                            try {
+                                const errorData = JSON.parse(text);
+                                console.error('❌ Parsed error data:', errorData);
+                                throw new Error(errorData.message || errorData.error || `HTTP ${response.status}: Failed to add replacement`);
+                            } catch (parseError) {
+                                console.error('❌ Failed to parse error response:', parseError);
+                                throw new Error(`HTTP ${response.status}: Failed to add replacement. Server response: ${text.substring(0, 200)}`);
+                            }
+                        });
                     }
                     return response.json();
                 })
                 .then(data => {
+                    console.log('✅ Replacement created with data:', data);
+
+                    // Validate response has required fields
+                    if (!data.replacement || !data.replacement.id) {
+                        console.error('❌ Response missing replacement data:', data);
+                        throw new Error('Server response missing replacement ID');
+                    }
+
                     // Add to DOM with database ID
-                    addReplacementItem(itemName, oldCondition, newItem, newPrice, warranty, data.id);
+                    addReplacementItem(itemName, oldCondition, newItem, newPrice, warranty, data.replacement.id);
 
                     // Clear inputs
                     document.getElementById('itemName').value = '';
@@ -716,12 +1088,10 @@
                         text: 'Part replacement added successfully',
                         confirmButtonColor: '#151F28',
                         timer: 1500
-                    }).then(() => {
-                        // Optional: refresh if needed
                     });
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('❌ Full error:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -785,19 +1155,40 @@
 
             replacementRow.querySelector('.remove-replacement').addEventListener('click', async function () {
                 const dbReplacementId = replacementRow.getAttribute('data-replacement-id');
+                const currentServiceId = document.getElementById('serviceIdInput').value; // Get service ID from form
+
+                // Show confirmation dialog
+                const result = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Delete Permanently?',
+                    text: 'This part replacement will be permanently deleted. This action cannot be undone.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, Delete Permanently',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (!result.isConfirmed) {
+                    return;
+                }
 
                 if (dbReplacementId) {
                     // Has database ID - soft delete by setting is_disabled = 1
                     try {
                         const updatePayload = {
-                            service_id: parseInt(serviceId),
+                            service_id: parseInt(currentServiceId), // Use the service ID from the form
                             item_name: itemName,
                             old_item_condition: oldCondition,
                             new_item: newItem,
                             new_item_price: parseFloat(newPrice),
                             new_item_warranty: warranty || null,
-                            is_disabled: 1  // Disable it (soft delete)
+                            is_disabled: true  // Disable it (soft delete)
                         };
+
+                        console.log('📤 Updating replacement with payload:', updatePayload);
+                        console.log('🔗 Service ID from form:', currentServiceId);
+                        console.log('🗑️ Replacement ID to delete:', dbReplacementId);
 
                         const response = await fetch(`/api/service-replacements/${dbReplacementId}`, {
                             method: 'PUT',
@@ -808,24 +1199,40 @@
                             body: JSON.stringify(updatePayload)
                         });
 
+                        console.log('📥 Response status:', response.status);
+                        console.log('📥 Response headers:', {
+                            contentType: response.headers.get('content-type')
+                        });
+
+                        let responseData;
+                        try {
+                            const text = await response.text();
+                            console.log('📥 Raw response:', text);
+                            responseData = text ? JSON.parse(text) : {};
+                        } catch (e) {
+                            console.error('❌ Failed to parse JSON response:', e);
+                            throw new Error('Server returned invalid JSON response');
+                        }
+
                         if (response.ok) {
+                            console.log('✅ Replacement deleted successfully:', responseData);
                             replacementRow.remove();
                             replacementCount--;
                             renumberReplacements();
 
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Removed',
-                                text: 'Part replacement removed successfully',
+                                title: 'Permanently Deleted',
+                                text: 'Part replacement has been permanently deleted',
                                 confirmButtonColor: '#151F28',
-                                timer: 1000
+                                timer: 1500
                             });
                         } else {
-                            const error = await response.json();
-                            throw new Error(error.message || 'Failed to remove replacement');
+                            console.error('❌ Server error response:', responseData);
+                            throw new Error(responseData.message || responseData.error || 'Failed to remove replacement');
                         }
                     } catch (error) {
-                        console.error('Error:', error);
+                        console.error('❌ Error deleting replacement:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -838,6 +1245,14 @@
                     replacementRow.remove();
                     replacementCount--;
                     renumberReplacements();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Removed',
+                        text: 'Part replacement has been removed',
+                        confirmButtonColor: '#151F28',
+                        timer: 1000
+                    });
                 }
             });
         }
@@ -862,7 +1277,8 @@
                     replacement.old_item_condition,
                     replacement.new_item,
                     replacement.new_item_price,
-                    replacement.new_item_warranty
+                    replacement.new_item_warranty,
+                    replacement.id  // Pass the database replacement ID
                 );
             });
         }

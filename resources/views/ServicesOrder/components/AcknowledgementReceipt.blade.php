@@ -34,7 +34,7 @@
             }
 
             .print-only {
-                display: block !important;
+                display: none !important;
             }
         }
 

@@ -72,15 +72,19 @@ class SalesController extends Controller
 
     /**
      * Calculate Total Sales (Quantity Sold x Sales Price for different products)
+     * Formula: Total Sales = Sum(stock_quantity x price) for each product in inventory
+     * Note: This is the total value of all products in stock, not filtered by date
      */
-    private function getTotalSales($startDate, $endDate)
+    private function getTotalSales($startDate = null, $endDate = null)
     {
-        // Get total sales from customer purchase orders (actual sold products)
-        $totalSales = CustomerPurchaseOrder::whereBetween('order_date', [$startDate, $endDate])
-            ->where('status', 'Success')
-            ->sum('total_price');
+        // Get total sales from product_stocks (quantity x price)
+        // Cast stock_quantity to INTEGER (SQL Server compatible)
+        $totalSales = Product_Stocks::select(
+            DB::raw('SUM(CAST(stock_quantity AS INT) * price) as total_sales')
+        )
+            ->value('total_sales');
 
-        return round($totalSales, 2);
+        return round($totalSales ?? 0, 2);
     }
 
     /**
@@ -110,12 +114,13 @@ class SalesController extends Controller
 
     /**
      * Get sales trend data for chart
+     * Shows daily revenue from customer orders within the date range
      */
     private function getSalesTrend($startDate, $endDate)
     {
         $salesTrend = [];
 
-        // Generate daily sales data
+        // Generate daily sales data from customer purchase orders
         $currentDate = $startDate->copy();
         while ($currentDate <= $endDate) {
             $dailySales = CustomerPurchaseOrder::whereDate('order_date', $currentDate)

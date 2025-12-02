@@ -79,14 +79,19 @@
                                     id="purchaseDiscountDisplay">0.00</span></span>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">VAT (3%)</span>
-                        <span class="font-semibold text-gray-900">₱<span id="purchaseVAT">0.00</span></span>
-                    </div>
                     <div class="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
                         <span class="font-semibold text-gray-900">Total</span>
                         <span class="font-bold text-gray-900 text-lg">₱<span
                                 id="purchaseTotalDisplay">0.00</span></span>
+                    </div>
+
+                    <!-- Display Total Price Only Checkbox -->
+                    <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+                        <input type="checkbox" id="displayTotalOnly" name="displayTotalOnly"
+                            class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer" />
+                        <label for="displayTotalOnly" class="text-sm text-gray-700 cursor-pointer">
+                            Hide Unit & Subtotal Prices
+                        </label>
                     </div>
                 </div>
 
@@ -126,8 +131,8 @@
             <input type="hidden" id="formCustomerId" name="customer_id" value="">
             <input type="hidden" id="formSubtotal" name="subtotal" value="0">
             <input type="hidden" id="formDiscount" name="discount" value="0">
-            <input type="hidden" id="formVat" name="vat" value="0">
             <input type="hidden" id="formTotal" name="total" value="0">
+            <input type="hidden" id="formDisplayTotalOnly" name="displayTotalOnly" value="false">
 
             <!-- Items container for dynamic items -->
             <div id="formItemsContainer"></div>
@@ -279,8 +284,8 @@
             // Update hidden form fields
             document.getElementById('formSubtotal').value = document.getElementById('purchaseSubtotalDisplay').textContent;
             document.getElementById('formDiscount').value = document.getElementById('purchaseDiscountDisplay').textContent;
-            document.getElementById('formVat').value = document.getElementById('purchaseVAT').textContent;
             document.getElementById('formTotal').value = totalAmount;
+            document.getElementById('formDisplayTotalOnly').value = document.getElementById('displayTotalOnly').checked ? 'true' : 'false';
 
             // Prepare form items
             prepareFormItems();

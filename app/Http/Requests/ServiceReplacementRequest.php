@@ -24,13 +24,13 @@ class ServiceReplacementRequest extends FormRequest
     public function rules()
     {
         return [
-            'service_id' => 'required|exists:services,id',
+            'service_id' => 'required|integer|exists:services,id',
             'item_name' => 'required|string|max:255',
             'old_item_condition' => 'required|string',
             'new_item' => 'required|string',
             'new_item_price' => 'required|numeric|min:0',
             'new_item_warranty' => 'nullable|string|max:255',
-            'is_disabled' => 'nullable|in:0,1',  // Accept 0 or 1
+            'is_disabled' => 'nullable|boolean',
         ];
     }
 }

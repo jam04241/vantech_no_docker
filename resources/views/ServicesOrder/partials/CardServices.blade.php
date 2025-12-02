@@ -75,11 +75,21 @@
 
     <!-- SERVICE FORM CARD - Adjust width: lg:w-96 or lg:w-1/2 lg:flex-1 -->
     <div class="flex-1 lg:w-1/3 bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full">
-        <!-- Form Header -->
-        <div class="bg-gradient-to-r from-[#151F28] to-[#0f161e] text-white p-6">
+        <!-- Form Header with Action Buttons -->
+        <div class="bg-gradient-to-r from-[#151F28] to-[#0f161e] text-white p-6 flex justify-between items-center">
             <h2 id="formTitle" class="text-xl font-bold flex items-center gap-2">
                 <i class="fas fa-plus-circle"></i> Create Service
             </h2>
+            <div class="flex gap-2">
+                <button type="button" id="addServiceTypeBtn"
+                    class="px-3 py-1.5 bg-white hover:bg-gray-100 text-[#151F28] rounded-lg font-semibold transition flex items-center gap-1 text-sm">
+                    <i class="fas fa-plus"></i>Add Service
+                </button>
+                <button type="button" id="editServiceTypeBtn"
+                    class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition flex items-center gap-1 text-sm">
+                    <i class="fas fa-edit"></i>Edit Service
+                </button>
+            </div>
         </div>
 
         <!-- Form Content with Scroll -->
@@ -103,17 +113,27 @@
                         class="absolute bg-white border border-gray-300 rounded-lg mt-1 w-full max-h-48 overflow-y-auto hidden z-10 shadow-lg">
                     </div>
                 </div>
-
-                <!-- Service Type -->
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        <i class="fas fa-cogs mr-1 text-[#151F28]"></i>Service Type *
-                    </label>
-                    <select name="service_type_id" id="serviceType"
-                        class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#151F28] transition text-sm"
-                        required>
-                        <option value="">Select type...</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- Service Type -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            <i class="fas fa-cogs mr-1 text-[#151F28]"></i>Service Type *
+                        </label>
+                        <select name="service_type_id" id="serviceType"
+                            class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#151F28] transition text-sm"
+                            required>
+                            <option value="">Select type...</option>
+                        </select>
+                    </div>
+                    <!-- Service Price (Moved Above Service Type) -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            <i class="fas fa-peso-sign mr-1 text-[#151F28]"></i>Service Fee *
+                        </label>
+                        <input type="number" name="total_price" id="totalPrice"
+                            class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#151F28] transition text-sm"
+                            step="0.01" min="0" placeholder="0.00" required>
+                    </div>
                 </div>
 
                 <!-- Type Input with Auto-Suggest -->
@@ -190,13 +210,17 @@
                         rows="2" placeholder="Actions..."></textarea>
                 </div>
 
-                <!-- Status & Price Row -->
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
+                <!-- Status Row (Status shows only when editing) -->
+                <div>
+                    <!-- Hidden Status Input - Always set to Pending by default -->
+                    <input type="hidden" name="status" id="status" value="Pending">
+
+                    <!-- Visible Status Dropdown (Show only when editing) -->
+                    <div id="statusContainer" style="display: none;">
                         <label class="block text-xs font-semibold text-gray-700 mb-1">
                             <i class="fas fa-flag mr-0.5 text-[#151F28]"></i>Status *
                         </label>
-                        <select name="status" id="status"
+                        <select id="statusDropdown"
                             class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#151F28] transition text-sm"
                             required>
                             <option value="">Select...</option>
@@ -205,14 +229,6 @@
                             <option value="Completed">Completed</option>
                             <option value="On Hold">On Hold</option>
                         </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">
-                            <i class="fas fa-peso-sign mr-0.5 text-[#151F28]"></i>Price *
-                        </label>
-                        <input type="number" name="total_price" id="totalPrice"
-                            class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#151F28] transition text-sm"
-                            step="0.01" min="0" placeholder="0.00" required>
                     </div>
                 </div>
 
@@ -242,6 +258,101 @@
                     class="w-full py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition text-sm mt-2">
                     <i class="fas fa-trash mr-1"></i>Archive
                 </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT SERVICE TYPE MODALS -->
+    <!-- Add Service Type Modal -->
+    <div id="addServiceTypeModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 relative transform scale-95 transition-transform duration-300"
+            id="addServiceTypeModalContent">
+            <button id="closeAddServiceTypeModal"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Add New Service Type</h3>
+            </div>
+            <form id="addServiceTypeForm" action="" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <label for="service_type_name" class="block text-sm font-medium text-gray-700 mb-2">Service Type
+                        Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="service_type_name"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        placeholder="Enter service type name" required>
+                </div>
+                <div>
+                    <label for="service_type_price" class="block text-sm font-medium text-gray-700 mb-2">Service Price
+                        (₱) <span class="text-red-500">*</span></label>
+                    <input type="number" name="price" id="service_type_price" step="0.01" min="0"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        placeholder="Enter price" required>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancelAddServiceTypeModal"
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-500 transition duration-200">Cancel</button>
+                    <button type="submit"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 shadow-lg">Save
+                        Service Type</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Service Type Modal -->
+    <div id="editServiceTypeModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 relative transform scale-95 transition-transform duration-300"
+            id="editServiceTypeModalContent">
+            <button id="closeEditServiceTypeModal"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Edit Service Type</h3>
+            </div>
+            <form id="editServiceTypeForm" method="POST" class="space-y-6">
+                @csrf
+                @method('PUT')
+                <div>
+                    <label for="edit_service_type_select" class="block text-sm font-medium text-gray-700 mb-2">Select
+                        Service Type <span class="text-red-500">*</span></label>
+                    <select id="edit_service_type_select"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        required>
+                        <option value="">Select a service type...</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="edit_service_type_name" class="block text-sm font-medium text-gray-700 mb-2">Service
+                        Type Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="edit_service_type_name"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        placeholder="Enter service type name" required>
+                </div>
+                <div>
+                    <label for="edit_service_type_price" class="block text-sm font-medium text-gray-700 mb-2">Service
+                        Price (₱) <span class="text-red-500">*</span></label>
+                    <input type="number" name="price" id="edit_service_type_price" step="0.01" min="0"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                        placeholder="Enter price" required>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancelEditServiceTypeModal"
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-500 transition duration-200">Cancel</button>
+                    <button type="submit"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 shadow-lg">Update
+                        Service Type</button>
+                </div>
             </form>
         </div>
     </div>

@@ -33,7 +33,7 @@
             }
 
             .print-only {
-                display: block !important;
+                display: none !important;
             }
         }
 
@@ -136,15 +136,15 @@
             </div>
 
             <!-- Product Table -->
-            <div class="mb-8">
+            <div class="mb-8" id="productTable">
                 <table class="w-full border-collapse">
                     <thead>
                         <tr class="border-b-2 border-gray-300">
                             <th class="text-left py-2 text-sm font-semibold">Description</th>
                             <th class="text-center py-2 text-sm font-semibold">Warranty</th>
                             <th class="text-center py-2 text-sm font-semibold">Qty</th>
-                            <th class="text-right py-2 text-sm font-semibold">Unit price</th>
-                            <th class="text-right py-2 text-sm font-semibold">Total price</th>
+                            <th class="text-right py-2 text-sm font-semibold" id="priceHeader">Unit price</th>
+                            <th class="text-right py-2 text-sm font-semibold" id="totalPriceHeader">Subtotal price</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,8 +160,8 @@ $receiptSubtotal = 0;
                                     <td class="py-2 text-sm">{{ $item['productName'] }}</td>
                                     <td class="text-center py-2 text-sm">{{ $item['warranty'] ?? '-' }}</td>
                                     <td class="text-center py-2 text-sm">{{ $item['quantity'] }}</td>
-                                    <td class="text-right py-2 text-sm">₱{{ number_format($item['price'], 2) }}</td>
-                                    <td class="text-right py-2 text-sm">₱{{ number_format($item['subtotal'], 2) }}</td>
+                                    <td class="text-right py-2 text-sm priceColumn">₱{{ number_format($item['price'], 2) }}</td>
+                                    <td class="text-right py-2 text-sm totalPriceColumn">₱{{ number_format($item['subtotal'], 2) }}</td>
                                 </tr>
                             @endforeach
                         @else
@@ -267,6 +267,22 @@ $receiptSubtotal = 0;
         // Auto focus on print button when page loads
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Receipt data loaded:', @json($receiptData));
+            
+            // Hide unit price and total price columns if displayTotalOnly is true
+            const receiptData = @json($receiptData);
+            if (receiptData.displayTotalOnly) {
+                // Hide headers
+                const priceHeader = document.getElementById('priceHeader');
+                const totalPriceHeader = document.getElementById('totalPriceHeader');
+                if (priceHeader) priceHeader.style.display = 'none';
+                if (totalPriceHeader) totalPriceHeader.style.display = 'none';
+                
+                // Hide all price cells in the table
+                const priceColumns = document.querySelectorAll('.priceColumn');
+                const totalPriceColumns = document.querySelectorAll('.totalPriceColumn');
+                priceColumns.forEach(cell => cell.style.display = 'none');
+                totalPriceColumns.forEach(cell => cell.style.display = 'none');
+            }
         });
     </script>
 </body>

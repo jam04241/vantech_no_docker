@@ -23,6 +23,8 @@
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
 
+    {{-- HTMX --}}
+    <script src="https://unpkg.com/htmx.org"></script>
     <style>
         .sidebar {
             transition: all 0.3s ease;
@@ -447,8 +449,7 @@
                     Sales
                 </button>
             @elseif(Auth::user() && Auth::user()->role === 'staff')
-                <button onclick="showAdminVerificationModal('{{ route('Sales') }}')"
-                    class="sidebar-item w-full text-left relative group">
+                <button onclick="showAdminVerificationModal('{{ route('Sales') }}')" class="sidebar-item relative group">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
@@ -477,9 +478,10 @@
                     </svg>
                 </summary>
                 <div class="dropdown-content space-y-1">
-                    <a href="{{ route('inventory')}}" class="dropdown-item">Inventory Manage</a>
+                    <a href="{{ route('inventory')}}" class="dropdown-item">Inventory
+                        Manage</a>
                     <a href="{{ route('inventory.list') }}" class="dropdown-item">Inventory List</a>
-                    <a href="" class="dropdown-item">Inventory Archive</a>
+                    <a href="{{ route('inventory.stock-out') }}" class="dropdown-item">Stock-Out</a>
                 </div>
             </details>
 
@@ -501,13 +503,14 @@
                         </svg>
                     </summary>
                     <div class="dropdown-content space-y-1">
-                        <a href="{{ route('suppliers') }}" class="dropdown-item">Supplier Manage</a>
+                        <a href="{{ route('suppliers') }}" class="dropdown-item">Supplier
+                            Manage</a>
                         <a href="{{ route('suppliers.list') }}" class="dropdown-item">Purchase Orders</a>
                     </div>
                 </details>
             @elseif(Auth::user() && Auth::user()->role === 'staff')
                 <button onclick="showAdminVerificationModal('{{ route('suppliers') }}')"
-                    class="dropdown-toggle w-full relative group">
+                    class="sidebar-item relative group">
                     <div class="flex items-center">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -534,7 +537,7 @@
                 </a>
             @elseif(Auth::user() && Auth::user()->role === 'staff')
                 <button onclick="showAdminVerificationModal('{{ route('audit.logs') }}')"
-                    class="sidebar-item w-full text-left relative group">
+                    class="sidebar-item relative group">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 2h6l4 4v6m-4 10H7a2 2 0 01-2-2V4a2 2 0 012-2h2m5 14a4 4 0 100-8 4 4 0 000 8zm5 5l-3.5-3.5">
@@ -558,7 +561,7 @@
                 </a>
             @elseif(Auth::user() && Auth::user()->role === 'staff')
                 <button onclick="showAdminVerificationModal('{{ route('staff.record') }}')"
-                    class="sidebar-item w-full text-left relative group">
+                    class="sidebar-item relative group">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M5.121 17.804A7 7 0 0112 14a7 7 0 016.879 3.804M12 12a5 5 0 100-10 5 5 0 000 10z" />
@@ -570,28 +573,14 @@
                 </button>
             @endif
 
-            <!-- Customer Manage - Admin Only -->
-            @if(Auth::user() && Auth::user()->role === 'admin')
-                <a href="{{ route('customer.records') }}" class="sidebar-item">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 2h6l4 4v14a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2h2zm3 8a3 3 0 110 6 3 3 0 010-6zm0 6c2.21 0 4 1.79 4 4H8c0-2.21 1.79-4 4-4z" />
-                    </svg>
-                    Customer Records
-                </a>
-            @elseif(Auth::user() && Auth::user()->role === 'staff')
-                <button onclick="showAdminVerificationModal('{{ route('customer.records') }}')"
-                    class="sidebar-item w-full text-left relative group">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 2h6l4 4v14a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2h2zm3 8a3 3 0 110 6 3 3 0 010-6zm0 6c2.21 0 4 1.79 4 4H8c0-2.21 1.79-4 4-4z" />
-                    </svg>
-                    Customer Records
-                    <span
-                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs bg-red-500 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Admin
-                        Only</span>
-                </button>
-            @endif
+
+            <a href="{{ route('customer.records') }}" class="sidebar-item">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 2h6l4 4v14a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2h2zm3 8a3 3 0 110 6 3 3 0 010-6zm0 6c2.21 0 4 1.79 4 4H8c0-2.21 1.79-4 4-4z" />
+                </svg>
+                Customer Records
+            </a>
 
             <!-- Logout -->
             <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="hidden">

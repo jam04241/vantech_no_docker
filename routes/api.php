@@ -49,7 +49,12 @@ Route::get('/test/database-check', function () {
         'purchase_details_count' => \App\Models\Purchase_Details::count(),
         'products_count' => \App\Models\Product::count(),
         'customers_count' => \App\Models\Customer::count(),
+        'product_stocks_count' => \App\Models\Product_Stocks::count(),
+        'product_stocks_data' => \App\Models\Product_Stocks::limit(5)->get(),
         'recent_customer_orders' => \App\Models\CustomerPurchaseOrder::latest()->limit(5)->get(),
-        'recent_purchase_details' => \App\Models\Purchase_Details::latest()->limit(5)->get()
+        'recent_purchase_details' => \App\Models\Purchase_Details::latest()->limit(5)->get(),
+        'total_sales_test' => \App\Models\Product_Stocks::select(
+            \Illuminate\Support\Facades\DB::raw('SUM(CAST(stock_quantity AS UNSIGNED) * price) as total_sales')
+        )->value('total_sales')
     ];
 });

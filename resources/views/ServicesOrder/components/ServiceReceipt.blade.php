@@ -34,7 +34,7 @@
             }
 
             .print-only {
-                display: block !important;
+                display: none !important;
             }
         }
 
@@ -174,29 +174,32 @@
                         <p class="font-semibold text-gray-800 mb-1 text-xs">DESCRIPTION OF WORK</p>
                         <p id="rcptDescription" class="text-gray-600 text-xs leading-normal">-</p>
                     </div>
+
+                    <!-- Full Width Section - Action Taken -->
+                    <div class="mt-2 pt-2 border-t border-gray-300">
+                        <p class="font-semibold text-gray-800 mb-1 text-xs">ACTION TAKEN</p>
+                        <p id="rcptActionTaken" class="text-gray-600 text-xs leading-normal">-</p>
+                    </div>
+
+                    <!-- Full Width Section - Part Replacement -->
+                    <div class="mt-2 pt-2 border-t border-gray-300">
+                        <p class="font-semibold text-gray-800 mb-1 text-xs">PART REPLACEMENT</p>
+                        <p id="rcptPartReplacement" class="text-gray-600 text-xs leading-normal whitespace-pre-line">-
+                        </p>
+                    </div>
+
+                    <!-- Full Width Section - Completion Date and Service Fee -->
+                    <div class="mt-2 pt-2 border-t border-gray-300 grid grid-cols-2 gap-2">
+                        <div>
+                            <p class="font-semibold text-gray-800 text-xs">COMPLETION DATE</p>
+                            <p id="rcptDateCompletion" class="text-gray-600 text-xs">-</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 text-xs">SERVICE FEE</p>
+                            <p id="rcptPrice" class="text-gray-600 text-xs">₱0.00</p>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Action Taken -->
-                <p class="text-xs text-gray-700 mb-2">
-                    <strong>Action Taken:</strong> <span id="rcptActionTaken" class="text-gray-600">-</span>
-                </p>
-
-                <!-- Part Replacement -->
-                <p class="text-xs text-gray-700 mb-0">
-                    <strong>Part Replacement:</strong>
-                </p>
-                <div id="rcptPartReplacementDiv" class="text-xs text-gray-600 mb-4 pl-4 whitespace-pre-line">
-                    <span id="rcptPartReplacement">-</span>
-                </div>
-
-                <!-- Service Terms -->
-                <p class="text-xs text-gray-700 mb-1">
-                    <strong>Completion Date:</strong> <span id="rcptDateCompletion" class="text-gray-600">-</span>
-                </p>
-
-                <p class="text-xs text-gray-700 mb-2">
-                    <strong>Service Fee:</strong> ₱<span id="rcptPrice" class="text-gray-600">0.00</span>
-                </p>
 
                 <!-- Closing -->
                 <p class="text-xs text-gray-700 mb-2">
@@ -273,7 +276,7 @@
             document.getElementById('rcptDescription').textContent = serviceData.description || '-';
             document.getElementById('rcptActionTaken').textContent = serviceData.actionTaken || '-';
             document.getElementById('rcptPartReplacement').textContent = serviceData.partReplacement || '-';
-            document.getElementById('rcptPrice').textContent = parseFloat(serviceData.totalPrice || 0).toFixed(2);
+            document.getElementById('rcptPrice').textContent = '₱' + parseFloat(serviceData.totalPrice || 0).toFixed(2);
         });
 
         /**
