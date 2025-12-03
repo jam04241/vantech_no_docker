@@ -6,10 +6,12 @@ use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Traits\LoadsCategoryData;
+use App\Traits\LogsAuditTrail;
 
 class CategoryController extends Controller
 {
     use LoadsCategoryData;
+    use LogsAuditTrail;
 
     public function index()
     {
@@ -20,7 +22,12 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request)
     {
         $validated = $request->validated();
-        Category::create($validated);
+        $category = Category::create($validated);
+
+        // Log the category creation
+        $description = "Added a new Category {$validated['category_name']}";
+        $this->logCreateAudit('CREATE', 'Inventory', $description, $validated, $request);
+
         return redirect()->route('product.add')->with('success', 'Category created successfully.');
     }
     public function posCategories()
@@ -55,7 +62,13 @@ class CategoryController extends Controller
     }
     public function update(CategoryRequest $request, Category $category)
     {
-        $category->update($request->validated());
+        $oldData = $category->toArray();
+        $validated = $request->validated();
+        $category->update($validated);
+
+        // Log the category update
+        $description = "Update {$oldData['category_name']} ->{$validated['category_name']}";
+        $this->logUpdateAudit('UPDATE', 'Inventory', $description, $oldData, $validated, $request);
 
         return redirect()->route('inventory')->with('success', 'Category updated successfully.');
     }

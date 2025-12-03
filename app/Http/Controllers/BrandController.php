@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Traits\LoadsBrandData;
 use App\Traits\LoadsProductData;
 use App\Traits\LoadsCategoryData;
+use App\Traits\LogsAuditTrail;
 use Illuminate\Http\Request;
 
 class BrandController extends Controller
@@ -15,6 +16,7 @@ class BrandController extends Controller
     use LoadsBrandData;
     use LoadsProductData;
     use LoadsCategoryData;
+    use LogsAuditTrail;
 
     public function index()
     {
@@ -81,7 +83,12 @@ class BrandController extends Controller
     public function store(BrandRequest $request)
     {
         $validated = $request->validated();
-        Brand::create($validated);
+        $brand = Brand::create($validated);
+
+        // Log the brand creation
+        $description = "Added a new Brand {$validated['brand_name']}";
+        $this->logCreateAudit('CREATE', 'Inventory', $description, $validated, $request);
+
         return redirect()->route('product.add')->with('success', 'Brand created successfully.');
     }
 
@@ -100,7 +107,13 @@ class BrandController extends Controller
 
     public function update(BrandRequest $request, Brand $brand)
     {
-        $brand->update($request->validated());
+        $oldData = $brand->toArray();
+        $validated = $request->validated();
+        $brand->update($validated);
+
+        // Log the brand update
+        $description = "Update {$oldData['brand_name']} ->{$validated['brand_name']}";
+        $this->logUpdateAudit('UPDATE', 'Inventory', $description, $oldData, $validated, $request);
 
         return redirect()->route('inventory')->with('success', 'Brand updated successfully.');
     }

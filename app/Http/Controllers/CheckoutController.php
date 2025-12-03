@@ -7,12 +7,14 @@ use App\Models\CustomerPurchaseOrder;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Product_Stocks;
+use App\Traits\LogsAuditTrail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
+    use LogsAuditTrail;
     public function store(Request $request)
     {
         Log::info('=== CHECKOUT PROCESS STARTED ===');
@@ -90,8 +92,15 @@ class CheckoutController extends Controller
             DB::commit();
             Log::info('=== CHECKOUT PROCESS COMPLETED SUCCESSFULLY ===');
 
-            // Store receipt data in session for receipt page
+            // Get customer for audit logging
             $customer = Customer::find($customerId);
+            $totalQuantity = collect($items)->sum('quantity');
+            $totalPrice = $amount;
+
+            // Log the POS sale to audit trail
+            $this->logSaleAudit('POS', $customer, $totalQuantity, $totalPrice, $request);
+
+            // Store receipt data in session for receipt page
             $receiptData = [
                 'customerName' => $customer->first_name . ' ' . $customer->last_name,
                 'customerId' => $customerId,

@@ -9,6 +9,7 @@ use App\Models\Product_Stocks;
 use App\Traits\LoadsBrandData;
 use App\Traits\LoadsProductData;
 use App\Traits\LoadsCategoryData;
+use App\Traits\LogsAuditTrail;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class ProductController extends Controller
     use LoadsBrandData;
     use LoadsProductData;
     use LoadsCategoryData;
+    use LogsAuditTrail;
 
     public function create()
     {
@@ -61,6 +63,15 @@ class ProductController extends Controller
                     'price' => $price,
                 ]);
             }
+
+            // Get brand name for description
+            $brand = $product->brand;
+            $brandName = $brand ? $brand->brand_name : 'Unknown';
+
+            // Log the product creation
+            $description = "Added new product: {$brandName} {$data['product_name']} (SKU: {$data['serial_number']})";
+            $logData = array_merge($data, ['price' => $price]);
+            $this->logCreateAudit('CREATE', 'Inventory', $description, $logData, $request);
 
             DB::commit();
 
@@ -366,6 +377,7 @@ class ProductController extends Controller
         try {
             $product = Product::with('stock')->findOrFail($id);
             $newPrice = $request->price;
+            $oldPrice = $product->stock?->price ?? 0;
 
             DB::transaction(function () use ($product, $newPrice, $id) {
                 if ($product->product_condition === 'Brand New') {
@@ -407,6 +419,10 @@ class ProductController extends Controller
                 }
             });
 
+            // Log the price update
+            $description = "Update Price for {$product->product_name}: {$oldPrice} -> {$newPrice}";
+            $this->logUpdateAudit('Update', 'Inventory', $description, ['price' => $oldPrice], ['price' => $newPrice], $request);
+
             return redirect()->route('inventory.list')
                 ->with('success');
         } catch (\Exception $e) {
@@ -418,6 +434,8 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         $data = $request->validated();
+        $oldProduct = $product->toArray();
+        $oldStock = $product->stock ? $product->stock->toArray() : null;
 
         DB::transaction(function () use ($product, $data) {
             $productData = collect($data)->except(['price', 'product_condition'])->toArray();
@@ -435,6 +453,29 @@ class ProductController extends Controller
             $stock->stock_quantity = $stock->stock_quantity ?? 1;
             $stock->save();
         });
+
+        // Determine what was updated and log accordingly
+        $oldData = $oldProduct;
+        $newData = $product->fresh()->toArray();
+
+        // Check which field was actually updated (price or serial_number or other details)
+        if (isset($data['price']) && $oldStock && $oldStock['price'] != $data['price']) {
+            $condition = 'Price';
+            $lastValue = $oldStock['price'];
+            $updatedValue = $data['price'];
+        } elseif (isset($data['serial_number']) && $oldData['serial_number'] != $data['serial_number']) {
+            $condition = 'Serial No.';
+            $lastValue = $oldData['serial_number'];
+            $updatedValue = $data['serial_number'];
+        } else {
+            // For other fields, just label as 'Detail'
+            $condition = 'Detail';
+            $lastValue = json_encode($oldData);
+            $updatedValue = json_encode($newData);
+        }
+
+        $description = "Update {$condition} for {$product->product_name}: {$lastValue} -> {$updatedValue}";
+        $this->logUpdateAudit('Update', 'Inventory', $description, $oldData, $newData, $request);
 
         return redirect()->route('inventory')->with('success', 'Product updated successfully.');
     }
