@@ -49,7 +49,12 @@
                         <option value="">All Actions</option>
                         <option value="CREATE" @selected(($action ?? '') === 'CREATE')>Create</option>
                         <option value="UPDATE" @selected(($action ?? '') === 'UPDATE')>Update</option>
-                        <option value="DELETE" @selected(($action ?? '') === 'DELETE')>Delete</option>
+                        <option value="PURCHASE" @selected(($action ?? '') === 'PURCHASE')>Purchase
+                        </option>
+                        <option value="COMPLETED SERVICE" @selected(($action ?? '') === 'COMPLETED SERVICE')>Completed Service
+                        </option>
+                        <option value="ACKNOWLEDGE" @selected(($action ?? '') === 'ACKNOWLEDGE')>Acknowledge
+                        </option>
                         <option value="LOGIN" @selected(($action ?? '') === 'LOGIN')>Login</option>
                         <option value="LOGOUT" @selected(($action ?? '') === 'LOGOUT')>Logout</option>
                         <option value="VIEW" @selected(($action ?? '') === 'VIEW')>View</option>

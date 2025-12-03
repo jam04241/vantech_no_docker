@@ -40,10 +40,11 @@ class SalesController extends Controller
             $endDate = Carbon::parse($endDate)->endOfDay();
 
             $data = [
-                'total_sales' => $this->getTotalSales($startDate, $endDate),
+                'total_good_cost' => $this->getTotalSales($startDate, $endDate),
                 'total_orders' => $this->getTotalOrders($startDate, $endDate),
-                'avg_order_value' => 0, // Will calculate after getting revenue
+                'avg_order_value' => $this->getAverageOrderValue($startDate, $endDate),
                 'revenue' => $this->getRevenue($startDate, $endDate),
+                'profit' => $this->getProfit($startDate, $endDate),
                 'sales_trend' => $this->getSalesTrend($startDate, $endDate),
                 'top_products' => $this->getTopProducts($startDate, $endDate),
                 'recent_transactions' => $this->getRecentTransactions($startDate, $endDate),
@@ -52,11 +53,6 @@ class SalesController extends Controller
                     'end' => $endDate->format('Y-m-d')
                 ]
             ];
-
-            // Calculate average order value
-            $data['avg_order_value'] = $data['total_orders'] > 0
-                ? round($data['revenue'] / $data['total_orders'], 2)
-                : 0;
 
             return response()->json([
                 'success' => true,
@@ -71,24 +67,22 @@ class SalesController extends Controller
     }
 
     /**
-     * Calculate Total Sales (Quantity Sold x Sales Price for different products)
-     * Formula: Total Sales = Sum(stock_quantity x price) for each product in inventory
-     * Note: This is the total value of all products in stock, not filtered by date
+     * Calculate Total Good Cost (Sum of total_price from purchase_details where status = 'Received')
+     * Formula: Total Good Cost = Sum of all purchase detail totals with status = 'Received'
      */
     private function getTotalSales($startDate = null, $endDate = null)
     {
-        // Get total sales from product_stocks (quantity x price)
-        // Cast stock_quantity to INTEGER (SQL Server compatible)
-        $totalSales = Product_Stocks::select(
-            DB::raw('SUM(CAST(stock_quantity AS INT) * price) as total_sales')
-        )
-            ->value('total_sales');
+        // Get total good cost from purchase_details (only 'Received' status)
+        $totalGoodCost = Purchase_Details::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Received')
+            ->sum('total_price');
 
-        return round($totalSales ?? 0, 2);
+        return round($totalGoodCost ?? 0, 2);
     }
 
     /**
      * Get Total Orders (from purchase_details with status = 'Received')
+     * Also used for Average Order Value calculation
      */
     private function getTotalOrders($startDate, $endDate)
     {
@@ -100,6 +94,43 @@ class SalesController extends Controller
     }
 
     /**
+     * Calculate Average Order Value (Total Good Cost of 'Received' items / Count of 'Received' items)
+     */
+    private function getAverageOrderValue($startDate, $endDate)
+    {
+        $totalReceivedCost = Purchase_Details::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Received')
+            ->sum('total_price');
+
+        $totalReceivedOrders = Purchase_Details::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Received')
+            ->count();
+
+        return $totalReceivedOrders > 0
+            ? round($totalReceivedCost / $totalReceivedOrders, 2)
+            : 0;
+    }
+
+    /**
+     * Calculate Profit (Revenue - Total Good Cost)
+     * Formula: Profit = SUM(customer_purchase_orders.total_price) - SUM(purchase_details.total_price where status='Received')
+     */
+    private function getProfit($startDate, $endDate)
+    {
+        // Get total revenue from customer purchase orders
+        $totalRevenue = CustomerPurchaseOrder::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Success')
+            ->sum('total_price');
+
+        // Get total good cost from purchase details (only Received)
+        $totalGoodCost = Purchase_Details::whereBetween('order_date', [$startDate, $endDate])
+            ->where('status', 'Received')
+            ->sum('total_price');
+
+        return round($totalRevenue - $totalGoodCost, 2);
+    }
+
+    /**
      * Calculate Revenue (Units Sold x Selling Price from customer_purchase_orders)
      */
     private function getRevenue($startDate, $endDate)
@@ -107,7 +138,7 @@ class SalesController extends Controller
         // Revenue from actual customer sales
         $revenue = CustomerPurchaseOrder::whereBetween('order_date', [$startDate, $endDate])
             ->where('status', 'Success')
-            ->sum(DB::raw('quantity * unit_price'));
+            ->sum('total_price');
 
         return round($revenue, 2);
     }
@@ -214,15 +245,14 @@ class SalesController extends Controller
             $endDate = Carbon::parse($request->get('end_date', Carbon::now()->endOfMonth()));
 
             $summary = [
-                'total_sales' => $this->getTotalSales($startDate, $endDate),
+                'total_good_cost' => $this->getTotalSales($startDate, $endDate),
                 'total_orders' => $this->getTotalOrders($startDate, $endDate),
                 'revenue' => $this->getRevenue($startDate, $endDate),
+                'profit' => $this->getProfit($startDate, $endDate),
                 'period' => $startDate->format('M d') . ' - ' . $endDate->format('M d, Y')
             ];
 
-            $summary['avg_order_value'] = $summary['total_orders'] > 0
-                ? round($summary['revenue'] / $summary['total_orders'], 2)
-                : 0;
+            $summary['avg_order_value'] = $this->getAverageOrderValue($startDate, $endDate);
 
             return response()->json([
                 'success' => true,
@@ -245,9 +275,10 @@ class SalesController extends Controller
             $today = Carbon::today();
 
             $realTimeData = [
-                'today_sales' => $this->getTotalSales($today, $today),
+                'today_good_cost' => $this->getTotalSales($today, $today),
                 'today_orders' => $this->getTotalOrders($today, $today),
                 'today_revenue' => $this->getRevenue($today, $today),
+                'today_profit' => $this->getProfit($today, $today),
                 'last_updated' => Carbon::now()->format('Y-m-d H:i:s')
             ];
 

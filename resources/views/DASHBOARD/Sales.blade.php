@@ -44,13 +44,13 @@
         </div>
 
         <!-- Key Metrics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-gray-600 text-sm font-medium">Total Sales</p>
-                        <p class="text-3xl font-bold text-gray-800 mt-2" id="totalSales">₱0.00</p>
-                        <p class="text-green-600 text-xs mt-2" id="totalSalesChange">—</p>
+                        <p class="text-gray-600 text-sm font-medium">Total Good Cost</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" id="totalGoodCost">₱0.00</p>
+                        <p class="text-green-600 text-xs mt-2">Cost for purchase order from Supplier</p>
                     </div>
                     <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -65,7 +65,7 @@
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Total Orders</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="totalOrders">0</p>
-                        <p class="text-green-600 text-xs mt-2" id="totalOrdersChange">—</p>
+                        <p class="text-green-600 text-xs mt-2">Received Total Orders from Supplier</p>
                     </div>
                     <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -79,7 +79,7 @@
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Avg Order Value</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="avgOrderValue">₱0.00</p>
-                        <p class="text-green-600 text-xs mt-2" id="avgOrderValueChange">—</p>
+                        <p class="text-green-600 text-xs mt-2">Order value average from Supplier</p>
                     </div>
                     <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -93,11 +93,26 @@
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Revenue</p>
                         <p class="text-3xl font-bold text-gray-800 mt-2" id="revenue">₱0.00</p>
-                        <p class="text-green-600 text-xs mt-2" id="revenueChange">—</p>
+                        <p class="text-green-600 text-xs mt-2">Revenue from your retail products</p>
                     </div>
                     <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Profit</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" id="profit">₱0.00</p>
+                        <p class="text-green-600 text-xs mt-2">Total profit (Revenue - Good Cost)</p>
+                    </div>
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
                         </path>
                     </svg>
                 </div>
@@ -475,10 +490,11 @@
 
                 // Show fallback empty state
                 updateDashboard({
-                    total_sales: 0,
+                    total_good_cost: 0,
                     total_orders: 0,
                     avg_order_value: 0,
                     revenue: 0,
+                    profit: 0,
                     sales_trend: [],
                     top_products: [],
                     recent_transactions: []
@@ -515,10 +531,11 @@
         }
 
         function updateMetrics(data) {
-            document.getElementById('totalSales').textContent = formatCurrency(data.total_sales || 0);
+            document.getElementById('totalGoodCost').textContent = formatCurrency(data.total_good_cost || 0);
             document.getElementById('totalOrders').textContent = (data.total_orders || 0).toLocaleString();
             document.getElementById('avgOrderValue').textContent = formatCurrency(data.avg_order_value || 0);
             document.getElementById('revenue').textContent = formatCurrency(data.revenue || 0);
+            document.getElementById('profit').textContent = formatCurrency(data.profit || 0);
         }
 
         function updateSalesTrendChart(salesTrend) {
@@ -631,18 +648,18 @@
                 const productName = itemMatch ? itemMatch[2] : transaction.items;
 
                 row.innerHTML = `
-                        <td class="px-4 py-3">#${transaction.id}</td>
-                        <td class="px-4 py-3">${transaction.customer_name}</td>
-                        <td class="px-4 py-3 font-semibold">${formatCurrency(transaction.amount)}</td>
-                        <td class="px-4 py-3" title="${productName}">${productName.length > 20 ? productName.substring(0, 20) + '...' : productName}</td>
-                        <td class="px-4 py-3 text-center font-medium">${quantity}</td>
-                        <td class="px-4 py-3">${transaction.date}</td>
-                        <td class="px-4 py-3">
-                            <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(transaction.status)}">
-                                ${transaction.status}
-                            </span>
-                        </td>
-                    `;
+                                                        <td class="px-4 py-3">#${transaction.id}</td>
+                                                        <td class="px-4 py-3">${transaction.customer_name}</td>
+                                                        <td class="px-4 py-3 font-semibold">${formatCurrency(transaction.amount)}</td>
+                                                        <td class="px-4 py-3" title="${productName}">${productName.length > 20 ? productName.substring(0, 20) + '...' : productName}</td>
+                                                        <td class="px-4 py-3 text-center font-medium">${quantity}</td>
+                                                        <td class="px-4 py-3">${transaction.date}</td>
+                                                        <td class="px-4 py-3">
+                                                            <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(transaction.status)}">
+                                                                ${transaction.status}
+                                                            </span>
+                                                        </td>
+                                                    `;
                 tbody.appendChild(row);
             });
 

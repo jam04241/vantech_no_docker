@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ServiceType;
 use App\Http\Requests\ServiceTypeRequest;
+use App\Traits\LogsAuditTrail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class ServiceTypeController extends Controller
 {
+    use LogsAuditTrail;
     /**
      * Display a listing of the resource.
      *
@@ -44,6 +46,9 @@ class ServiceTypeController extends Controller
                 'name' => $request->validated()['name'],
                 'price' => $request->validated()['price'],
             ]);
+
+            // Log the audit trail
+            $this->logAddServiceTypeAudit($serviceType->name, $serviceType->price, $request);
 
             Log::info('ServiceType created successfully', ['id' => $serviceType->id, 'name' => $serviceType->name]);
 
@@ -95,10 +100,23 @@ class ServiceTypeController extends Controller
         try {
             Log::info('ServiceType update request received', ['id' => $serviceType->id, 'data' => $request->all()]);
 
+            $oldName = $serviceType->name;
+            $oldFee = $serviceType->price;
+            $newName = $request->validated()['name'];
+            $newFee = $request->validated()['price'];
+
             $serviceType->update([
-                'name' => $request->validated()['name'],
-                'price' => $request->validated()['price'],
+                'name' => $newName,
+                'price' => $newFee,
             ]);
+
+            // Log audit trail for each change
+            if ($oldName !== $newName) {
+                $this->logUpdateServiceNameAudit($oldName, $newName, $request);
+            }
+            if ($oldFee != $newFee) {
+                $this->logUpdateServiceFeeAudit($newName, $oldFee, $newFee, $request);
+            }
 
             Log::info('ServiceType updated successfully', ['id' => $serviceType->id, 'name' => $serviceType->name]);
 

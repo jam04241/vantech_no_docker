@@ -1291,12 +1291,23 @@
             const serviceType = document.getElementById('serviceType').value;
             const type = document.getElementById('type').value.trim();
             const description = document.getElementById('description').value.trim();
+            const serviceId = document.getElementById('serviceIdInput').value;
 
             if (!customerName || !serviceType || !type || !description) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Information',
                     text: 'Please fill in all required fields before viewing acknowledgement',
+                    confirmButtonColor: '#151F28'
+                });
+                return;
+            }
+
+            if (!serviceId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Service Not Saved',
+                    text: 'Please save the service first before issuing acknowledgement receipt',
                     confirmButtonColor: '#151F28'
                 });
                 return;
@@ -1319,7 +1330,36 @@
             };
 
             sessionStorage.setItem('serviceData', JSON.stringify(serviceData));
-            window.location.href = '/acknowledgement-receipt';
+
+            // Call audit logging endpoint
+            fetch(`/services/${serviceId}/log-acknowledgment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to log acknowledgment');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Acknowledgment logged:', data);
+                    window.location.href = '/acknowledgement-receipt';
+                })
+                .catch(error => {
+                    console.error('❌ Error logging acknowledgment:', error);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Logging Warning',
+                        text: 'Acknowledgment receipt will be issued but logging may have failed',
+                        confirmButtonColor: '#151F28'
+                    }).then(() => {
+                        window.location.href = '/acknowledgement-receipt';
+                    });
+                });
         }
 
         async function handleServiceReceipt(e) {
@@ -1329,6 +1369,7 @@
             const serviceType = document.getElementById('serviceType').value;
             const type = document.getElementById('type').value.trim();
             const description = document.getElementById('description').value.trim();
+            const serviceId = document.getElementById('serviceIdInput').value;
 
             if (!customerName || !serviceType || !type || !description) {
                 Swal.fire({
@@ -1340,9 +1381,18 @@
                 return;
             }
 
+            if (!serviceId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Service Not Saved',
+                    text: 'Please save the service first before issuing service receipt',
+                    confirmButtonColor: '#151F28'
+                });
+                return;
+            }
+
             try {
                 // First, update service status to Completed
-                const serviceId = document.getElementById('serviceIdInput').value;
                 if (serviceId) {
                     const serviceUpdateData = {
                         customer_id: parseInt(document.getElementById('customerId').value),
@@ -1422,7 +1472,36 @@
             };
 
             sessionStorage.setItem('serviceData', JSON.stringify(receiptData));
-            window.location.href = '/service-receipt';
+
+            // Call audit logging endpoint
+            fetch(`/services/${serviceId}/log-receipt`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to log service receipt');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Service receipt logged:', data);
+                    window.location.href = '/service-receipt';
+                })
+                .catch(error => {
+                    console.error('❌ Error logging service receipt:', error);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Logging Warning',
+                        text: 'Service receipt will be issued but logging may have failed',
+                        confirmButtonColor: '#151F28'
+                    }).then(() => {
+                        window.location.href = '/service-receipt';
+                    });
+                });
         }
 
         async function handleArchiveService(e) {

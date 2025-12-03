@@ -156,16 +156,24 @@ class CheckoutController extends Controller
             }
         }
 
-        // Get authenticated user's full name
+        // Get authenticated user's full name and role
         $authenticatedUser = auth()->user();
         $preparedBy = 'N/A';
+        $preparedByRole = 'N/A';
         if ($authenticatedUser) {
             $preparedBy = trim($authenticatedUser->first_name . ' ' .
                 ($authenticatedUser->middle_name ? $authenticatedUser->middle_name . ' ' : '') .
                 $authenticatedUser->last_name);
+
+            // Translate role based on conditions
+            if ($authenticatedUser->role === 'admin') {
+                $preparedByRole = $authenticatedUser->id === 1 ? 'Owner' : 'Co Owner';
+            } else {
+                $preparedByRole = ucfirst($authenticatedUser->role ?? 'N/A');
+            }
         }
 
-        return view('POS_SYSTEM.PurchaseReceipt', compact('receiptData', 'customerContact', 'preparedBy'));
+        return view('POS_SYSTEM.PurchaseReceipt', compact('receiptData', 'customerContact', 'preparedBy', 'preparedByRole'));
     }
 
     /**

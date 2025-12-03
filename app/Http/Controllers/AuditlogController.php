@@ -34,24 +34,29 @@ class AuditlogController extends Controller
         // Apply search filter - search across multiple fields
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
+                // Search in user's first name or last name (checks individual fields)
                 $q->whereHas('user', function ($userQuery) use ($search) {
                     $userQuery->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
                 })
+                    // Also search in other audit log fields
                     ->orWhere('action', 'like', "%{$search}%")
                     ->orWhere('module', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
-        }
 
-        // Apply module filter
-        if (!empty($module)) {
-            $query->where('module', $module);
-        }
+            // When doing a search, ignore the module and action filters
+            // This allows searching across all modules and actions for a specific user
+        } else {
+            // Only apply module and action filters when NOT searching
+            if (!empty($module)) {
+                $query->where('module', $module);
+            }
 
-        // Apply action filter
-        if (!empty($action)) {
-            $query->where('action', $action);
+            if (!empty($action)) {
+                $query->where('action', $action);
+            }
         }
 
         // Apply sorting

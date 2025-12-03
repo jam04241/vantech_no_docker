@@ -105,24 +105,40 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/acknowledgement-receipt', function () {
             $authenticatedUser = auth()->user();
             $preparedBy = 'N/A';
+            $preparedByRole = 'N/A';
             if ($authenticatedUser) {
                 $preparedBy = trim($authenticatedUser->first_name . ' ' .
                     ($authenticatedUser->middle_name ? $authenticatedUser->middle_name . ' ' : '') .
                     $authenticatedUser->last_name);
+
+                // Translate role based on conditions
+                if ($authenticatedUser->role === 'admin') {
+                    $preparedByRole = $authenticatedUser->id === 1 ? 'Owner' : 'Co Owner';
+                } else {
+                    $preparedByRole = ucfirst($authenticatedUser->role ?? 'N/A');
+                }
             }
-            return view('ServicesOrder.components.AcknowledgementReceipt', compact('preparedBy'));
+            return view('ServicesOrder.components.AcknowledgementReceipt', compact('preparedBy', 'preparedByRole'));
         })->name('acknowledgement.receipt');
 
         // Service Receipt Route (view only)
         Route::get('/service-receipt', function () {
             $authenticatedUser = auth()->user();
             $preparedBy = 'N/A';
+            $preparedByRole = 'N/A';
             if ($authenticatedUser) {
                 $preparedBy = trim($authenticatedUser->first_name . ' ' .
                     ($authenticatedUser->middle_name ? $authenticatedUser->middle_name . ' ' : '') .
                     $authenticatedUser->last_name);
+
+                // Translate role based on conditions
+                if ($authenticatedUser->role === 'admin') {
+                    $preparedByRole = $authenticatedUser->id === 1 ? 'Owner' : 'Co Owner';
+                } else {
+                    $preparedByRole = ucfirst($authenticatedUser->role ?? 'N/A');
+                }
             }
-            return view('ServicesOrder.components.ServiceReceipt', compact('preparedBy'));
+            return view('ServicesOrder.components.ServiceReceipt', compact('preparedBy', 'preparedByRole'));
         })->name('service.receipt');
 
         // Issue Receipt for Quotation and Purchase
@@ -132,6 +148,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Services/Job Order Routes
         Route::resource('services', ServicesController::class);
+        // Service audit logging routes
+        Route::post('/services/{service}/log-acknowledgment', [ServicesController::class, 'logAcknowledgmentReceipt'])->name('services.log-acknowledgment');
+        Route::post('/services/{service}/log-receipt', [ServicesController::class, 'logServiceReceipt'])->name('services.log-receipt');
     });
 
     // Purchase Orders List

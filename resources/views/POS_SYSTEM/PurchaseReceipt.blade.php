@@ -217,6 +217,8 @@ $receiptSubtotal = 0;
                 <div class="justify-end text-right">
                     <p class="text-sm mb-8">Prepared by:</p>
                     <p class="text-sm font-semibold">{{ strtoupper($preparedBy ?? 'N/A') }}</p>
+                    <div class="w-30 border-t border-gray-400"></div>
+                    <p class="text-sm text-gray-600 mt-0.5">{{ $preparedByRole ?? 'N/A' }}</p>
                 </div>
             </div>
 

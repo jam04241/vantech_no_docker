@@ -421,7 +421,7 @@ class ProductController extends Controller
 
             // Log the price update
             $description = "Update Price for {$product->product_name}: {$oldPrice} -> {$newPrice}";
-            $this->logUpdateAudit('Update', 'Inventory', $description, ['price' => $oldPrice], ['price' => $newPrice], $request);
+            $this->logUpdateAudit('UPDATE', 'Inventory', $description, ['price' => $oldPrice], ['price' => $newPrice], $request);
 
             return redirect()->route('inventory.list')
                 ->with('success');

@@ -39,13 +39,16 @@
                         <!-- Action Column -->
                         <td class="px-4 py-3">
                             <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                    @if($log->action === 'CREATE') bg-green-100 text-green-800
-                                    @elseif($log->action === 'UPDATE') bg-yellow-100 text-yellow-800
-                                    @elseif($log->action === 'DELETE') bg-red-100 text-red-800
-                                    @elseif($log->action === 'LOGIN') bg-green-100 text-green-800
-                                    @elseif($log->action === 'LOGOUT') bg-orange-100 text-orange-800
-                                    @else bg-gray-100 text-gray-800
-                                    @endif">
+                                        @if($log->action === 'CREATE') bg-green-100 text-green-800
+                                        @elseif($log->action === 'UPDATE') bg-yellow-100 text-yellow-800
+                                        @elseif($log->action === 'DELETE') bg-red-100 text-red-800
+                                        @elseif($log->action === 'LOGIN') bg-green-100 text-green-800
+                                        @elseif($log->action === 'LOGOUT') bg-orange-100 text-orange-800
+                                        @elseif($log->action === 'PURCHASE') bg-purple-100 text-purple-800
+                                        @elseif($log->action === 'ACKNOWLEDGE') bg-purple-100 text-purple-800
+                                        @elseif($log->action === 'COMPLETED SERVICE') bg-purple-100 text-purple-800
+                                        @else bg-gray-100 text-gray-800
+                                        @endif">
                                 {{ $log->action }}
                             </span>
                         </td>

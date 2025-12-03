@@ -6,12 +6,13 @@ use App\Models\Service;
 use App\Models\ServiceType;
 use App\Http\Requests\ServiceRequest;
 use App\Traits\LoadsBrandData;
+use App\Traits\LogsAuditTrail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class ServicesController extends Controller
 {
-    use LoadsBrandData;
+    use LoadsBrandData, LogsAuditTrail;
     /**
      * Display a listing of all services.
      */
@@ -35,8 +36,15 @@ class ServicesController extends Controller
     {
         $service = Service::create($request->validated());
 
-        // Load relationships but exclude replacements to avoid table-not-found errors
+        // Load relationships
         $service->load(['customer', 'serviceType']);
+
+        // Log the audit trail for adding service
+        $customerName = $service->customer ? $service->customer->first_name . ' ' . $service->customer->last_name : 'Unknown';
+        $serviceName = $service->serviceType ? $service->serviceType->name : 'Unknown';
+        $fee = $service->serviceType ? $service->serviceType->price : 0;
+
+        $this->logAddServiceListAudit($customerName, $serviceName, $fee, $request);
 
         return response()->json([
             'success' => true,
@@ -123,6 +131,43 @@ class ServicesController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Service deleted successfully.'
+        ]);
+    }
+
+    /**
+     * Log Acknowledgment Receipt issuance
+     */
+    public function logAcknowledgmentReceipt(Request $request, Service $service)
+    {
+        $service->load(['customer', 'serviceType']);
+
+        $customerName = $service->customer ? $service->customer->first_name . ' ' . $service->customer->last_name : 'Unknown';
+        $serviceName = $service->serviceType ? $service->serviceType->name : 'Unknown';
+
+        $this->logAcknowledgmentReceiptAudit($customerName, $serviceName, $request);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Acknowledgment receipt logged successfully.'
+        ]);
+    }
+
+    /**
+     * Log Service Receipt issuance
+     */
+    public function logServiceReceipt(Request $request, Service $service)
+    {
+        $service->load(['customer', 'serviceType']);
+
+        $customerName = $service->customer ? $service->customer->first_name . ' ' . $service->customer->last_name : 'Unknown';
+        $serviceName = $service->serviceType ? $service->serviceType->name : 'Unknown';
+        $totalAmount = $service->total_price ?? 0;
+
+        $this->logServiceReceiptAudit($customerName, $serviceName, $totalAmount, $request);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service receipt logged successfully.'
         ]);
     }
 

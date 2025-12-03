@@ -213,12 +213,14 @@
             <div class="flex justify-between mt-6 pt-3 border-t border-gray-300">
                 <div>
                     <p class="text-sm mb-8">Received by:</p>
-                    <div class="w-24 border-t border-gray-400"></div>
-                    <p class="text-sm text-gray-600 mt-0.5">Customer Signature</p>
+                    <div class="w-30 border-t border-gray-400 mt-12"></div>
+                    <p class="text-sm text-gray-600 mt-0.5">Printed Name Signature</p>
                 </div>
                 <div class="text-right">
                     <p class="text-sm mb-8">Prepared by:</p>
                     <p class="text-sm font-semibold">{{ strtoupper($preparedBy ?? 'N/A') }}</p>
+                    <div class="w-30 border-t border-gray-400"></div>
+                    <p class="text-sm text-gray-600 mt-0.5">{{ $preparedByRole ?? 'N/A' }}</p>
                 </div>
             </div>
 

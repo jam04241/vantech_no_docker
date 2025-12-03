@@ -109,6 +109,93 @@ trait LogsAuditTrail
         ];
 
         // Log with 'Sold' action for POS module
-        $this->logAudit('CREATE', $module, $description, $changes, $request);
+        $this->logAudit('PURCHASE', $module, $description, $changes, $request);
+    }
+
+    /**
+     * Log Add Service Type action
+     * Format: "Added new service: {service_name} (Fee: ₱{fee})"
+     */
+    protected function logAddServiceTypeAudit($serviceName, $fee, $request = null)
+    {
+        $description = "Added new service: {$serviceName} (Fee: ₱" . number_format($fee, 2) . ")";
+        $changes = [
+            'service_name' => $serviceName,
+            'fee' => $fee
+        ];
+        $this->logAudit('CREATE', 'Services', $description, $changes, $request);
+    }
+
+    /**
+     * Log Add Service List action (Customer avails service)
+     * Format: "Created service for {customer_name} - {service_name} (Fee: ₱{fee})"
+     */
+    protected function logAddServiceListAudit($customerName, $serviceName, $fee, $request = null)
+    {
+        $description = "Created service for {$customerName} - {$serviceName} (Fee: ₱" . number_format($fee, 2) . ")";
+        $changes = [
+            'customer_name' => $customerName,
+            'service_name' => $serviceName,
+            'fee' => $fee
+        ];
+        $this->logAudit('CREATE', 'Services', $description, $changes, $request);
+    }
+
+    /**
+     * Log Update Service Name action
+     * Format: "Updated service name: {old_name} -> {new_name}"
+     */
+    protected function logUpdateServiceNameAudit($oldName, $newName, $request = null)
+    {
+        $description = "Updated service name: {$oldName} -> {$newName}";
+        $changes = [
+            'old_name' => $oldName,
+            'new_name' => $newName
+        ];
+        $this->logAudit('UPDATE', 'Services', $description, $changes, $request);
+    }
+
+    /**
+     * Log Update Service Fee action
+     * Format: "Updated {service_name} fee: ₱{old_fee} -> ₱{new_fee}"
+     */
+    protected function logUpdateServiceFeeAudit($serviceName, $oldFee, $newFee, $request = null)
+    {
+        $description = "Updated {$serviceName} fee: ₱" . number_format($oldFee, 2) . " -> ₱" . number_format($newFee, 2);
+        $changes = [
+            'service_name' => $serviceName,
+            'old_fee' => $oldFee,
+            'new_fee' => $newFee
+        ];
+        $this->logAudit('UPDATE', 'Services', $description, $changes, $request);
+    }
+
+    /**
+     * Log Issue Acknowledgment Receipt action
+     * Format: "Issued acknowledgment receipt for {customer_name} - {service_name}"
+     */
+    protected function logAcknowledgmentReceiptAudit($customerName, $serviceName, $request = null)
+    {
+        $description = "Issued acknowledgment receipt for {$customerName} - {$serviceName}";
+        $changes = [
+            'customer_name' => $customerName,
+            'service_name' => $serviceName
+        ];
+        $this->logAudit('ACKNOWLEDGE', 'Services', $description, $changes, $request);
+    }
+
+    /**
+     * Log Issue Service Receipt (Final) action
+     * Format: "Issued service receipt for {customer_name} - {service_name} (Total Service Fee: ₱{total_amount})"
+     */
+    protected function logServiceReceiptAudit($customerName, $serviceName, $totalAmount, $request = null)
+    {
+        $description = "Issued service receipt for {$customerName} - {$serviceName} (Total Service Fee: ₱" . number_format($totalAmount, 2) . ")";
+        $changes = [
+            'customer_name' => $customerName,
+            'service_name' => $serviceName,
+            'total_amount' => $totalAmount
+        ];
+        $this->logAudit('COMPLETED SERVICE', 'Services', $description, $changes, $request);
     }
 }
