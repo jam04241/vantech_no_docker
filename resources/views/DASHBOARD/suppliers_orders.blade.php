@@ -240,7 +240,7 @@
                                     @if($order->status == 'Pending')
                                         <button class="confirm-order-btn border bg-green-600 text-white px-3 py-1 rounded"
                                             onclick="confirmOrder({{ $order->id }})">
-                                            Confirm
+                                            Receive
                                         </button>
                                         <button class="cancel-order-btn border bg-red-600 text-white px-3 py-1 rounded"
                                             onclick="cancelOrder({{ $order->id }})">
@@ -255,7 +255,7 @@
                                         </button>
                                     @elseif($order->status == 'Cancelled')
                                         <button class="border bg-gray-400 text-white px-3 py-1 rounded cursor-not-allowed" disabled>
-                                            Confirm
+                                            Receive
                                         </button>
                                         <button class="border bg-gray-400 text-white px-3 py-1 rounded cursor-not-allowed" disabled>
                                             Cancelled
