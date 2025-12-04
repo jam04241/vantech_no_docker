@@ -4,69 +4,118 @@
 @section('name', 'Customer Management')
 
 @section('content')
-    <div class="space-y-8 bg-gray-50 min-h-screen p-6">
-
-        <!-- Search, Filters, and Add Button -->
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 w-full">
-
-                <!-- Search + Filters -->
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                    <!-- Search Bar -->
-                    <div class="relative w-60">
-                        <input type="search" placeholder="Search..."
-                            class="w-full px-3 py-2 pl-9 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Add Button -->
-                <button onclick="openModal()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-1 whitespace-nowrap">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    <div class="bg-white border rounded-lg p-6 shadow-sm">
+        {{-- Header Section --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            {{-- Search Bar --}}
+            <div class="relative w-full sm:flex-1 sm:max-w-md">
+                <input type="text" id="searchInput" placeholder="Search customers by name, contact, or address..."
+                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 shadow-sm"
+                    aria-label="Search customers">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Add Customer
-                </button>
+                </div>
+                <a href="#" id="clearSearch"
+                    class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition">
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                    </svg>
+                </a>
+            </div>
 
+            <button id="openCustomerModal"
+                class="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 shadow-lg font-medium hover:shadow-xl transform hover:-translate-y-0.5"
+                aria-label="Add a new customer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add New Customer
+            </button>
+        </div>
+
+        <div class="border-t border-gray-200 my-6"></div>
+
+        {{-- Page Title --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Customer Management</h2>
+                <p class="text-gray-600 mt-1">Manage your customers and their information</p>
             </div>
         </div>
 
-        <!-- Customer Table -->
-        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Customer List</h2>
+        {{-- Statistics Cards --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div
+                class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Customers</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalCustomersCount">0</p>
+                    </div>
+                </div>
             </div>
 
+            <div
+                class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Male</p>
+                        <p class="text-2xl font-bold text-gray-900" id="maleCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-5 border border-pink-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-pink-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Female</p>
+                        <p class="text-2xl font-bold text-gray-900" id="femaleCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Customers Table --}}
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-100 text-gray-700 text-base">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">First
-                                Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Last
-                                Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                Contact</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                Gender</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                Street</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                Barangay</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                City/Province</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                Actions</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">First Name</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">Last Name</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">Contact</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">Gender</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">Street</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">Barangay</th>
+                            <th class="px-6 py-4 font-semibold text-gray-700">City/Province</th>
+                            <th class="px-6 py-4 text-center font-semibold text-gray-700">Actions</th>
                         </tr>
                     </thead>
-
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($customers as $customer)
+                    <tbody class="bg-white divide-y divide-gray-200 text-center">
+                        @forelse($customers as $customer)
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $customer->first_name }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $customer->last_name }}</td>
@@ -78,8 +127,8 @@
 
                                 <td class="px-6 py-4 text-center">
                                     <button onclick="editCustomer({{ $customer->id }})"
-                                        class="inline-flex items-center px-3 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition">
-                                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition duration-200">
+                                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
@@ -87,20 +136,26 @@
                                     </button>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                                    <p class="text-sm">No customers found</p>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Simple Add/Edit Customer Modal -->
-        <div id="customerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto hidden">
-            <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-                <div class="mt-3">
-                    <!-- Modal Header -->
-                    <div class="flex justify-between items-center pb-3 border-b">
-                        <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Add New Customer</h3>
-                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+        {{-- Add/Edit Customer Modal --}}
+        <div id="customerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+            <div
+                class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto transform scale-95 transition-all duration-300">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 id="modalTitle" class="text-2xl font-bold text-gray-800">Add New Customer</h3>
+                        <button id="closeCustomerModal" class="text-gray-400 hover:text-gray-600 transition duration-200">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
@@ -108,30 +163,29 @@
                         </button>
                     </div>
 
-                    <!-- Modal Body -->
-                    <form id="customerForm" class="space-y-4 mt-4">
+                    <form id="customerForm" class="space-y-4">
                         @csrf
                         <input type="hidden" id="customerId" name="id">
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">First Name *</label>
                             <input type="text" id="firstName" name="first_name" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Last Name *</label>
                             <input type="text" id="lastName" name="last_name" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Contact Number *</label>
                             <input type="text" id="contactNo" name="contact_no" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Gender *</label>
                             <select id="gender" name="gender" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                                 <option value="">Select Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
@@ -141,27 +195,26 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Street</label>
                             <input type="text" id="street" name="street"
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Barangay</label>
                             <input type="text" id="brgy" name="brgy"
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">City/Province</label>
                             <input type="text" id="cityProvince" name="city_province"
-                                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
 
-                        <!-- Modal Footer -->
-                        <div class="flex justify-end space-x-3 pt-4 border-t">
-                            <button type="button" onclick="closeModal()"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                        <div class="flex gap-3 mt-8">
+                            <button type="button" id="cancelBtn"
+                                class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-200">
                                 Cancel
                             </button>
                             <button type="submit" id="submitBtn"
-                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                                class="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition duration-200">
                                 Save Customer
                             </button>
                         </div>
@@ -175,24 +228,105 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Modal elements
+        const customerModal = document.getElementById('customerModal');
+        const openCustomerModal = document.getElementById('openCustomerModal');
+        const closeCustomerModal = document.getElementById('closeCustomerModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        // Calculate statistics
+        function updateStatistics() {
+            const customers = document.querySelectorAll('tbody tr:not(:has(td[colspan]))');
+            let totalCustomers = 0;
+            let maleCount = 0;
+            let femaleCount = 0;
+
+            customers.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 3) {
+                    totalCustomers++;
+                    const gender = cells[3].textContent.trim();
+                    if (gender === 'Male') {
+                        maleCount++;
+                    } else if (gender === 'Female') {
+                        femaleCount++;
+                    }
+                }
+            });
+
+            document.getElementById('totalCustomersCount').textContent = totalCustomers;
+            document.getElementById('maleCount').textContent = maleCount;
+            document.getElementById('femaleCount').textContent = femaleCount;
+        }
+
+        // Modal functions
         function openModal() {
-            document.getElementById('customerModal').classList.remove('hidden');
-            document.getElementById('modalTitle').textContent = 'Add New Customer';
-            document.getElementById('customerForm').reset();
-            document.getElementById('customerId').value = '';
-            document.getElementById('submitBtn').textContent = 'Save Customer';
+            customerModal.classList.remove('hidden');
+            customerModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+
+            setTimeout(() => {
+                customerModal.querySelector('.max-w-md').classList.remove('scale-95');
+                customerModal.querySelector('.max-w-md').classList.add('scale-100');
+            }, 10);
         }
 
         function closeModal() {
-            document.getElementById('customerModal').classList.add('hidden');
+            customerModal.querySelector('.max-w-md').classList.remove('scale-100');
+            customerModal.querySelector('.max-w-md').classList.add('scale-95');
+            setTimeout(() => {
+                customerModal.classList.add('hidden');
+                customerModal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+                document.getElementById('customerForm').reset();
+            }, 200);
         }
+
+        // Event listeners for modal
+        openCustomerModal.addEventListener('click', openModal);
+        closeCustomerModal.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        customerModal.addEventListener('click', (e) => {
+            if (e.target === customerModal) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !customerModal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr:not(:has(td[colspan]))');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+
+            document.getElementById('clearSearch').classList.toggle('hidden', !searchTerm);
+        });
+
+        // Clear search
+        document.getElementById('clearSearch').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+        });
 
         async function editCustomer(id) {
             try {
                 const response = await fetch(`/customers/${id}`);
                 const customer = await response.json();
 
-                document.getElementById('customerModal').classList.remove('hidden');
                 document.getElementById('modalTitle').textContent = 'Edit Customer';
                 document.getElementById('customerId').value = customer.id;
                 document.getElementById('firstName').value = customer.first_name;
@@ -203,6 +337,7 @@
                 document.getElementById('brgy').value = customer.brgy;
                 document.getElementById('cityProvince').value = customer.city_province;
                 document.getElementById('submitBtn').textContent = 'Update Customer';
+                openModal();
             } catch (error) {
                 Swal.fire('Error', 'Failed to load customer data', 'error');
             }
@@ -216,9 +351,8 @@
             const isEditing = customerId !== '';
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
+            submitBtn.textContent = isEditing ? 'Updating...' : 'Saving...';
 
-            // Create form data object
             const formData = {
                 first_name: document.getElementById('firstName').value,
                 last_name: document.getElementById('lastName').value,
@@ -255,7 +389,6 @@
                         window.location.reload();
                     });
                 } else {
-                    // Handle validation errors
                     if (data.errors) {
                         let errorMessage = 'Please fix the following errors:\n';
                         Object.values(data.errors).forEach(error => {
@@ -274,12 +407,8 @@
             }
         });
 
-        // Close modal when clicking outside
-        document.getElementById('customerModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
+        // Initialize statistics on page load
+        document.addEventListener('DOMContentLoaded', updateStatistics);
 
         // Show messages from server
         @if(session('success'))

@@ -1,76 +1,141 @@
 @extends('SIDEBAR.layouts')
 @section('title', 'Inventory List')
-@section('name', 'Inventory List')
+@section('name', 'INVENTORY LIST')
 @section('content')
     @php
         $activeSort = $currentSort ?? request('sort', 'name_asc');
     @endphp
-    <div class="flex items-center gap-2 w-full sm:w-auto flex-1" id="filter-container">
-        <input type="text" name="search" placeholder="Search inventory..." value="{{ request('search') }}"
-            hx-get="{{ route('inventory.list') }}" hx-trigger="input changed delay:300ms, search"
-            hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
-            class="w-1/3 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
 
-        <select name="category" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
-            hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
-            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-            <option value="" {{ request('category') == '' ? 'selected' : '' }}>All Categories</option>
-            @isset($categories)
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                        {{ $category->category_name }}
-                    </option>
-                @endforeach
-            @endisset
-        </select>
+    <div class="bg-white border rounded-lg p-6 shadow-sm">
+        {{-- Header Section --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            {{-- Search Form --}}
+            <div class="flex-1 max-w-md" id="filter-container">
+                <div class="relative">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search products by name, brand, category..." hx-get="{{ route('inventory.list') }}"
+                        hx-trigger="input changed delay:300ms, search" hx-target="#product-table-container"
+                        hx-include="#filter-container" hx-swap="innerHTML"
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 shadow-sm"
+                        aria-label="Search inventory">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    @if(request('search'))
+                        <a href="{{ route('inventory.list') }}"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition duration-200"
+                            title="Clear search">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
 
-        <select name="brand" hx-get="{{ route('inventory.list') }}" hx-trigger="change" hx-target="#product-table-container"
-            hx-include="#filter-container" hx-swap="innerHTML"
-            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-            <option value="" {{ request('brand') == '' ? 'selected' : '' }}>All Brands</option>
-            @isset($brands)
-                @foreach ($brands as $brand)
-                    <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>
-                        {{ $brand->brand_name }}
-                    </option>
-                @endforeach
-            @endisset
-        </select>
+        <div class="border-t border-gray-200 my-6"></div>
 
-        {{-- Condition filter --}}
-        <select name="condition" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
-            hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
-            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-            <option value="" {{ request('condition') == '' ? 'selected' : '' }}>All Conditions</option>
-            <option value="Brand New" {{ request('condition') == 'Brand New' ? 'selected' : '' }}>Brand New</option>
-            <option value="Second Hand" {{ request('condition') == 'Second Hand' ? 'selected' : '' }}>Second Hand</option>
-        </select>
+        {{-- Page Title --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Inventory List</h2>
+                <p class="text-gray-600 mt-1">View and manage all products</p>
+            </div>
+        </div>
 
-        {{-- Status filter --}}
-        <select name="status" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
-            hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
-            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-            <option value="active" {{ request('status', 'active') == 'active' ? 'selected' : '' }}>Active Products</option>
-            <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>Archived Products</option>
-            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Products</option>
-        </select>
+        {{-- Filter Section in Card Container --}}
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6" id="filter-container">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Category</label>
+                    <select name="category" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
+                        hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('category') == '' ? 'selected' : '' }}>All Categories</option>
+                        @isset($categories)
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->category_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
 
-        <select name="sort" hx-get="{{ route('inventory.list') }}" hx-trigger="change" hx-target="#product-table-container"
-            hx-include="#filter-container" hx-swap="innerHTML"
-            class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-            <option value="name_asc" {{ $activeSort === 'name_asc' ? 'selected' : '' }}>Name A-Z</option>
-            <option value="name_desc" {{ $activeSort === 'name_desc' ? 'selected' : '' }}>Name Z-A</option>
-            <option value="qty_desc" {{ $activeSort === 'qty_desc' ? 'selected' : '' }}>Quantity High-Low</option>
-            <option value="qty_asc" {{ $activeSort === 'qty_asc' ? 'selected' : '' }}>Quantity Low-High</option>
-            <option value="price_desc" {{ $activeSort === 'price_desc' ? 'selected' : '' }}>Price High-Low</option>
-            <option value="price_asc" {{ $activeSort === 'price_asc' ? 'selected' : '' }}>Price Low-High</option>
-            <option value="condition_new" {{ $activeSort === 'condition_new' ? 'selected' : '' }}>Brand New First</option>
-            <option value="condition_used" {{ $activeSort === 'condition_used' ? 'selected' : '' }}>Second Hand First</option>
-        </select>
-    </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Brand</label>
+                    <select name="brand" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
+                        hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('brand') == '' ? 'selected' : '' }}>All Brands</option>
+                        @isset($brands)
+                            @foreach ($brands as $brand)
+                                <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>
+                                    {{ $brand->brand_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
 
-    <div class="py-6 rounded-xl" id="product-table-container">
-        @include('partials.productTable_InventList', ['products' => $products, 'currentSort' => $currentSort])
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Condition</label>
+                    <select name="condition" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
+                        hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('condition') == '' ? 'selected' : '' }}>All Conditions</option>
+                        <option value="Brand New" {{ request('condition') == 'Brand New' ? 'selected' : '' }}>Brand New
+                        </option>
+                        <option value="Second Hand" {{ request('condition') == 'Second Hand' ? 'selected' : '' }}>Second Hand
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
+                        hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="active" {{ request('status', 'active') == 'active' ? 'selected' : '' }}>Active Products
+                        </option>
+                        <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>Archived Products
+                        </option>
+                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Products</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Sort By</label>
+                    <select name="sort" hx-get="{{ route('inventory.list') }}" hx-trigger="change"
+                        hx-target="#product-table-container" hx-include="#filter-container" hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="name_asc" {{ $activeSort === 'name_asc' ? 'selected' : '' }}>Name A-Z</option>
+                        <option value="name_desc" {{ $activeSort === 'name_desc' ? 'selected' : '' }}>Name Z-A</option>
+                        <option value="qty_desc" {{ $activeSort === 'qty_desc' ? 'selected' : '' }}>Quantity High-Low</option>
+                        <option value="qty_asc" {{ $activeSort === 'qty_asc' ? 'selected' : '' }}>Quantity Low-High</option>
+                        <option value="price_desc" {{ $activeSort === 'price_desc' ? 'selected' : '' }}>Price High-Low
+                        </option>
+                        <option value="price_asc" {{ $activeSort === 'price_asc' ? 'selected' : '' }}>Price Low-High</option>
+                        <option value="condition_new" {{ $activeSort === 'condition_new' ? 'selected' : '' }}>Brand New First
+                        </option>
+                        <option value="condition_used" {{ $activeSort === 'condition_used' ? 'selected' : '' }}>Second Hand
+                            First</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        {{-- Inventory Product Table in Card Container --}}
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div id="product-table-container">
+                @include('partials.productTable_InventList', ['products' => $products, 'currentSort' => $currentSort])
+            </div>
+        </div>
     </div>
 
     {{-- Price Edit Modal --}}
@@ -226,12 +291,12 @@
                         const submitBtn = form.querySelector('button[type="submit"]');
                         const originalText = submitBtn.innerHTML;
                         submitBtn.innerHTML = `
-                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Updating...
-                                `;
+                                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Updating...
+                                                `;
                         submitBtn.disabled = true;
 
                         form.submit();
@@ -253,14 +318,14 @@
                     Swal.fire({
                         title: 'Archive Product',
                         html: `Are you sure you want to archive <strong>"${productName}"</strong>?<br><br>
-                                          <div class="text-left text-sm text-gray-600 mt-2">
-                                              <span class="font-semibold">This will:</span>
-                                              <ul class="list-disc list-inside mt-1 space-y-1">
-                                                  <li>Make the product unavailable for POS</li>
-                                                  <li>Prevent new stock from being added</li>
-                                                  <li>Move the product to archived products</li>
-                                              </ul>
-                                          </div>`,
+                                                          <div class="text-left text-sm text-gray-600 mt-2">
+                                                              <span class="font-semibold">This will:</span>
+                                                              <ul class="list-disc list-inside mt-1 space-y-1">
+                                                                  <li>Make the product unavailable for POS</li>
+                                                                  <li>Prevent new stock from being added</li>
+                                                                  <li>Move the product to archived products</li>
+                                                              </ul>
+                                                          </div>`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#eab308',
@@ -278,12 +343,12 @@
                             // Show loading state
                             const originalText = button.innerHTML;
                             button.innerHTML = `
-                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Archiving...
-                                        `;
+                                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                            </svg>
+                                                            Archiving...
+                                                        `;
                             button.disabled = true;
 
                             form.submit();
@@ -303,14 +368,14 @@
                     Swal.fire({
                         title: 'Unarchive Product',
                         html: `Are you sure you want to unarchive <strong>"${productName}"</strong>?<br><br>
-                                          <div class="text-left text-sm text-gray-600 mt-2">
-                                              <span class="font-semibold">This will:</span>
-                                              <ul class="list-disc list-inside mt-1 space-y-1">
-                                                  <li>Make the product available for POS again</li>
-                                                  <li>Allow new stock to be added</li>
-                                                  <li>Move the product back to active products</li>
-                                              </ul>
-                                          </div>`,
+                                                          <div class="text-left text-sm text-gray-600 mt-2">
+                                                              <span class="font-semibold">This will:</span>
+                                                              <ul class="list-disc list-inside mt-1 space-y-1">
+                                                                  <li>Make the product available for POS again</li>
+                                                                  <li>Allow new stock to be added</li>
+                                                                  <li>Move the product back to active products</li>
+                                                              </ul>
+                                                          </div>`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#22c55e',
@@ -328,12 +393,12 @@
                             // Show loading state
                             const originalText = button.innerHTML;
                             button.innerHTML = `
-                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Unarchiving...
-                                        `;
+                                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                            </svg>
+                                                            Unarchiving...
+                                                        `;
                             button.disabled = true;
 
                             form.submit();

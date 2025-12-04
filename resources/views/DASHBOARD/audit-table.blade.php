@@ -39,16 +39,16 @@
                         <!-- Action Column -->
                         <td class="px-4 py-3">
                             <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                        @if($log->action === 'CREATE') bg-green-100 text-green-800
-                                        @elseif($log->action === 'UPDATE') bg-yellow-100 text-yellow-800
-                                        @elseif($log->action === 'DELETE') bg-red-100 text-red-800
-                                        @elseif($log->action === 'LOGIN') bg-green-100 text-green-800
-                                        @elseif($log->action === 'LOGOUT') bg-orange-100 text-orange-800
-                                        @elseif($log->action === 'PURCHASE') bg-purple-100 text-purple-800
-                                        @elseif($log->action === 'ACKNOWLEDGE') bg-purple-100 text-purple-800
-                                        @elseif($log->action === 'COMPLETED SERVICE') bg-purple-100 text-purple-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
+                                                    @if($log->action === 'CREATE') bg-green-100 text-green-800
+                                                    @elseif($log->action === 'UPDATE') bg-yellow-100 text-yellow-800
+                                                    @elseif($log->action === 'DELETE') bg-red-100 text-red-800
+                                                    @elseif($log->action === 'LOGIN') bg-green-100 text-green-800
+                                                    @elseif($log->action === 'LOGOUT') bg-orange-100 text-orange-800
+                                                    @elseif($log->action === 'PURCHASE') bg-purple-100 text-purple-800
+                                                    @elseif($log->action === 'ACKNOWLEDGE') bg-purple-100 text-purple-800
+                                                    @elseif($log->action === 'COMPLETED SERVICE') bg-purple-100 text-purple-800
+                                                    @else bg-gray-100 text-gray-800
+                                                    @endif">
                                 {{ $log->action }}
                             </span>
                         </td>
@@ -81,21 +81,21 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex justify-between items-center mt-6">
+    <div class="flex justify-between items-center mt-6 p-6 border-t border-gray-200">
         <div class="text-sm text-gray-600">
             Showing {{ $auditLogs->firstItem() ?? 0 }} to {{ $auditLogs->lastItem() ?? 0 }}
             of {{ $auditLogs->total() }} results
         </div>
         <div class="space-x-2">
             @if ($auditLogs->onFirstPage())
-                <button class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>
+                <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>
                     ← Previous
                 </button>
             @else
                 <a href="{{ $auditLogs->previousPageUrl() }}&search={{ request('search', '') }}&module={{ request('module', '') }}&action={{ request('action', '') }}&sortBy={{ request('sortBy', 'created_at') }}&sortOrder={{ request('sortOrder', 'desc') }}"
                     hx-get="{{ $auditLogs->previousPageUrl() }}&search={{ request('search', '') }}&module={{ request('module', '') }}&action={{ request('action', '') }}&sortBy={{ request('sortBy', 'created_at') }}&sortOrder={{ request('sortOrder', 'desc') }}"
                     hx-target="#logs-table" hx-swap="outerHTML"
-                    class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
                     ← Previous
                 </a>
             @endif
@@ -104,11 +104,11 @@
                 <a href="{{ $auditLogs->nextPageUrl() }}&search={{ request('search', '') }}&module={{ request('module', '') }}&action={{ request('action', '') }}&sortBy={{ request('sortBy', 'created_at') }}&sortOrder={{ request('sortOrder', 'desc') }}"
                     hx-get="{{ $auditLogs->nextPageUrl() }}&search={{ request('search', '') }}&module={{ request('module', '') }}&action={{ request('action', '') }}&sortBy={{ request('sortBy', 'created_at') }}&sortOrder={{ request('sortOrder', 'desc') }}"
                     hx-target="#logs-table" hx-swap="outerHTML"
-                    class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
                     Next →
                 </a>
             @else
-                <button class="px-3 py-1 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>
+                <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>
                     Next →
                 </button>
             @endif

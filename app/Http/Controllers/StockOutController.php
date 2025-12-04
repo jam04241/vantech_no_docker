@@ -35,6 +35,12 @@ class StockOutController extends Controller
             });
         }
 
+        // Apply date filtering
+        if ($request->filled('date')) {
+            $date = $request->get('date');
+            $query->whereDate('products.created_at', $date);
+        }
+
         // Apply sorting
         $sort = $request->get('sort', 'date_added_desc');
         $query = $this->applySorting($query, $sort);
@@ -55,6 +61,7 @@ class StockOutController extends Controller
             'totalSoldProducts' => $totalSoldProducts,
             'currentSort' => $sort,
             'searchQuery' => $request->get('search', ''),
+            'selectedDate' => $request->get('date', ''),
         ];
 
         // If HTMX request, return only the table partial

@@ -4,7 +4,7 @@
 @section('name', 'PURCHASE ORDERS')
 
 @section('content')
-    <div class="p-6">
+    <div class="bg-white border rounded-lg p-6 shadow-sm">
         <!-- SweetAlert Notifications -->
         @if(session('success'))
             <div class="mb-4">
@@ -24,54 +24,147 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Total Orders</p>
-                <h1 class="text-2xl font-bold" id="totalOrdersCount">{{ $totalOrders }}</h1>
-            </div>
+        {{-- Header Section with Search and Add Button --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            {{-- Search Form --}}
+            <form method="GET" action="{{ route('suppliers.list') }}" class="flex-1 max-w-md">
+                <div class="relative">
+                    <input type="text" id="searchInput" name="search" value="{{ request('search') }}"
+                        placeholder="Find order..."
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 shadow-sm"
+                        aria-label="Search orders">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    @if(request('search'))
+                        <a href="{{ route('suppliers.list') }}"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition duration-200"
+                            title="Clear search">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+            </form>
 
-            <div class="bg-white p-4 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Pending Orders</p>
-                <h1 class="text-2xl font-bold" id="pendingOrdersCount">{{ $pendingOrders }}</h1>
-            </div>
+            <a href="{{ route('Supplier.CreateOrders') }}"
+                class="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 shadow-lg font-medium hover:shadow-xl transform hover:-translate-y-0.5"
+                aria-label="Create new purchase order">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                New Purchase Order
+            </a>
+        </div>
 
-            <div class="bg-white p-4 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Received Orders</p>
-                <h1 class="text-2xl font-bold" id="receivedOrdersCount">{{ $receivedOrders }}</h1>
-            </div>
+        <div class="border-t border-gray-200 my-6"></div>
 
-            <div class="bg-white p-4 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Cancelled Orders</p>
-                <h1 class="text-2xl font-bold" id="cancelledOrdersCount">{{ $cancelledOrders }}</h1>
+        {{-- Page Title --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Purchase Orders</h2>
+                <p class="text-gray-600 mt-1">Manage and track all purchase orders</p>
             </div>
         </div>
 
-        {{-- SEARCH + SORT + FILTER --}}
-        <div class="flex flex-wrap justify-between items-center mb-4 gap-3">
-            <input type="text" placeholder="Find order" id="searchInput"
-                class="px-4 py-2 border rounded-lg w-1/2 mt-4 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 shadow-sm"
-                aria-label="Search orders">
+        {{-- Statistics Cards --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div
+                class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Orders</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ $totalOrders }}</p>
+                    </div>
+                </div>
+            </div>
 
-            <div class="flex gap-2">
-                <select class="px-4 py-2 border rounded-lg bg-white" id="statusFilter">
-                    <option value="">All Status</option>
-                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="Received" {{ request('status') == 'Received' ? 'selected' : '' }}>Received</option>
-                    <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
+            <div
+                class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-5 border border-yellow-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-yellow-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Orders</p>
+                        <p class="text-2xl font-bold text-gray-900" id="pendingOrdersCount">{{ $pendingOrders }}</p>
+                    </div>
+                </div>
+            </div>
 
-                <input type="date" class="px-4 py-2 border rounded-lg bg-white" id="dateFilter"
-                    value="{{ request('date') }}">
+            <div
+                class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Received Orders</p>
+                        <p class="text-2xl font-bold text-gray-900" id="receivedOrdersCount">{{ $receivedOrders }}</p>
+                    </div>
+                </div>
+            </div>
 
-                <a href="{{ route('Supplier.CreateOrders') }}"
-                    class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-50 transition duration-200">
-                    + New Purchase Order
-                </a>
+            <div
+                class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border border-red-200 shadow-sm hover:shadow-md transition duration-200">
+                <div class="flex items-center">
+                    <div class="p-3 bg-red-500 rounded-xl shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Cancelled Orders</p>
+                        <p class="text-2xl font-bold text-gray-900" id="cancelledOrdersCount">{{ $cancelledOrders }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Filter Card --}}
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
+                {{-- Status Filter --}}
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Status</label>
+                    <select id="statusFilter"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white">
+                        <option value="">All Status</option>
+                        <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Received" {{ request('status') == 'Received' ? 'selected' : '' }}>Received</option>
+                        <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
+
+                {{-- Date Filter --}}
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Order Date</label>
+                    <input type="date" id="dateFilter" value="{{ request('date') }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white">
+                </div>
             </div>
         </div>
 
         {{-- TABLE --}}
-        <div class="bg-white rounded-2xl shadow-lg border overflow-x-auto mt-4">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-gray-100 text-gray-700 text-base">
                     <tr>

@@ -8,7 +8,7 @@
                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Warranty</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Brand</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Category</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-700">Added On</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-700">Date & Time</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
                         {{ $product->category?->category_name ?? '-' }}
                     </td>
                     <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
-                        {{ $product->created_at->format('M d, Y') }}
+                        {{ $product->created_at->format('M. d Y h:i:s A')  }}
                     </td>
                 </tr>
             @empty

@@ -1,100 +1,153 @@
 @extends('SIDEBAR.layouts')
 @section('title', 'Inventory')
-@section('name', 'Inventory')
+@section('name', 'INVENTORY')
 @section('content')
     @php
         $activeSort = $currentSort ?? request('sort', 'name_asc');
     @endphp
 
-    <div class="py-6 rounded-xl">
-        <div class="flex flex-col sm:flex-row justify-between gap-3">
-            <div class="flex items-center gap-2 w-full sm:w-auto flex-1" id="filter-container">
-                {{-- SEARCH BAR --}}
-                <input type="text" name="search" placeholder="Search inventory..." value="{{ request('search') }}"
-                    hx-get="{{ route('inventory') }}" hx-trigger="input changed delay:300ms, search"
-                    hx-target="#product-table-container"
-                    hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
-                    hx-swap="innerHTML"
-                    class="w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+    <div class="bg-white border rounded-lg p-6 shadow-sm">
+        {{-- Header Section --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            {{-- Search Form --}}
+            <form method="GET" action="{{ route('inventory') }}" class="flex-1 max-w-md">
+                <div class="relative">
+                    <input type="text" name="search" value="{{ request('search') }}" hx-get="{{ route('inventory') }}"
+                        hx-trigger="input changed delay:300ms, search" hx-target="#product-table-container"
+                        hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
+                        hx-swap="innerHTML" placeholder="Search products by name, brand, category..."
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 shadow-sm"
+                        aria-label="Search inventory">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    @if(request('search'))
+                        <a href="{{ route('inventory') }}"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition duration-200"
+                            title="Clear search">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+            </form>
 
-                <select name="category" hx-get="{{ route('inventory') }}" hx-trigger="change"
-                    hx-target="#product-table-container"
-                    hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
-                    hx-swap="innerHTML"
-                    class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-                    <option value="" {{ request('category') == '' ? 'selected' : '' }}>All Categories</option>
-                    @isset($categories)
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                {{ $category->category_name }}
-                            </option>
-                        @endforeach
-                    @endisset
-                </select>
+            <button id="addProductBtn"
+                class="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 shadow-lg font-medium hover:shadow-xl transform hover:-translate-y-0.5"
+                onclick="window.location.href='{{ route('product.add') }}'" aria-label="Add a new product">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Product
+            </button>
+        </div>
 
-                <select name="brand" hx-get="{{ route('inventory') }}" hx-trigger="change"
-                    hx-target="#product-table-container"
-                    hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
-                    hx-swap="innerHTML"
-                    class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-                    <option value="" {{ request('brand') == '' ? 'selected' : '' }}>All Brands</option>
-                    @isset($brands)
-                        @foreach ($brands as $brand)
-                            <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>
-                                {{ $brand->brand_name }}
-                            </option>
-                        @endforeach
-                    @endisset
-                </select>
+        <div class="border-t border-gray-200 my-6"></div>
 
-                {{-- ADDED: Condition filter --}}
-                <select name="condition" hx-get="{{ route('inventory') }}" hx-trigger="change"
-                    hx-target="#product-table-container"
-                    hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
-                    hx-swap="innerHTML"
-                    class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-                    <option value="" {{ request('condition') == '' ? 'selected' : '' }}>All Conditions</option>
-                    <option value="Brand New" {{ request('condition') == 'Brand New' ? 'selected' : '' }}>Brand New</option>
-                    <option value="Second Hand" {{ request('condition') == 'Second Hand' ? 'selected' : '' }}>Second Hand
-                    </option>
-                </select>
-
-                {{-- ADDED: Supplier filter --}}
-                <select name="supplier" hx-get="{{ route('inventory') }}" hx-trigger="change"
-                    hx-target="#product-table-container"
-                    hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
-                    hx-swap="innerHTML"
-                    class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white">
-                    <option value="" {{ request('supplier') == '' ? 'selected' : '' }}>All Suppliers</option>
-                    @isset($suppliers)
-                        @foreach ($suppliers as $supplier)
-                            <option value="{{ $supplier->id }}" {{ request('supplier') == $supplier->id ? 'selected' : '' }}>
-                                {{ $supplier->company_name }}
-                            </option>
-                        @endforeach
-                    @endisset
-                </select>
-                <button type="button" id="openBrandEditor"
-                    class="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out whitespace-nowrap">
-                    Edit Brand
-                </button>
-                <button type="button" id="openCategoryEditor"
-                    class="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out whitespace-nowrap">
-                    Edit Category
-                </button>
-            </div>
-            <div class="flex flex-wrap gap-2 justify-end">
-                <a id="addProductBtn" href="{{ route('product.add') }}"
-                    class="bg-[#46647F] text-white px-4 py-2 rounded-lg shadow hover:bg-[#3B4A5A] focus:ring-2 focus:ring-[#3B4A5A] transition duration-150 ease-in-out whitespace-nowrap">
-                    Add Product
-                </a>
+        {{-- Page Title --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Inventory Management</h2>
+                <p class="text-gray-600 mt-1">Manage all products</p>
             </div>
         </div>
-    </div>
 
-    {{-- Inventory Product table --}}
-    <div id="product-table-container">
-        @include('partials.productTable_Inventory')
+        {{-- Filter Section in Card Container --}}
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Category</label>
+                    <select name="category" hx-get="{{ route('inventory') }}" hx-trigger="change"
+                        hx-target="#product-table-container"
+                        hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
+                        hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('category') == '' ? 'selected' : '' }}>All Categories</option>
+                        @isset($categories)
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->category_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Brand</label>
+                    <select name="brand" hx-get="{{ route('inventory') }}" hx-trigger="change"
+                        hx-target="#product-table-container"
+                        hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
+                        hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('brand') == '' ? 'selected' : '' }}>All Brands</option>
+                        @isset($brands)
+                            @foreach ($brands as $brand)
+                                <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>
+                                    {{ $brand->brand_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Condition</label>
+                    <select name="condition" hx-get="{{ route('inventory') }}" hx-trigger="change"
+                        hx-target="#product-table-container"
+                        hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
+                        hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('condition') == '' ? 'selected' : '' }}>All Conditions</option>
+                        <option value="Brand New" {{ request('condition') == 'Brand New' ? 'selected' : '' }}>Brand New
+                        </option>
+                        <option value="Second Hand" {{ request('condition') == 'Second Hand' ? 'selected' : '' }}>Second Hand
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Supplier</label>
+                    <select name="supplier" hx-get="{{ route('inventory') }}" hx-trigger="change"
+                        hx-target="#product-table-container"
+                        hx-include="[name='search'], [name='category'], [name='brand'], [name='condition'], [name='supplier']"
+                        hx-swap="innerHTML"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out bg-white text-sm">
+                        <option value="" {{ request('supplier') == '' ? 'selected' : '' }}>All Suppliers</option>
+                        @isset($suppliers)
+                            @foreach ($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}" {{ request('supplier') == $supplier->id ? 'selected' : '' }}>
+                                    {{ $supplier->company_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
+
+                <div class="flex gap-2 items-end">
+                    <button type="button" id="openBrandEditor"
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white shadow hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out text-sm font-medium text-gray-700">
+                        Edit Brand
+                    </button>
+                    <button type="button" id="openCategoryEditor"
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white shadow hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out text-sm font-medium text-gray-700">
+                        Edit Category
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Inventory Product Table in Card Container --}}
+
+        <div id="product-table-container">
+            @include('partials.productTable_Inventory')
+        </div>
+
     </div>
 
     {{-- ================= EDIT MODALS ================= --}}

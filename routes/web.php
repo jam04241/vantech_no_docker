@@ -231,7 +231,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/suppliers', [SuppliersController::class, 'index'])->name('suppliers');
     Route::post('/suppliers', [SuppliersController::class, 'store'])->name('suppliers.store');
     Route::get('/suppliers/{id}', [SuppliersController::class, 'show']);
-    Route::post('/suppliers/{id}', [SuppliersController::class, 'update']);
+    Route::put('/suppliers/{id}', [SuppliersController::class, 'update'])->name('suppliers.update');
     Route::post('/suppliers/{supplier}/toggle-status', [SuppliersController::class, 'toggleStatus'])->name('suppliers.toggle-status');
 
     // Inventory fetch 

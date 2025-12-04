@@ -11,7 +11,7 @@
             {{-- Search Form --}}
             <form method="GET" action="{{ route('suppliers') }}" class="flex-1 max-w-md">
                 <div class="relative">
-                    <input type="text" name="search" value="{{ request('search') }}" 
+                    <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Search suppliers by name, company, phone, or address..."
                         class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 shadow-sm"
                         aria-label="Search suppliers">
@@ -22,11 +22,12 @@
                         </svg>
                     </div>
                     @if(request('search'))
-                        <a href="{{ route('suppliers') }}" 
+                        <a href="{{ route('suppliers') }}"
                             class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition duration-200"
                             title="Clear search">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </a>
                     @endif
@@ -46,7 +47,7 @@
         <div class="border-t border-gray-200 my-6"></div>
 
         {{-- Page Title --}}
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Supplier Management</h2>
                 <p class="text-gray-600 mt-1">Manage your suppliers and their information</p>
@@ -120,121 +121,121 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 text-center">
                         @forelse($suppliers as $supplier)
-                            <tr class="hover:bg-gray-50 transition duration-150 group" id="supplier-{{ $supplier->id }}">
-                                {{-- Number --}}
-                                <td class="p-4 text-gray-900 font-medium text-lg">
-                                    {{ ($suppliers->currentPage() - 1) * $suppliers->perPage() + $loop->iteration }}
-                                </td>
+                                        <tr class="hover:bg-gray-50 transition duration-150 group" id="supplier-{{ $supplier->id }}">
+                                            {{-- Number --}}
+                                            <td class="p-4 text-gray-900 font-medium text-lg">
+                                                {{ ($suppliers->currentPage() - 1) * $suppliers->perPage() + $loop->iteration }}
+                                            </td>
 
-                                {{-- Supplier Info --}}
-                                <td class="p-4">
-                                    <div class="flex items-center justify-center">
-                                        <div
-                                            class="h-14 w-14 bg-indigo-500 text-white text-lg font-bold rounded-lg flex items-center justify-center">
-                                            {{ substr($supplier->supplier_name, 0, 1) }}
-                                        </div>
-                                        <div class="ml-5 text-left">
-                                            <div
-                                                class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition duration-200">
-                                                {{ $supplier->supplier_name }}
-                                            </div>
-                                            <div class="text-md text-gray-500">{{ $supplier->company_name }}</div>
-                                        </div>
-                                    </div>
-                                </td>
+                                            {{-- Supplier Info --}}
+                                            <td class="p-4">
+                                                <div class="flex items-center justify-center">
+                                                    <div
+                                                        class="h-14 w-14 bg-indigo-500 text-white text-lg font-bold rounded-lg flex items-center justify-center">
+                                                        {{ substr($supplier->supplier_name, 0, 1) }}
+                                                    </div>
+                                                    <div class="ml-5 text-left">
+                                                        <div
+                                                            class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition duration-200">
+                                                            {{ $supplier->supplier_name }}
+                                                        </div>
+                                                        <div class="text-md text-gray-500">{{ $supplier->company_name }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
 
-                                {{-- Contact --}}
-                                <td class="p-4">
-                                    <div class="flex items-center justify-center gap-3 text-md text-gray-900">
-                                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                        </svg>
-                                        {{ $supplier->contact_phone }}
-                                    </div>
-                                </td>
+                                            {{-- Contact --}}
+                                            <td class="p-4">
+                                                <div class="flex items-center justify-center gap-3 text-md text-gray-900">
+                                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                    </svg>
+                                                    {{ $supplier->contact_phone }}
+                                                </div>
+                                            </td>
 
-                                {{-- Address --}}
-                                <td class="p-4">
-                                    @if($supplier->address)
-                                        <div class="flex justify-center gap-3 max-w-md mx-auto">
-                                            <svg class="w-5 h-5 text-gray-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            <span class="text-md text-gray-900 break-words" title="{{ $supplier->address }}">
-                                                {{ Str::limit($supplier->address, 60) }}
-                                            </span>
-                                        </div>
-                                    @else
-                                        <span class="text-md text-gray-400 italic">No address provided</span>
-                                    @endif
-                                </td>
+                                            {{-- Address --}}
+                                            <td class="p-4">
+                                                @if($supplier->address)
+                                                    <div class="flex justify-center gap-3 max-w-md mx-auto">
+                                                        <svg class="w-5 h-5 text-gray-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        <span class="text-md text-gray-900 break-words" title="{{ $supplier->address }}">
+                                                            {{ Str::limit($supplier->address, 60) }}
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <span class="text-md text-gray-400 italic">No address provided</span>
+                                                @endif
+                                            </td>
 
-                                {{-- Status --}}
-                                <td class="p-4">
-                                    <span id="status-badge-{{ $supplier->id }}" class="inline-flex items-center px-4 py-2 rounded-full text-md font-medium 
-                                            {{ $supplier->status === 'active'
+                                            {{-- Status --}}
+                                            <td class="p-4">
+                                                <span id="status-badge-{{ $supplier->id }}" class="inline-flex items-center px-4 py-2 rounded-full text-md font-medium 
+                                                                                    {{ $supplier->status === 'active'
                             ? 'bg-green-100 text-green-800 border border-green-200'
                             : 'bg-red-100 text-red-800 border border-red-200' }}">
-                                        <span
-                                            class="w-2 h-2 rounded-full mr-2 
-                                                {{ $supplier->status === 'active' ? 'bg-green-500' : 'bg-red-500' }}"></span>
-                                        {{ ucfirst($supplier->status) }}
-                                    </span>
-                                </td>
+                                                    <span
+                                                        class="w-2 h-2 rounded-full mr-2 
+                                                                                        {{ $supplier->status === 'active' ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                                                    {{ ucfirst($supplier->status) }}
+                                                </span>
+                                            </td>
 
-                                {{-- Actions --}}
-                                <td class="p-4">
-                                    <div class="flex justify-center items-center space-x-3">
-                                        {{-- Toggle Status Button --}}
-                                        <button id="toggle-btn-{{ $supplier->id }}"
-                                            onclick="toggleStatus('{{ $supplier->id }}')" class="p-3 rounded-lg transition duration-200 
-                                            {{ $supplier->status === 'active'
+                                            {{-- Actions --}}
+                                            <td class="p-4">
+                                                <div class="flex justify-center items-center space-x-3">
+                                                    {{-- Toggle Status Button --}}
+                                                    <button id="toggle-btn-{{ $supplier->id }}"
+                                                        onclick="toggleStatus('{{ $supplier->id }}')" class="p-3 rounded-lg transition duration-200 
+                                                                                    {{ $supplier->status === 'active'
                             ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
                             : 'bg-green-50 text-green-600 hover:bg-green-100' }}"
-                                            title="{{ $supplier->status === 'active' ? 'Deactivate' : 'Activate' }}">
-                                            @if($supplier->status === 'active')
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            @else
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                </svg>
-                                            @endif
-                                        </button>
+                                                        title="{{ $supplier->status === 'active' ? 'Deactivate' : 'Activate' }}">
+                                                        @if($supplier->status === 'active')
+                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        @else
+                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                            </svg>
+                                                        @endif
+                                                    </button>
 
-                                        {{-- Edit Button - Conditionally Enabled --}}
-                                        @if($supplier->status === 'active')
-                                            <button onclick="editSupplier('{{ $supplier->id }}')"
-                                                class="p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition duration-200 edit-btn"
-                                                title="Edit Supplier" data-supplier-id="{{ $supplier->id }}">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </button>
-                                        @else
-                                            <button
-                                                class="p-3 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed transition duration-200 edit-btn"
-                                                title="Cannot edit inactive supplier" data-supplier-id="{{ $supplier->id }}"
-                                                disabled>
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
+                                                    {{-- Edit Button - Conditionally Enabled --}}
+                                                    @if($supplier->status === 'active')
+                                                        <button onclick="editSupplier('{{ $supplier->id }}')"
+                                                            class="p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition duration-200 edit-btn"
+                                                            title="Edit Supplier" data-supplier-id="{{ $supplier->id }}">
+                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </button>
+                                                    @else
+                                                        <button
+                                                            class="p-3 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed transition duration-200 edit-btn"
+                                                            title="Cannot edit inactive supplier" data-supplier-id="{{ $supplier->id }}"
+                                                            disabled>
+                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="p-16 text-center">
@@ -288,7 +289,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                         {{-- Showing results info --}}
                         <div class="text-sm text-gray-700">
-                            Showing 
+                            Showing
                             <span class="font-medium">{{ $suppliers->firstItem() }}</span>
                             to
                             <span class="font-medium">{{ $suppliers->lastItem() }}</span>
@@ -352,13 +353,15 @@
 
         {{-- Add Supplier Modal --}}
         <div id="supplierModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto transform scale-95 transition-all duration-300">
+            <div
+                class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto transform scale-95 transition-all duration-300">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-2xl font-bold text-gray-800">Add New Supplier</h3>
                         <button id="closeSupplierModal" class="text-gray-400 hover:text-gray-600 transition duration-200">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
@@ -367,21 +370,24 @@
                         @csrf
                         <div class="space-y-4">
                             <div>
-                                <label for="supplier_name" class="block text-sm font-medium text-gray-700 mb-2">Supplier Name *</label>
+                                <label for="supplier_name" class="block text-sm font-medium text-gray-700 mb-2">Supplier
+                                    Name *</label>
                                 <input type="text" id="supplier_name" name="supplier_name" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter supplier name">
                             </div>
 
                             <div>
-                                <label for="company_name" class="block text-sm font-medium text-gray-700 mb-2">Company Name *</label>
+                                <label for="company_name" class="block text-sm font-medium text-gray-700 mb-2">Company Name
+                                    *</label>
                                 <input type="text" id="company_name" name="company_name" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter company name">
                             </div>
 
                             <div>
-                                <label for="contact_phone" class="block text-sm font-medium text-gray-700 mb-2">Contact Phone *</label>
+                                <label for="contact_phone" class="block text-sm font-medium text-gray-700 mb-2">Contact
+                                    Phone *</label>
                                 <input type="text" id="contact_phone" name="contact_phone" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter phone number">
@@ -411,14 +417,18 @@
         </div>
 
         {{-- Edit Supplier Modal --}}
-        <div id="editSupplierModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto transform scale-95 transition-all duration-300">
+        <div id="editSupplierModal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+            <div
+                class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto transform scale-95 transition-all duration-300">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-2xl font-bold text-gray-800">Edit Supplier</h3>
-                        <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition duration-200">
+                        <button onclick="closeEditModal()"
+                            class="text-gray-400 hover:text-gray-600 transition duration-200">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
@@ -427,31 +437,35 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" id="edit_supplier_id" name="supplier_id">
-                        
+
                         <div class="space-y-4">
                             <div>
-                                <label for="edit_supplier_name" class="block text-sm font-medium text-gray-700 mb-2">Supplier Name *</label>
+                                <label for="edit_supplier_name"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Supplier Name *</label>
                                 <input type="text" id="edit_supplier_name" name="supplier_name" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter supplier name">
                             </div>
 
                             <div>
-                                <label for="edit_company_name" class="block text-sm font-medium text-gray-700 mb-2">Company Name *</label>
+                                <label for="edit_company_name" class="block text-sm font-medium text-gray-700 mb-2">Company
+                                    Name *</label>
                                 <input type="text" id="edit_company_name" name="company_name" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter company name">
                             </div>
 
                             <div>
-                                <label for="edit_contact_phone" class="block text-sm font-medium text-gray-700 mb-2">Contact Phone *</label>
+                                <label for="edit_contact_phone" class="block text-sm font-medium text-gray-700 mb-2">Contact
+                                    Phone *</label>
                                 <input type="text" id="edit_contact_phone" name="contact_phone" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter phone number">
                             </div>
 
                             <div>
-                                <label for="edit_address" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                <label for="edit_address"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Address</label>
                                 <textarea id="edit_address" name="address" rows="3"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                     placeholder="Enter supplier address"></textarea>
@@ -484,8 +498,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .animate-spin {
@@ -493,8 +514,13 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .edit-btn:disabled {
@@ -734,7 +760,7 @@
                             editButton.className = 'p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition duration-200 edit-btn smooth-transition';
                             editButton.title = 'Edit Supplier';
                             editButton.disabled = false;
-                            editButton.onclick = function() { editSupplier(supplierId); };
+                            editButton.onclick = function () { editSupplier(supplierId); };
                         }
 
                     } else {
@@ -778,10 +804,10 @@
 
                 // Revert to previous state on error
                 statusBadge.className = currentStatusClass;
-                statusBadge.innerHTML = currentStatus === 'active' 
+                statusBadge.innerHTML = currentStatus === 'active'
                     ? '<span class="w-2 h-2 rounded-full mr-2 bg-green-500"></span>Active'
                     : '<span class="w-2 h-2 rounded-full mr-2 bg-red-500"></span>Inactive';
-                    
+
                 toggleButton.className = currentButtonClass;
                 toggleButton.title = currentButtonTitle;
                 toggleButton.innerHTML = currentButtonHTML;
@@ -831,13 +857,23 @@
                 submitButton.innerHTML = '<svg class="w-4 h-4 animate-spin mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Updating...';
                 submitButton.disabled = true;
 
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest'
+                // Convert FormData to JSON object
+                const jsonData = {};
+                formData.forEach((value, key) => {
+                    if (key !== '_token' && key !== '_method') {
+                        jsonData[key] = value;
                     }
+                });
+
+                const response = await fetch(this.action, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
                 });
 
                 const data = await response.json();
@@ -872,7 +908,7 @@
 
         // Auto-submit search form when typing (optional - debounced)
         let searchTimeout;
-        document.querySelector('input[name="search"]')?.addEventListener('input', function(e) {
+        document.querySelector('input[name="search"]')?.addEventListener('input', function (e) {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 if (e.target.value.length === 0 || e.target.value.length >= 3) {
