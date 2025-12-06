@@ -24,3 +24,14 @@ docker-compose ps
 
 #if need reset for permission issue
 docker-compose restart
+# Stop containers
+docker-compose down
+
+# Fix permissions (important!)
+docker-compose up -d
+docker-compose exec -u root laravel.test chmod -R 775 storage bootstrap/cache
+docker-compose exec -u root laravel.test chown -R www-data:www-data storage bootstrap/cache
+
+# Clear and optimize
+docker-compose exec laravel.test php artisan optimize:clear
+docker-compose exec laravel.test php artisan optimize
