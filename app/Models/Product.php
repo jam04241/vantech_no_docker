@@ -79,4 +79,12 @@ class Product extends Model
     {
         $this->update(['archived' => false]);
     }
+
+    /**
+     * Get customer purchase orders for this product.
+     */
+    public function customerPurchaseOrders()
+    {
+        return $this->hasMany(\App\Models\CustomerPurchaseOrder::class, 'product_id');
+    }
 }

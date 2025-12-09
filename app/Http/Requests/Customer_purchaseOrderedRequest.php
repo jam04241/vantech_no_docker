@@ -24,6 +24,7 @@ class Customer_purchaseOrderedRequest extends FormRequest
     public function rules()
     {
         return [
+            'dr_receipt_id' => 'required|exists:dr_transactions,id',
             'product_id' => 'required|exists:products,id',
             'customer_id' => 'required|exists:customers,id',
             'quantity' => 'required|integer|min:1',

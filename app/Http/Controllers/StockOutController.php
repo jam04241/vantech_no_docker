@@ -14,7 +14,7 @@ class StockOutController extends Controller
     public function index(Request $request)
     {
         // Get all products where stock_quantity = 0 (sold out)
-        $query = Product::with(['brand', 'category', 'stock'])
+        $query = Product::with(['brand', 'category', 'stock', 'customerPurchaseOrders.drTransaction'])
             ->whereHas('stock', function ($q) {
                 $q->where('stock_quantity', 0);
             });
@@ -31,6 +31,9 @@ class StockOutController extends Controller
                     })
                     ->orWhereHas('category', function ($c) use ($search) {
                         $c->where('category_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('customerPurchaseOrders.drTransaction', function ($dr) use ($search) {
+                        $dr->where('receipt_no', 'like', "%{$search}%");
                     });
             });
         }

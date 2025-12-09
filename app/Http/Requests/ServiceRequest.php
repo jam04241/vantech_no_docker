@@ -24,6 +24,7 @@ class ServiceRequest extends FormRequest
     public function rules()
     {
         return [
+            'dr_receipt_id' => 'required|exists:dr_transactions,id',
             'customer_id' => 'required|exists:customers,id',
             'service_type_id' => 'required|exists:service_types,id',
             'type' => 'required|string|max:255',
@@ -35,7 +36,6 @@ class ServiceRequest extends FormRequest
             'total_price' => 'required|numeric|min:0',
             'date_in' => 'nullable|date_format:Y-m-d',
             'date_out' => 'nullable|date_format:Y-m-d',
-            'dr_receipt_id' => 'nullable|exists:dr_transactions,id',
         ];
     }
 
