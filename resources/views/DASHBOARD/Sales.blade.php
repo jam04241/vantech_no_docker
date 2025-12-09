@@ -139,7 +139,7 @@
         <!-- Recent Transactions Table -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold text-gray-800">Recent Transactions</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Recent Purchase Product Transactions</h2>
                 <div class="flex gap-2 items-center">
                     <!-- Search Bar -->
                     <div class="relative">
@@ -166,14 +166,15 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-100 border-b">
-                        <tr>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Order ID</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Customer</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Amount</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Product</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Qty</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Date</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
+                        <tr class="bg-gray-100 text-gray-700">
+                            <th class="px-4 py-3 text-left w-1/12">Order ID</th>
+                            <th class="px-4 py-3 text-center w-1/12">Receipt No</th>
+                            <th class="px-4 py-3 text-left w-2/12">Customer</th>
+                            <th class="px-4 py-3 text-left w-3/12">Product</th>
+                            <th class="px-4 py-3 text-center w-1/12">Qty</th>
+                            <th class="px-4 py-3 text-right w-2/12">Amount</th>
+                            <th class="px-4 py-3 text-left w-1/12">Date</th>
+                            <th class="px-4 py-3 text-left w-1/12">Status</th>
                         </tr>
                     </thead>
                 </table>
@@ -655,19 +656,19 @@
                 const productName = itemMatch ? itemMatch[2] : transaction.items;
 
                 row.innerHTML = `
-
-                                    <td class="px-4 py-3">#${transaction.id}</td>
-                                    <td class="px-4 py-3">${transaction.customer_name}</td>
-                                    <td class="px-4 py-3 font-semibold">${formatCurrency(transaction.amount)}</td>
-                                    <td class="px-4 py-3" title="${productName}">${productName.length > 20 ? productName.substring(0, 20) + '...' : productName}</td>
-                                    <td class="px-4 py-3 text-center font-medium">${quantity}</td>
-                                    <td class="px-4 py-3">${transaction.date}</td>
-                                    <td class="px-4 py-3">
-                                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(transaction.status)}">
-                                            ${transaction.status}
-                                        </span>
-                                    </td>
-                                    `;
+                            <td class="px-4 py-3 text-left w-1/12">#${transaction.id}</td>
+                            <td class="px-4 py-3 text-center w-1/12 font-medium">${transaction.receipt_no ?? '-'}</td>
+                            <td class="px-4 py-3 text-left w-2/12">${transaction.customer_name}</td>
+                            <td class="px-4 py-3 text-left w-3/12" title="${productName}">${productName.length > 20 ? productName.substring(0, 20) + '...' : productName}</td>
+                            <td class="px-4 py-3 text-center w-1/12 font-medium">${quantity}</td>
+                            <td class="px-4 py-3 text-right w-2/12 font-semibold">${formatCurrency(transaction.amount)}</td>
+                            <td class="px-4 py-3 text-left w-1/12">${transaction.date}</td>
+                            <td class="px-4 py-3 text-left w-1/12">
+                                <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(transaction.status)}">
+                                    ${transaction.status}
+                                </span>
+                            </td>
+                        `;
 
                 tbody.appendChild(row);
             });

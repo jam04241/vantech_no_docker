@@ -172,7 +172,7 @@
                     <span class="absolute left-4 top-3 text-gray-700 font-semibold">₱</span>
                     <input type="number" id="amount" name="amount" step="0.01" min="0"
                         class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-8 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                        placeholder="0.00" required>
+                        placeholder="0.00" required readonly>
                 </div>
             </div>
 

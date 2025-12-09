@@ -217,10 +217,12 @@ class SalesController extends Controller
             'customer_purchase_orders.quantity',
             'products.product_name',
             'customer_purchase_orders.order_date',
-            'customer_purchase_orders.status'
+            'customer_purchase_orders.status',
+            'dr_transactions.receipt_no as receipt_no'
         )
             ->join('customers', 'customer_purchase_orders.customer_id', '=', 'customers.id')
             ->join('products', 'customer_purchase_orders.product_id', '=', 'products.id')
+            ->leftJoin('dr_transactions', 'customer_purchase_orders.dr_receipt_id', '=', 'dr_transactions.id')
             ->whereBetween('customer_purchase_orders.order_date', [$startDate, $endDate])
             ->orderBy('customer_purchase_orders.order_date', 'desc')
             ->limit(50) // Increased limit for better pagination
@@ -234,7 +236,8 @@ class SalesController extends Controller
                     'product_name' => $transaction->product_name,
                     'items' => $transaction->quantity . 'x ' . $transaction->product_name,
                     'date' => Carbon::parse($transaction->order_date)->format('M d, Y'),
-                    'status' => $transaction->status
+                    'status' => $transaction->status,
+                    'receipt_no' => $transaction->receipt_no ?? '-'
                 ];
             });
 
