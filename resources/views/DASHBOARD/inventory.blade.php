@@ -674,27 +674,18 @@
                 if (e.target.matches('.pagination a')) {
                     e.preventDefault();
                     const url = e.target.href;
-
-                    // Get current filter values
-                    const search = document.querySelector('[name="search"]').value;
-                    const category = document.querySelector('[name="category"]').value;
-                    const brand = document.querySelector('[name="brand"]').value;
-                    const condition = document.querySelector('[name="condition"]').value;
-                    const supplier = document.querySelector('[name="supplier"]').value;
-
-                    // Build URL with filters
-                    const urlObj = new URL(url);
-                    if (search) urlObj.searchParams.set('search', search);
-                    if (category) urlObj.searchParams.set('category', category);
-                    if (brand) urlObj.searchParams.set('brand', brand);
-                    if (condition) urlObj.searchParams.set('condition', condition);
-                    if (supplier) urlObj.searchParams.set('supplier', supplier);
-
-                    // Make HTMX request
-                    htmx.ajax('GET', urlObj.toString(), {
+                    
+                    // Make HTMX request with all current filters
+                    htmx.ajax('GET', url, {
                         target: '#product-table-container',
-                        swap: 'innerHTML'
+                        swap: 'innerHTML',
+                        headers: {
+                            'HX-Request': 'true'
+                        }
                     });
+                    
+                    // Update URL in browser without reloading
+                    window.history.pushState({}, '', url);
                 }
             });
         });

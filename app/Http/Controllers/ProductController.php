@@ -142,8 +142,8 @@ class ProductController extends Controller
                     $category->whereRaw('LOWER(category_name) LIKE ?', [$like]);
                 })
                 ->orWhereHas('stock', function ($stock) use ($like) {
-                    $stock->whereRaw('LOWER(CAST(stock_quantity AS VARCHAR(50))) LIKE ?', [$like])
-                        ->orWhereRaw('LOWER(CAST(price AS VARCHAR(50))) LIKE ?', [$like]);
+                    $stock->whereRaw('LOWER(CAST(stock_quantity AS CHAR)) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(CAST(price AS CHAR)) LIKE ?', [$like]);
                 })
                 ->orWhereHas('supplier', function ($supplier) use ($like) {
                     $supplier->whereRaw('LOWER(company_name) LIKE ?', [$like])
@@ -251,7 +251,17 @@ class ProductController extends Controller
         $query = $this->applySorting($query, $request);
 
         // Get products with pagination (50 per page)
+        // $products = $query->paginate(50);
         $products = $query->paginate(50)->withQueryString();
+        // Append all query parameters to pagination links
+        $products->appends([
+            'search' => $request->search,
+            'category' => $request->category,
+            'brand' => $request->brand,
+            'condition' => $request->condition,
+            'supplier' => $request->supplier,
+            'sort' => $request->sort,
+        ]);
 
         $suppliers = Suppliers::where('status', 'active')->orderBy('supplier_name')->get();
 
@@ -261,7 +271,7 @@ class ProductController extends Controller
             compact('products', 'suppliers'),
             ['currentSort' => $request->get('sort', 'created_desc')]
         );
-
+        
         // If HTMX request, return only the table partial
         if ($request->header('HX-Request')) {
             return view('partials.productTable_Inventory', $data);
@@ -358,7 +368,10 @@ class ProductController extends Controller
             count($productsArray),
             $perPage,
             $page,
-            ['path' => $request->url(), 'query' => $request->query()]
+            [
+                'path' => $request->url(), 
+                'query' => $request->query() // This will automatically include all query parameters
+            ]
         );
 
         $data = array_merge(
@@ -730,5 +743,19 @@ class ProductController extends Controller
         $exists = Product::where('serial_number', $serial)->exists();
 
         return response()->json(['exists' => $exists]);
+    }
+    /**
+ * Get all filter parameters from request
+ */
+    protected function getFilterParams(Request $request): array
+    {
+        return [
+            'search' => $request->search,
+            'category' => $request->category,
+            'brand' => $request->brand,
+            'condition' => $request->condition,
+            'supplier' => $request->supplier,
+            'sort' => $request->sort,
+        ];
     }
 }

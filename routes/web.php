@@ -66,14 +66,6 @@ Route::middleware(['auth'])->group(function () {
             return view('INVENTORY.brandcategoryHistory');
         })->name('inventory.brandcategory');
 
-        // POS ITEM LIST
-        Route::get('/Suppliers/Create_Orders', function () {
-            return view('SUPPLIERS.suppliers_purchase');
-        })->name('Supplier.CreateOrders');
-
-        Route::get('/Total Stocks', function () {
-            return view('partials.total_stock');
-        })->name('inventory.stocktotal');
 
         Route::get('/Audit', [AuditlogController::class, 'index'])->name('audit.logs');
     });
@@ -84,6 +76,15 @@ Route::middleware(['auth'])->group(function () {
             return view('Customer.addCustomer');
         })->name('customer.addCustomer');
 
+                // POS ITEM LIST
+        Route::get('/Suppliers/Create_Orders', function () {
+            return view('SUPPLIERS.suppliers_purchase');
+        })->name('Supplier.CreateOrders');
+
+        Route::get('/Total Stocks', function () {
+            return view('partials.total_stock');
+        })->name('inventory.stocktotal');
+        
         Route::get('/PointOfSale/purchaseFrame', function () {
             return view('POS_SYSTEM.purchaseFrame');
         })->name('pointofsale.purchaseframe');
