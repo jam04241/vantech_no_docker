@@ -236,32 +236,43 @@ class SalesController extends Controller
         $transactions = DB::table('dr_transactions')
             ->select(
                 'dr_transactions.id',
-                DB::raw("CONCAT(customers.first_name, ' ', customers.last_name) as customer_name"),
+                DB::raw("MAX(CONCAT(customers.first_name, ' ', customers.last_name)) as customer_name"),
                 'dr_transactions.total_sum',
                 'dr_transactions.created_at',
-                'dr_transactions.receipt_no'
+                'dr_transactions.receipt_no',
+                DB::raw('SUM(customer_purchase_orders.total_price) as subtotal')
             )
             ->leftJoin('customer_purchase_orders', 'dr_transactions.id', '=', 'customer_purchase_orders.dr_receipt_id')
             ->leftJoin('customers', 'customer_purchase_orders.customer_id', '=', 'customers.id')
             ->whereBetween('dr_transactions.created_at', [$startDate, $endDate])
+            ->groupBy(
+                'dr_transactions.id',
+                'dr_transactions.total_sum',
+                'dr_transactions.created_at',
+                'dr_transactions.receipt_no'
+            )
             ->orderBy('dr_transactions.created_at', 'desc')
             ->limit(50)
             ->get()
             ->map(function ($transaction) {
+                $subtotal = round($transaction->subtotal ?? 0, 2);
+                $totalSum = round($transaction->total_sum ?? 0, 2);
+                $discount = round($subtotal - $totalSum, 2);
+
                 return [
                     'id' => $transaction->id,
                     'customer_name' => $transaction->customer_name ?? '-',
-                    'amount' => round($transaction->total_sum, 2),
+                    'subtotal' => $subtotal,
+                    'discount' => $discount > 0 ? $discount : 0,
+                    'amount' => $totalSum,
                     'date' => Carbon::parse($transaction->created_at)->format('m/d/Y h:i A'),
                     'receipt_no' => $transaction->receipt_no ?? '-'
                 ];
-            })
-            ->unique('receipt_no')
-            ->values();
+            });
 
         return $transactions;
     }
-    /**
+    /**     
      * Get sales summary by date range (quick endpoint)
      */
     public function getSalesSummary(Request $request)

@@ -186,9 +186,11 @@
                         <tr class="bg-gray-100 text-gray-700">
                             <th class="px-4 py-3 text-left w-1/12">Order ID</th>
                             <th class="px-4 py-3 text-center w-1/12">Receipt No</th>
-                            <th class="px-4 py-3 text-left w-3/12">Customer</th>
-                            <th class="px-4 py-3 text-right w-2/12">Amount</th>
-                            <th class="px-4 py-3 text-left w-3/12">Date</th>
+                            <th class="px-4 py-3 text-left w-2/12">Customer</th>
+                            <th class="px-4 py-3 text-right w-2/12">Subtotal</th>
+                            <th class="px-4 py-3 text-right w-2/12">Discount</th>
+                            <th class="px-4 py-3 text-right w-2/12">Total Price</th>
+                            <th class="px-4 py-3 text-left w-2/12">Date</th>
                         </tr>
                     </thead>
                 </table>
@@ -623,6 +625,8 @@
                     transaction.id.toString(),
                     transaction.customer_name,
                     transaction.amount.toString(),
+                    transaction.subtotal?.toString() || '0',
+                    transaction.discount?.toString() || '0',
                     transaction.date,
                     transaction.receipt_no
                 ].join(' ').toLowerCase();
@@ -650,7 +654,7 @@
             tbody.innerHTML = '';
 
             if (filteredTransactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No transactions found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No transactions found</td></tr>';
                 updatePaginationInfo(0, 0, 0);
                 return;
             }
@@ -668,9 +672,11 @@
                 row.innerHTML = `
                                             <td class="px-4 py-3 text-left w-1/12">#${transaction.id}</td>
                                             <td class="px-4 py-3 text-center w-1/12 font-medium">${transaction.receipt_no ?? '-'}</td>
-                                            <td class="px-4 py-3 text-left w-3/12">${transaction.customer_name}</td>
+                                            <td class="px-4 py-3 text-left w-2/12">${transaction.customer_name}</td>
+                                            <td class="px-4 py-3 text-right w-2/12">${formatCurrency(transaction.subtotal || 0)}</td>
+                                            <td class="px-4 py-3 text-right w-2/12">${formatCurrency(transaction.discount || 0)}</td>
                                             <td class="px-4 py-3 text-right w-2/12 font-semibold">${formatCurrency(transaction.amount)}</td>
-                                            <td class="px-4 py-3 text-left w-3/12">${transaction.date}</td>
+                                            <td class="px-4 py-3 text-left w-2/12">${transaction.date}</td>
                                         `;
 
                 tbody.appendChild(row);

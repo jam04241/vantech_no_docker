@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Dashboard API Routes (accessible from web with session auth)
-Route::middleware('web')->prefix('dashboard')->group(function () {
+Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     Route::get('/data', [DashboardController::class, 'getDashboardData']);
 });
 

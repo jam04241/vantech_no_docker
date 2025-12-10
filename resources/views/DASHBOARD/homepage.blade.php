@@ -159,28 +159,57 @@
     </div>
 
     <script>
+        let isLoading = false;
+        let refreshInterval = null;
+
         document.addEventListener('DOMContentLoaded', function () {
+            // Initial load
             loadDashboardData();
 
-            // Auto-refresh every 30 seconds
-            setInterval(loadDashboardData, 30000);
+            // Real-time refresh every 250ms
+            refreshInterval = setInterval(loadDashboardData, 250);
+        });
+
+        // Clean up interval when page is hidden/unloaded
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+            } else {
+                if (!refreshInterval) {
+                    loadDashboardData();
+                    refreshInterval = setInterval(loadDashboardData, 250);
+                }
+            }
         });
 
         async function loadDashboardData() {
+            // Prevent multiple simultaneous requests
+            if (isLoading) {
+                return;
+            }
+
             try {
-                console.log('📊 Fetching dashboard data...');
-                const response = await fetch('/api/dashboard/data');
+                isLoading = true;
+                const response = await fetch('/api/dashboard/data', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
-                console.log('✅ Dashboard data received:', result);
 
                 if (result.success && result.data) {
                     const data = result.data;
-                    console.log('📈 Updating dashboard with metrics:', data.metrics);
                     updateMetrics(data.metrics);
                     updateTopProducts(data.top_products);
                     updateLowStockAlerts(data.low_stock_alerts);
@@ -188,12 +217,12 @@
                     updateInventoryStatus(data.inventory_status);
                 } else {
                     console.warn('⚠️ Invalid response format:', result);
-                    showFallbackData();
                 }
             } catch (error) {
                 console.error('❌ Error loading dashboard data:', error);
-                // Show fallback data
-                showFallbackData();
+                // Don't show fallback on every error to avoid flickering
+            } finally {
+                isLoading = false;
             }
         }
 
@@ -201,46 +230,55 @@
             document.getElementById('employeeCount').textContent = metrics.employees;
             document.getElementById('customerCount').textContent = metrics.customers;
             document.getElementById('productCount').textContent = metrics.products;
-            document.getElementById('todaysSales').textContent = '₱' + new Intl.NumberFormat('en-PH').format(metrics.daily_sales);
+            // Format daily sales with exactly 2 decimal places
+            const formattedSales = parseFloat(metrics.daily_sales || 0).toFixed(2);
+            document.getElementById('todaysSales').textContent = '₱' + new Intl.NumberFormat('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(formattedSales);
         }
 
         function updateTopProducts(topProducts) {
-            const container = document.getElementById('topProducts');
+    const container = document.getElementById('topProducts');
 
-            if (topProducts.length === 0) {
-                container.innerHTML = '<div class="text-gray-500 text-center py-8">No sales data available</div>';
-                return;
-            }
+    if (topProducts.length === 0) {
+        container.innerHTML = '<div class="text-gray-500 text-center py-8">No sales data available</div>';
+        return;
+    }
 
-            const html = topProducts.map(product => `
-                                                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors">
-                                                        <div class="flex-1">
-                                                            <p class="font-semibold text-gray-800 text-sm">${product.name}</p>
-                                                        </div>
-                                                        <div class="text-lg font-bold text-indigo-600">${product.sold}</div>
-                                                    </div>
-                                                `).join('');
-            container.innerHTML = html;
-        }
+    const html = topProducts.map(product => `
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors">
+            <div class="flex-1">
+                <p class="font-semibold text-gray-800 text-sm">${product.name}</p>
+                <p class="text-xs text-gray-500">${product.price}</p>
+            </div>
+            <div class="text-lg font-bold text-indigo-600">${product.sold} sold</div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
 
         function updateLowStockAlerts(lowStockItems) {
-            const container = document.getElementById('lowStockItems');
+    const container = document.getElementById('lowStockItems');
 
-            if (lowStockItems.length === 0) {
-                container.innerHTML = '<div class="text-green-600 text-center py-8 font-medium">All items well stocked!</div>';
-                return;
-            }
+    if (lowStockItems.length === 0) {
+        container.innerHTML = '<div class="text-green-600 text-center py-8 font-medium">All items well stocked!</div>';
+        return;
+    }
 
-            const html = lowStockItems.map(item => `
-                                                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors">
-                                                        <div class="flex-1">
-                                                            <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
-                                                        </div>
-                                                        <div class="text-lg font-bold text-yellow-600">${item.left}</div>
-                                                    </div>
-                                                `).join('');
-            container.innerHTML = html;
-        }
+    const html = lowStockItems.map(item => `
+        <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors">
+            <div class="flex-1">
+                <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
+                <p class="text-xs text-gray-500">${item.price}</p>
+            </div>
+            <div class="text-lg font-bold text-yellow-600">${item.left} left</div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
 
         function updateSupplierStatus(supplierStatus) {
             document.getElementById('activeSuppliers').textContent = supplierStatus.active;
