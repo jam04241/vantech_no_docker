@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warranty Receipt - Vantech Computers</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Warranty Receipt</title>
+    {{-- Tailwind & Vite --}}
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
     <style>
         @media print {
             @page {
@@ -109,10 +110,10 @@
                     <h3 class="text-lg font-bold text-blue-700 text-right whitespace-nowrap">WARRANTY RECEIPT</h3>
                     
                     @php
-                        use Picqer\Barcode\BarcodeGeneratorPNG;
-                        $generator = new BarcodeGeneratorPNG();
-                        $drNumber = $receiptData['drNumber'] ?? 'NO-RECEIPT-GENERATED'; // Get from receipt data or default
-                        $barcode = base64_encode($generator->getBarcode($drNumber, $generator::TYPE_CODE_128, 1, 30));
+use Picqer\Barcode\BarcodeGeneratorPNG;
+$generator = new BarcodeGeneratorPNG();
+$drNumber = $receiptData['drNumber'] ?? 'NO-RECEIPT-GENERATED'; // Get from receipt data or default
+$barcode = base64_encode($generator->getBarcode($drNumber, $generator::TYPE_CODE_128, 1, 30));
                     @endphp
                     
                     <!-- Barcode -->
@@ -159,19 +160,52 @@
                     <tbody>
                         @php
 $receiptSubtotal = 0;
+$groupedItems = [];
+
+if (isset($receiptData['items']) && count($receiptData['items']) > 0) {
+    foreach ($receiptData['items'] as $item) {
+        $groupKey = $item['productName'] . '|' . ($item['warranty'] ?? 'N/A') . '|' . $item['price'];
+
+        if (!isset($groupedItems[$groupKey])) {
+            $groupedItems[$groupKey] = [
+                'productName' => $item['productName'],
+                'warranty' => $item['warranty'] ?? 'N/A',
+                'price' => $item['price'],
+                'quantity' => 0,
+                'subtotal' => 0,
+                'serials' => []
+            ];
+        }
+
+        $groupedItems[$groupKey]['quantity'] += $item['quantity'];
+        $groupedItems[$groupKey]['subtotal'] += $item['subtotal'];
+        if (isset($item['serialNumber'])) {
+            $groupedItems[$groupKey]['serials'][] = $item['serialNumber'];
+        }
+    }
+}
                         @endphp
-                        @if(isset($receiptData['items']) && count($receiptData['items']) > 0)
-                            @foreach($receiptData['items'] as $item)
+                        @if(count($groupedItems) > 0)
+                            @foreach($groupedItems as $groupKey => $group)
                                 @php
-        $receiptSubtotal += $item['subtotal'];
+        $receiptSubtotal += $group['subtotal'];
                                 @endphp
                                 <tr class="border-b border-gray-200">
-                                    <td class="py-2 text-sm">{{ $item['productName'] }}</td>
-                                    <td class="text-center py-2 text-sm">{{ $item['warranty'] ?? '-' }}</td>
-                                    <td class="text-center py-2 text-sm">{{ $item['quantity'] }}</td>
-                                    <td class="text-right py-2 text-sm priceColumn">₱{{ number_format($item['price'], 2) }}</td>
+                                    <td class="py-2 text-sm">
+                                        <div class="font-medium">{{ $group['productName'] }}</div>
+                                        @if(count($group['serials']) > 0)
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                @foreach($group['serials'] as $serial)
+                                                    <div>- {{ $serial }}</div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="text-center py-2 text-sm">{{ $group['warranty'] }}</td>
+                                    <td class="text-center py-2 text-sm">{{ $group['quantity'] }}</td>
+                                    <td class="text-right py-2 text-sm priceColumn">₱{{ number_format($group['price'], 2) }}</td>
                                     <td class="text-right py-2 text-sm totalPriceColumn">
-                                        ₱{{ number_format($item['subtotal'], 2) }}</td>
+                                        ₱{{ number_format($group['subtotal'], 2) }}</td>
                                 </tr>
                             @endforeach
                         @else
@@ -187,7 +221,7 @@ $receiptSubtotal = 0;
             <div class="flex justify-between mb-8">
                 <div class="w-1/2">
                     <p class="text-sm font-semibold">Note:</p>
-                    <p class="text-sm text-gray-600 mt-1">Thank you for your purchase!</p>
+                    {{-- <p class="text-sm text-gray-600 mt-1">Thank you for your purchase!</p> --}}
                 </div>
                 <div class="w-1/2">
 

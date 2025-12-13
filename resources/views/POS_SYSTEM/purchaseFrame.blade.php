@@ -325,22 +325,17 @@
         const formItemsContainer = document.getElementById('formItemsContainer');
         formItemsContainer.innerHTML = '';
 
-        const orderListItems = document.querySelectorAll('#purchaseOrderList li');
+        let itemIndex = 0;
 
-        orderListItems.forEach((li, index) => {
-            const productId = li.getAttribute('data-product-id');
-            const unitPrice = li.getAttribute('data-unit-price');
-            const quantity = li.getAttribute('data-quantity');
-            const totalPrice = li.getAttribute('data-total-price');
-            const serialNumber = li.getAttribute('data-serial-number');
-
-            if (productId && unitPrice && quantity && totalPrice && serialNumber) {
+        // Use orderItems array directly instead of DOM parsing
+        if (typeof orderItems !== 'undefined' && orderItems.length > 0) {
+            orderItems.forEach((item) => {
                 const inputs = [
-                    { name: `items[${index}][product_id]`, value: productId },
-                    { name: `items[${index}][unit_price]`, value: unitPrice },
-                    { name: `items[${index}][quantity]`, value: quantity },
-                    { name: `items[${index}][total_price]`, value: totalPrice },
-                    { name: `items[${index}][serial_number]`, value: serialNumber }
+                    { name: `items[${itemIndex}][product_id]`, value: item.id },
+                    { name: `items[${itemIndex}][unit_price]`, value: parseFloat(item.price).toFixed(2) },
+                    { name: `items[${itemIndex}][quantity]`, value: 1 },
+                    { name: `items[${itemIndex}][total_price]`, value: parseFloat(item.price).toFixed(2) },
+                    { name: `items[${itemIndex}][serial_number]`, value: item.serialNumber }
                 ];
 
                 inputs.forEach(input => {
@@ -350,8 +345,20 @@
                     hiddenInput.value = input.value;
                     formItemsContainer.appendChild(hiddenInput);
                 });
-            }
-        });
+
+                console.log(`Item ${itemIndex} prepared:`, {
+                    product_id: item.id,
+                    unit_price: item.price,
+                    quantity: 1,
+                    total_price: item.price,
+                    serial_number: item.serialNumber
+                });
+
+                itemIndex++;
+            });
+        }
+
+        console.log(`Total items prepared for submission: ${itemIndex}`);
     }
 
     /**

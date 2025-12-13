@@ -292,55 +292,82 @@
             const purchaseList = document.getElementById('purchaseOrderList');
             const emptyPurchaseMsg = document.getElementById('emptyOrderMsg');
 
+            // Group items by product name, warranty, and price
+            const groupedItems = {};
+            const groupOrder = [];
+
+            orderItems.forEach((item, index) => {
+                const groupKey = `${item.name}|${item.warranty}|${item.price}`;
+
+                if (!groupedItems[groupKey]) {
+                    groupedItems[groupKey] = {
+                        name: item.name,
+                        warranty: item.warranty,
+                        price: item.price,
+                        qty: 0,
+                        serials: [],
+                        indices: []
+                    };
+                    groupOrder.push(groupKey);
+                }
+
+                groupedItems[groupKey].qty += item.qty;
+                groupedItems[groupKey].serials.push(item.serialNumber);
+                groupedItems[groupKey].indices.push(index);
+            });
+
             let html = '';
             let subtotal = 0;
+            let sequenceNumber = 1;
 
-            console.log('📊 DISPLAYING ORDER ITEMS:');
-            orderItems.forEach((item, index) => {
-                const itemSubtotal = item.price * item.qty;
+            console.log(' DISPLAYING GROUPED ORDER ITEMS:');
+            groupOrder.forEach((groupKey) => {
+                const group = groupedItems[groupKey];
+                const itemSubtotal = group.price * group.qty;
                 subtotal += itemSubtotal;
-                const sequenceNumber = index + 1;
 
                 console.log(`Item ${sequenceNumber}:`, {
-                    product_id: item.id,
-                    product_name: item.name,
-                    serial_number: item.serialNumber,
-                    warranty: item.warranty,
-                    unit_price: item.price,
-                    quantity: item.qty,
+                    product_name: group.name,
+                    warranty: group.warranty,
+                    unit_price: group.price,
+                    quantity: group.qty,
+                    serials: group.serials,
                     subtotal: itemSubtotal
                 });
 
+                const serialsList = group.serials.map(sn => `SN: ${sn}`).join(', ');
+
                 html += `
-                                                        <li class="py-3 px-3 hover:bg-gray-100 transition"
-                                                            data-product-id="${item.id}"
-                                                            data-serial-number="${item.serialNumber}"
-                                                            data-unit-price="${item.price}"
-                                                            data-quantity="${item.qty}"
-                                                            data-total-price="${itemSubtotal}">
-                                                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
-                                                                <div class="col-span-1 text-center">
-                                                                    <span class="font-semibold text-gray-900">${sequenceNumber}</span>
-                                                                </div>
-                                                                <div class="col-span-3">
-                                                                    <p class="font-medium text-gray-900 truncate">${item.name}</p>
-                                                                    <p class="text-gray-500 text-xs">SN: ${item.serialNumber}</p>
-                                                                </div>
-                                                                <div class="col-span-2 text-center">
-                                                                    <span class="text-gray-700 text-xs">${item.warranty}</span>
-                                                                </div>
-                                                                <div class="col-span-2 text-center">
-                                                                    <span class="text-gray-700 font-semibold">₱${item.price.toFixed(2)}</span>
-                                                                </div>
-                                                                <div class="col-span-3 text-right">
-                                                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
-                                                                </div>
-                                                                <div class="col-span-1 text-center">
-                                                                    <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    `;
+                        <li class="py-3 px-3 hover:bg-gray-100 transition"
+                            data-group-key="${groupKey}"
+                            data-unit-price="${group.price}"
+                            data-quantity="${group.qty}"
+                            data-total-price="${itemSubtotal}">
+                            <div class="grid grid-cols-12 gap-1 items-center text-xs">
+                                <div class="col-span-1 text-center">
+                                    <span class="font-semibold text-gray-900">${sequenceNumber}</span>
+                                </div>
+                                <div class="col-span-3">
+                                    <p class="font-medium text-gray-900 truncate">${group.name}</p>
+                                    <p class="text-gray-500 text-xs">${serialsList}</p>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="text-gray-700 text-xs">${group.warranty}</span>
+                                </div>
+                                <div class="col-span-2 text-center">
+                                    <span class="text-gray-700 font-semibold">₱${group.price.toFixed(2)}</span>
+                                </div>
+                                <div class="col-span-3 text-right">
+                                    <span class="font-semibold text-gray-900">₱${itemSubtotal.toFixed(2)}</span>
+                                </div>
+                                <div class="col-span-1 text-center">
+                                    <button onclick="removeGroupedItems('${groupKey}')" class="text-red-500 hover:text-red-700 font-bold text-lg">−</button>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+
+                sequenceNumber++;
             });
 
             purchaseList.innerHTML = html;
@@ -351,11 +378,25 @@
             // Update subtotal
             document.getElementById('purchaseSubtotalDisplay').textContent = subtotal.toFixed(2);
 
-            console.log('💰 TOTALS UPDATED:');
+            console.log(' TOTALS UPDATED:');
             console.log('   Subtotal:', subtotal.toFixed(2));
 
             // Recalculate totals
             updatePurchaseTotal();
+        }
+
+        // Remove all items in a grouped set
+        function removeGroupedItems(groupKey) {
+            const parts = groupKey.split('|');
+            const name = parts[0];
+            const warranty = parts[1];
+            const price = parseFloat(parts[2]);
+
+            orderItems = orderItems.filter(item =>
+                !(item.name === name && item.warranty === warranty && item.price === price)
+            );
+
+            updateOrderDisplay();
         }
 
         // Remove item from order (basis: product ID)

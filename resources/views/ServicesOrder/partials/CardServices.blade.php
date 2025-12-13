@@ -305,17 +305,12 @@
                     </button>
                 </div>
 
-                <!-- Acknowledgment Receipt Button (Show except when Completed) -->
-                <button type="button" id="acknowledgmentBtn"
+                <!-- Acknowledgment Receipt Button (Show only when editing) -->
+                <button type="button" id="acknowledgmentBtn" style="display: none;"
                     class="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm mt-2">
                     <i class="fas fa-handshake"></i>Acknowledgment Receipt
                 </button>
 
-                <!-- Delete Button (Only show if editing) -->
-                <button type="button" id="deleteBtn" style="display: none;"
-                    class="w-full py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition text-sm mt-2">
-                    <i class="fas fa-trash mr-1"></i>Archive
-                </button>
             </form>
         </div>
     </div>

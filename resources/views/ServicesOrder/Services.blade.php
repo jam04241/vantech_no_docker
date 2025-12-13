@@ -407,12 +407,6 @@
                     acknowledgmentBtn.addEventListener('click', handleAcknowledgmentReceipt);
                 }
 
-                // Delete/Archive button
-                const deleteBtn = document.getElementById('deleteBtn');
-                if (deleteBtn) {
-                    deleteBtn.addEventListener('click', handleArchiveService);
-                }
-
                 // Add Replacement button
                 const addReplacementBtn = document.getElementById('addReplacementBtn');
                 if (addReplacementBtn) {
@@ -745,7 +739,6 @@
                 document.getElementById('dateIn').classList.add('bg-gray-100', 'cursor-not-allowed');
 
                 document.getElementById('formTitle').innerHTML = '<i class="fas fa-pencil-alt"></i> Progress Service';
-                document.getElementById('deleteBtn').style.display = 'block';
                 document.getElementById('saveBtn').style.display = 'flex';
                 document.getElementById('replacementCard').style.display = 'flex';
 
@@ -770,7 +763,6 @@
                 document.getElementById('statusDropdown').value = ''; // Clear visible dropdown
                 document.getElementById('statusContainer').style.display = 'none'; // Hide status dropdown
                 document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create Service';
-                document.getElementById('deleteBtn').style.display = 'none';
                 document.getElementById('saveBtn').style.display = 'flex';
                 document.getElementById('serviceReceiptBtn').style.display = 'none';
                 document.getElementById('replacementCard').style.display = 'none';
@@ -809,15 +801,21 @@
                 const saveBtn = document.getElementById('saveBtn');
                 const receiptBtn = document.getElementById('serviceReceiptBtn');
                 const ackBtn = document.getElementById('acknowledgmentBtn');
+                const serviceIdInput = document.getElementById('serviceIdInput');
+                const isCreating = !serviceIdInput || serviceIdInput.value === '';
 
                 if (status === 'Completed') {
                     saveBtn.style.display = 'none';
                     receiptBtn.style.display = 'flex';
                     ackBtn.style.display = 'none';
+                } else if (status === 'In Progress') {
+                    saveBtn.style.display = 'flex';
+                    receiptBtn.style.display = 'none';
+                    ackBtn.style.display = isCreating ? 'none' : 'flex';
                 } else {
                     saveBtn.style.display = 'flex';
                     receiptBtn.style.display = 'none';
-                    ackBtn.style.display = 'flex';
+                    ackBtn.style.display = isCreating ? 'none' : 'flex';
                 }
             }
 
