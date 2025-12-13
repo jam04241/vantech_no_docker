@@ -142,14 +142,28 @@
                                 </td>
 
                                 <td class="px-6 py-4 text-center">
-                                    <button onclick="viewPurchaseTransactions({{ $customer->id }})"
-                                        class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition duration-200">
-                                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Transactions
-                                    </button>
+                                    @if(Auth::user() && Auth::user()->role === 'admin')
+                                        <button onclick="viewPurchaseTransactions({{ $customer->id }})"
+                                            class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition duration-200">
+                                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Transactions
+                                        </button>
+                                        {{-- @elseif(Auth::user() && Auth::user()->role === 'staff')
+                                        <button onclick="showAdminVerificationModal('{{ route('customer.records') }}')"
+                                            class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition duration-200 relative group">
+                                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Transactions
+                                            <span
+                                                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs bg-red-500 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Admin
+                                                Only</span>
+                                        </button> --}}
+                                    @endif
                                     <button onclick="editCustomer({{ $customer->id }})"
                                         class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition duration-200">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,16 +215,21 @@
                                 <p class="text-sm font-medium text-gray-600">Contact No.</p>
                                 <p id="transactionContactNo" class="text-lg font-semibold text-gray-900">-</p>
                             </div>
-                            <div class="md:col-span-2">
+                            <div>
                                 <p class="text-sm font-medium text-gray-600">Full Address</p>
                                 <p id="transactionFullAddress" class="text-lg font-semibold text-gray-900">-</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Payment Method</p>
+                                <p id="transactionPaymentMethod" class="text-lg font-semibold text-gray-900">-</p>
                             </div>
                         </div>
                     </div>
 
                     {{-- Receipt Selection --}}
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Receipt No.</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Recent Purchase Order Receipt
+                            No.</label>
                         <select id="receiptSelect"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="">-- Select a receipt --</option>
@@ -228,9 +247,6 @@
                                 <div>
                                     <p class="text-sm font-medium text-gray-600">Receipt No.</p>
                                     <p id="transactionReceiptNo" class="text-lg font-semibold text-gray-900">-</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Created By</p>
                                 </div>
                             </div>
 
@@ -596,27 +612,46 @@
             }
         });
 
-        function viewPurchaseTransactions(customerId) {
-            const customerRow = event.target.closest('tr');
-            const cells = customerRow.querySelectorAll('td');
-            const firstName = cells[1].textContent.trim();
-            const lastName = cells[2].textContent.trim();
-            const contactNo = cells[3].textContent.trim();
-            const street = cells[5].textContent.trim();
-            const barangay = cells[6].textContent.trim();
-            const city = cells[7].textContent.trim();
+        async function viewPurchaseTransactions(customerId) {
+            try {
+                const response = await fetch(`/customers/${customerId}/purchase-transactions`);
+                const data = await response.json();
 
-            document.getElementById('transactionFullName').textContent = firstName + ' ' + lastName;
-            document.getElementById('transactionContactNo').textContent = contactNo;
-            document.getElementById('transactionFullAddress').textContent = (street + ' ' + barangay + ' ' + city).trim();
+                if (!data.success) {
+                    Swal.fire('Error', data.message || 'Failed to fetch transactions', 'error');
+                    return;
+                }
 
-            receiptSelect.innerHTML = '<option value="">-- Select a receipt --</option>';
-            allTransactions = [];
+                const customer = data.customer;
+                document.getElementById('transactionFullName').textContent = customer.full_name;
+                document.getElementById('transactionContactNo').textContent = customer.contact_no;
+                document.getElementById('transactionFullAddress').textContent = customer.address;
 
-            document.getElementById('transactionDetailsContainer').classList.add('hidden');
-            document.getElementById('noTransactionsMessage').classList.remove('hidden');
+                if (data.receipts.length > 0) {
+                    document.getElementById('transactionPaymentMethod').textContent = data.receipts[0].payment_method || 'N/A';
+                }
 
-            openTransactionModal();
+                receiptSelect.innerHTML = '<option value="">-- Select a receipt --</option>';
+                allTransactions = data.receipts;
+
+                if (data.receipts.length === 0) {
+                    document.getElementById('transactionDetailsContainer').classList.add('hidden');
+                    document.getElementById('noTransactionsMessage').classList.remove('hidden');
+                } else {
+                    data.receipts.forEach((receipt, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = receipt.receipt_no;
+                        receiptSelect.appendChild(option);
+                    });
+                    document.getElementById('noTransactionsMessage').classList.add('hidden');
+                }
+
+                openTransactionModal();
+            } catch (error) {
+                Swal.fire('Error', 'Failed to fetch purchase transactions', 'error');
+                console.error('Error:', error);
+            }
         }
 
         receiptSelect.addEventListener('change', function () {
@@ -628,7 +663,7 @@
             const selectedTransaction = allTransactions[parseInt(this.value)];
             if (!selectedTransaction) return;
 
-            const dateTime = new Date(selectedTransaction.created_at);
+            const dateTime = new Date(selectedTransaction.date_time);
             const formattedDate = dateTime.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: '2-digit',
@@ -646,7 +681,6 @@
             const productsTableBody = document.getElementById('productsTableBody');
             productsTableBody.innerHTML = '';
 
-            let subtotal = 0;
             selectedTransaction.products.forEach(product => {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-100 transition';
@@ -656,20 +690,19 @@
                 const warrantyWidth = Math.max(100, product.warranty.length * 8);
 
                 row.innerHTML = `
-                                <td class="px-4 py-3 text-left" style="min-width: ${productNameWidth}px;">${product.product_name}</td>
-                                <td class="px-4 py-3 text-left" style="min-width: ${serialNoWidth}px;">${product.serial_no}</td>
-                                <td class="px-4 py-3 text-left" style="min-width: ${warrantyWidth}px;">${product.warranty}</td>
-                                <td class="px-4 py-3 text-right">₱ ${parseFloat(product.unit_price).toFixed(2)}</td>
-                                <td class="px-4 py-3 text-right">₱ ${parseFloat(product.total_price).toFixed(2)}</td>
-                            `;
+                                                                        <td class="px-4 py-3 text-left" style="min-width: ${productNameWidth}px;">${product.product_name}</td>
+                                                                        <td class="px-4 py-3 text-left" style="min-width: ${serialNoWidth}px;">${product.serial_no}</td>
+                                                                        <td class="px-4 py-3 text-left" style="min-width: ${warrantyWidth}px;">${product.warranty}</td>
+                                                                        <td class="px-4 py-3 text-right">₱ ${parseFloat(product.unit_price).toFixed(2)}</td>
+                                                                        <td class="px-4 py-3 text-right">₱ ${parseFloat(product.total_price).toFixed(2)}</td>
+                                                                    `;
                 productsTableBody.appendChild(row);
-                subtotal += parseFloat(product.total_price);
             });
 
             const discount = selectedTransaction.discount;
-            const total = selectedTransaction.total_sum;
+            const total = selectedTransaction.total_price;
 
-            document.getElementById('subtotalAmount').textContent = `₱ ${subtotal.toFixed(2)}`;
+            document.getElementById('subtotalAmount').textContent = `₱ ${selectedTransaction.subtotal.toFixed(2)}`;
             document.getElementById('discountAmount').textContent = `- ₱ ${discount.toFixed(2)}`;
             document.getElementById('totalAmount').textContent = `₱ ${parseFloat(total).toFixed(2)}`;
 

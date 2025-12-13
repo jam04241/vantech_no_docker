@@ -18,4 +18,9 @@ class Customer extends Model
         'brgy',            // Optional
         'city_province',   // Optional
     ];
+
+    public function purchaseOrders()
+    {
+        return $this->hasMany(CustomerPurchaseOrder::class);
+    }
 }

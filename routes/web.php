@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
             return view('Customer.addCustomer');
         })->name('customer.addCustomer');
 
-                // POS ITEM LIST
+        // POS ITEM LIST
         Route::get('/Suppliers/Create_Orders', function () {
             return view('SUPPLIERS.suppliers_purchase');
         })->name('Supplier.CreateOrders');
@@ -84,7 +84,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/Total Stocks', function () {
             return view('partials.total_stock');
         })->name('inventory.stocktotal');
-        
+
         Route::get('/PointOfSale/purchaseFrame', function () {
             return view('POS_SYSTEM.purchaseFrame');
         })->name('pointofsale.purchaseframe');
@@ -264,7 +264,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
     Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
-    //kani sad josh
+    Route::get('/customers/{customerId}/purchase-transactions', [CustomerController::class, 'getPurchaseTransactions'])->name('customers.purchase-transactions');
+
 
 
     // POS Routes

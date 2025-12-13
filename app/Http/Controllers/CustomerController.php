@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
+use App\Models\CustomerPurchaseOrder;
+use App\Models\DRTransaction;
 use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
@@ -104,5 +106,60 @@ class CustomerController extends Controller
         return response()->json($customers);
     }
 
-    public function getPurchaseTransactions() {}
+    public function getPurchaseTransactions($customerId)
+    {
+        try {
+            $customer = Customer::findOrFail($customerId);
+
+            $receipts = CustomerPurchaseOrder::where('customer_id', $customerId)
+                ->with(['drTransaction', 'product', 'paymentMethod'])
+                ->get()
+                ->groupBy(function ($order) {
+                    return $order->drTransaction->receipt_no;
+                })
+                ->map(function ($orders, $receiptNo) {
+                    $drTransaction = $orders->first()->drTransaction;
+                    $subtotal = $orders->sum('total_price');
+                    $discount = $subtotal - $drTransaction->total_sum;
+                    $paymentMethod = $orders->first()->paymentMethod;
+
+                    return [
+                        'receipt_no' => $receiptNo,
+                        'dr_receipt_id' => $drTransaction->id,
+                        'date_time' => $drTransaction->created_at,
+                        'subtotal' => $subtotal,
+                        'discount' => $discount,
+                        'total_price' => $drTransaction->total_sum,
+                        'payment_method' => $paymentMethod ? $paymentMethod->method_name : 'N/A',
+                        'products' => $orders->map(function ($order) {
+                            return [
+                                'product_name' => $order->product->product_name,
+                                'serial_no' => $order->serial_number,
+                                'warranty' => $order->product->warranty_period,
+                                'unit_price' => $order->unit_price,
+                                'total_price' => $order->total_price
+                            ];
+                        })->values()
+                    ];
+                })
+                ->values();
+
+            return response()->json([
+                'success' => true,
+                'customer' => [
+                    'id' => $customer->id,
+                    'full_name' => $customer->first_name . ' ' . $customer->last_name,
+                    'contact_no' => $customer->contact_no,
+                    'address' => trim(($customer->street ?? '') . ' ' . ($customer->brgy ?? '') . ' ' . ($customer->city_province ?? ''))
+                ],
+                'receipts' => $receipts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch purchase transactions.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
