@@ -218,7 +218,7 @@
                                        transform hover:scale-[1.02] transition duration-200 focus:outline-none 
                                        focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-800/50
                                        shadow-blue-500/30 backdrop-blur-sm font-sans">
-                                Login to System
+                                Login
                             </button>
 
                             <!-- Error Message -->
