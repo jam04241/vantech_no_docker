@@ -159,41 +159,60 @@
     </div>
 
     <script>
-        let isLoading = false;
-        let refreshInterval = null;
+        // Add these variables at the top to manage state
+        let isDashboardLoading = false;
+        let dashboardDataInterval = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initial load
             loadDashboardData();
-
-            // Real-time refresh every 250ms
-            refreshInterval = setInterval(loadDashboardData, 250);
+            startDashboardInterval();
         });
 
-        // Clean up interval when page is hidden/unloaded
+        // Clean up interval when leaving the page
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                }
+                stopDashboardInterval();
             } else {
-                if (!refreshInterval) {
-                    loadDashboardData();
-                    refreshInterval = setInterval(loadDashboardData, 250);
-                }
+                startDashboardInterval();
             }
         });
 
+        function startDashboardInterval() {
+            // Clear existing interval
+            if (dashboardDataInterval) {
+                clearInterval(dashboardDataInterval);
+            }
+            // Start new interval only if page is visible
+            if (!document.hidden) {
+                dashboardDataInterval = setInterval(loadDashboardData, 30000);
+            }
+        }
+
+        function stopDashboardInterval() {
+            if (dashboardDataInterval) {
+                clearInterval(dashboardDataInterval);
+                dashboardDataInterval = null;
+            }
+        }
+
         async function loadDashboardData() {
             // Prevent multiple simultaneous requests
-            if (isLoading) {
+            if (isDashboardLoading) {
+                console.log('Dashboard data load already in progress, skipping...');
                 return;
             }
 
             try {
-                isLoading = true;
+                isDashboardLoading = true;
+
+                // Add a timeout to prevent hanging requests
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
                 const response = await fetch('/api/dashboard/data', {
-                    method: 'GET',
+                    signal: controller.signal,
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
@@ -202,27 +221,44 @@
                     credentials: 'same-origin'
                 });
 
+                clearTimeout(timeoutId);
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
 
-                if (result.success && result.data) {
+                if (result.success) {
                     const data = result.data;
                     updateMetrics(data.metrics);
                     updateTopProducts(data.top_products);
                     updateLowStockAlerts(data.low_stock_alerts);
                     updateSupplierStatus(data.supplier_status);
                     updateInventoryStatus(data.inventory_status);
+                    retryCount = 0; // Reset retry count on success
                 } else {
-                    console.warn('⚠️ Invalid response format:', result);
+                    throw new Error(result.message || 'Invalid response format');
                 }
             } catch (error) {
                 console.error('❌ Error loading dashboard data:', error);
-                // Don't show fallback on every error to avoid flickering
+
+                // Only show fallback data on first error or after retries
+                if (retryCount >= MAX_RETRIES) {
+                    showFallbackData();
+                    // Stop interval temporarily on persistent errors
+                    stopDashboardInterval();
+                    // Retry after 2 minutes
+                    setTimeout(() => {
+                        retryCount = 0;
+                        startDashboardInterval();
+                    }, 120000);
+                } else {
+                    retryCount++;
+                    console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                }
             } finally {
-                isLoading = false;
+                isDashboardLoading = false;
             }
         }
 
@@ -230,57 +266,52 @@
             document.getElementById('employeeCount').textContent = metrics.employees;
             document.getElementById('customerCount').textContent = metrics.customers;
             document.getElementById('productCount').textContent = metrics.products;
-            // Format daily sales with exactly 2 decimal places
-            const formattedSales = parseFloat(metrics.daily_sales || 0).toFixed(2);
-            document.getElementById('todaysSales').textContent = '₱' + new Intl.NumberFormat('en-PH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(formattedSales);
+            document.getElementById('todaysSales').textContent = '₱' + new Intl.NumberFormat('en-PH').format(metrics.daily_sales);
         }
 
         function updateTopProducts(topProducts) {
-    const container = document.getElementById('topProducts');
+            const container = document.getElementById('topProducts');
 
-    if (topProducts.length === 0) {
-        container.innerHTML = '<div class="text-gray-500 text-center py-8">No sales data available</div>';
-        return;
-    }
+            if (!topProducts || topProducts.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">No sales data available</div>';
+                return;
+            }
 
-    const html = topProducts.map(product => `
-        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors">
-            <div class="flex-1">
-                <p class="font-semibold text-gray-800 text-sm">${product.name}</p>
-                <p class="text-xs text-gray-500">${product.price}</p>
-            </div>
-            <div class="text-lg font-bold text-indigo-600">${product.sold} sold</div>
-        </div>
-    `).join('');
-    
-    container.innerHTML = html;
-}
+            const html = topProducts.map(product => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-sm">${product.name}</p>
+                            <p class="text-xs text-gray-500">${product.price} • ${product.sold} sold</p>
+                        </div>
+                        <div class="text-lg font-bold text-indigo-600">${product.sold}</div>
+                    </div>
+                `).join('');
+            container.innerHTML = html;
+        }
 
         function updateLowStockAlerts(lowStockItems) {
-    const container = document.getElementById('lowStockItems');
+            const container = document.getElementById('lowStockItems');
 
-    if (lowStockItems.length === 0) {
-        container.innerHTML = '<div class="text-green-600 text-center py-8 font-medium">All items well stocked!</div>';
-        return;
-    }
+            if (!lowStockItems || lowStockItems.length === 0) {
+                container.innerHTML = '<div class="text-green-600 text-center py-8 font-medium">All items well stocked!</div>';
+                return;
+            }
 
-    const html = lowStockItems.map(item => `
-        <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors">
-            <div class="flex-1">
-                <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
-                <p class="text-xs text-gray-500">${item.price}</p>
-            </div>
-            <div class="text-lg font-bold text-yellow-600">${item.left} left</div>
-        </div>
-    `).join('');
-    
-    container.innerHTML = html;
-}
+            const html = lowStockItems.map(item => `
+                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
+                            <p class="text-xs text-yellow-600">${item.price} • ${item.left} left in stock</p>
+                        </div>
+                        <div class="text-lg font-bold text-yellow-600">${item.left}</div>
+                    </div>
+                `).join('');
+            container.innerHTML = html;
+        }
 
         function updateSupplierStatus(supplierStatus) {
+            if (!supplierStatus) return;
+
             document.getElementById('activeSuppliers').textContent = supplierStatus.active;
             document.getElementById('inactiveSuppliers').textContent = supplierStatus.inactive;
             document.getElementById('supplierPercentage').textContent = supplierStatus.percentage + '%';
@@ -288,6 +319,8 @@
         }
 
         function updateInventoryStatus(inventoryStatus) {
+            if (!inventoryStatus) return;
+
             document.getElementById('brandNewProducts').textContent = inventoryStatus.brand_new;
             document.getElementById('usedProducts').textContent = inventoryStatus.used;
             document.getElementById('inventoryPercentage').textContent = inventoryStatus.percentage + '%';
