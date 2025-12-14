@@ -12,20 +12,20 @@
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 
-    <!-- <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    {{-- HTMX --}}
+    <script src="https://unpkg.com/htmx.org"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    {{--... other head content ...--}}
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     {{-- SweetAlert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
 
-    {{-- HTMX --}}
-    <script src="https://unpkg.com/htmx.org"></script> -->
+
     <style>
         .sidebar {
             transition: all 0.3s ease;
