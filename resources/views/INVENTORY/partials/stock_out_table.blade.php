@@ -3,6 +3,7 @@
     <table class="w-full text-sm">
         <thead>
             <tr class="border-b border-gray-300 bg-gray-50">
+                <th class="px-4 py-3 text-left font-semibold text-gray-700">#</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Product</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Serial Number</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Receipt No</th>
@@ -15,6 +16,8 @@
         <tbody>
             @forelse($products as $product)
                 <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 text-gray-600 font-medium text-center">
+                        {{ $products->firstItem() + $loop->iteration - 1 }}</td>
                     <td class="px-4 py-3 text-gray-800 font-medium">
                         {{ $product->product_name }}
                     </td>
@@ -39,7 +42,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                    <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-gray-300" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">

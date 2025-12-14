@@ -22,11 +22,11 @@ class DatabaseSeeder extends Seeder
             BrandSeeder::class,
             SupplierSeeder::class,
             CustomerSeeder::class,
+            ServiceTypeSeeder::class,
             ProductSeeder::class,
             ProductStockSeeder::class,
-            ServiceTypeSeeder::class,
-            ServiceReplacementSeeder::class,
             // AuditLogSeeder::class,
+            // ServiceReplacementSeeder::class,
         ]);
     }
 }

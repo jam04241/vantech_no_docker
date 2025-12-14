@@ -3,6 +3,7 @@
     <table class="w-full text-left">
         <thead class="bg-gray-100 text-gray-700 text-base">
             <tr>
+                <th class="p-4 font-semibold">#</th>
                 <th class="p-4 font-semibold">Product</th>
                 <th class="p-4 font-semibold">Serial Number</th>
                 <th class="p-4 font-semibold">Warranty</th>
@@ -19,6 +20,8 @@
         <tbody class="text-sm text-gray-700">
             @forelse($products as $product)
                 <tr class="border-t hover:bg-gray-50 transition">
+                    <td class="p-4 font-semibold text-center text-gray-600">
+                        {{ $products->firstItem() + $loop->iteration - 1 }}</td>
                     <td class="p-4 font-semibold">
                         <div class="flex items-center space-x-3">
                             <span>{{ $product->product_name }}</span>
@@ -89,7 +92,7 @@
                 </tr>
             @empty
                 <tr class="border-t">
-                    <td colspan="9" class="p-8 text-center text-gray-500">
+                    <td colspan="10" class="p-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

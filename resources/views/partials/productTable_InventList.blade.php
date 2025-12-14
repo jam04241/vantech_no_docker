@@ -1,6 +1,7 @@
 <table class="min-w-full mt-4">
     <thead>
         <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-left">#</th>
             <th class="px-4 py-2 text-left">Product Name</th>
             <th class="px-4 py-2 text-left">Brand</th>
             <th class="px-4 py-2 text-left">Category</th>
@@ -13,6 +14,8 @@
     <tbody>
         @forelse($products as $product)
             <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-center text-gray-600">
+                    {{ $products->firstItem() + $loop->iteration - 1 }}</td>
                 <td class="px-4 py-3 font-medium text-gray-800">
                     {{ $product->product_name }}
                 </td>

@@ -35,8 +35,8 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_name' => 'Samsung 990 Pro 4 TB M.2-2280 PCIe 4.0 X4 NVME SSD',
-                'brand_id' => 3,
-                'category_id' => 28,
+                'brand_id' => 28,
+                'category_id' => 6,
                 'supplier_id' => 1,
                 'warranty_period' => '1 year',
                 'product_condition' => 'Brand New',
