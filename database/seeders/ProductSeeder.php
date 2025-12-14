@@ -27,7 +27,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_name' => 'ASUS Dual GeForce RTX™ 4060 OC Edition 8GB GDDR6',
-                'brand_id' => 3,
+                'brand_id' => 5,
                 'category_id' => 3,
                 'supplier_id' => 1,
                 'warranty_period' => '1 year',
@@ -36,7 +36,7 @@ class ProductSeeder extends Seeder
             [
                 'product_name' => 'Samsung 990 Pro 4 TB M.2-2280 PCIe 4.0 X4 NVME SSD',
                 'brand_id' => 3,
-                'category_id' => 6,
+                'category_id' => 28,
                 'supplier_id' => 1,
                 'warranty_period' => '1 year',
                 'product_condition' => 'Brand New',
@@ -67,7 +67,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_name' => 'Thermalright Frozen Warframe 360 WHITE ARGB',
-                'brand_id' => 33,
+                'brand_id' => 34,
                 'category_id' => 4,
                 'supplier_id' => 1,
                 'warranty_period' => '1 year',
